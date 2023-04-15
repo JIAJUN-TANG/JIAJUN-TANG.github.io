@@ -20,7 +20,7 @@ redirect_from:
 # About Me
 I'm now an undergraduate student in [Central South University](https://en.csu.edu.cn), studying for a B.A. degree. At the same time, I'm also a student member in the Center for Intelligent Media and Communication Research leading by my tutor. In 2022, I was admitted by [Nanjing University](https://njunju.nju.edu.cn/EN/main.htm) as a postgraduate student. My main research areas include communication and media study, international communication and new media.
 <br>I'm working on the issue dynamics in international communication. If you're interested in this topic, welcome to contact me!
-<br>Current tutor: [Chengzhang Zhu](https://faculty.csu.edu.cn/zhuchengzhang/zh_CN/index.htm). Cooperative with: Bin Dai, [Yifeng Chen](https://chen-yifeng.github.io), Hao Feng, Jiayi Ding.
+<br>Current tutors: [Chengzhang Zhu（朱承璋）](https://faculty.csu.edu.cn/zhuchengzhang/zh_CN/index.htm), [Yalong Xiao（肖亚龙）](https://faculty.csu.edu.cn/xiaoyalong/zh_CN/index.htm), [Jie Feng（冯杰）](https://faculty.csu.edu.cn/fengjie1/zh_CN/index.htm). In Cooperation with: Bin Dai（戴斌）, [Yifeng Chen（陈奕丰）](https://chen-yifeng.github.io), Hao Feng（冯皓）, Jiayi Ding（丁佳仪）.
 
 
 # 🔥 News
@@ -34,15 +34,14 @@ I'm now an undergraduate student in [Central South University](https://en.csu.ed
 
 
 # 🎖 Honors and Awards
-- *2023.03* 中南大学优秀毕业生. 
-- *2022.12* 国家励志奖学金
-- *2022.12* 中南大学一等奖学金. 
-- *2022.12* 中南大学优秀学生.
-- *2021.12* 中南大学“华宇创新“奖学金
-- *2021.12* 中南大学二等奖学金
-- *2021.12* 中南大学优秀学生
-- *2020.12* 中南大学一等奖学金
-- *2020.12* 中南大学优秀学生
+- *2022.12*, 国家励志奖学金
+- *2022.12*, 中南大学一等奖学金. 
+- *2022.12*, 中南大学优秀学生.
+- *2021.12*, 中南大学“华宇创新“奖学金
+- *2021.12*, 中南大学二等奖学金
+- *2021.12*, 中南大学优秀学生
+- *2020.12*, 中南大学一等奖学金
+- *2020.12*, 中南大学优秀学生
 
 # 🎓 Educations
 - *2023.09 **(admission with exam exemption/推免)***, School of Information Management, Nanjing University. 
@@ -55,5 +54,5 @@ I'm now an undergraduate student in [Central South University](https://en.csu.ed
 - *2019.09 - 2020.06*, 中南大学文学与新闻传播学院朋辈心理互助会活动部干事.
 
 # 💻 Internships and Projects
-- *2022.05 - 2023.03*, Provincial College Student Innovation and Entrepreneurship Project. Hosting. China.
+- *2022.05 - 2023.03*, 湖南省大学生创新创业项目. 主持人.
 - *2022.08 - 2022.11*, [Hunan Daily Press](https://hnrbjt.voc.com.cn/about/bsjj.html). Intern Editor. China.
