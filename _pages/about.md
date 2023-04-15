@@ -29,8 +29,8 @@ I'm now an undergraduate student in [Central South University](https://en.csu.ed
 
 # 📝 Publications 
 ## Conference Paper
-- Chengzhang Zhu, **Jiajun Tang**, Yalong Xiao, Jie Feng. [How the Major Powers Persuade on Social Media: a Clue from Metadiscourse](https://iamcr.org/lyon2023). "IAMCR 2023". 2023.
-- 冯杰、**唐嘉骏**、肖亚龙、贺天琪、陶玥竹. [中美政治话语互动中的框架争夺](https://media.ucass.edu.cn/info/1018/1511.htm). “第九届政治传播与社会发展论坛”暨“第六届政治与传播研究生论坛”. 2022.
+- Chengzhang Zhu, **Jiajun Tang**, Yalong Xiao, Jie Feng*. "How the Major Powers Persuade on Social Media: a Clue from Metadiscourse". ["IAMCR 2023 (Lyon23 and OCP23)"](https://iamcr.org/lyon2023). 2023.
+- 冯杰*、**唐嘉骏**、肖亚龙、贺天琪、陶玥竹. ”中美政治话语互动中的框架争夺“. [“第九届政治传播与社会发展论坛”暨“第六届政治与传播研究生论坛”](https://media.ucass.edu.cn/info/1018/1511.htm). 2022.
 
 
 # 🎖 Honors and Awards
