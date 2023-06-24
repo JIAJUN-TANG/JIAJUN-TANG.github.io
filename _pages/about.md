@@ -18,25 +18,26 @@ redirect_from:
 <span class='anchor' id='about-me'></span>
 
 # About Me
-I'm now an undergraduate student in [Central South University](https://en.csu.edu.cn), studying for a B.A. degree. At the same time, I'm also a student member in the Center for Intelligent Media and Communication Research leading by my tutor. In 2022, I was admitted by [Nanjing University](https://njunju.nju.edu.cn/EN/main.htm) as a postgraduate student. My main research areas include communication and media study, international communication and new media.
+I got a B.A. in [Central South University](https://en.csu.edu.cn). At the same time, I was also a student member in the Center for Intelligent Media and Communication Research leading by my tutor. I'm now studying in [Nanjing University](https://www.nju.edu.cn/en/) as a postgraduate student. My main research areas include information and data science, communication and media study.
 <br>I'm working on the issue dynamics in international communication. If you're interested in this topic, welcome to contact me!
-<br>Current tutors: [Chengzhang Zhu（朱承璋）](https://faculty.csu.edu.cn/zhuchengzhang/zh_CN/index.htm), [Yalong Xiao（肖亚龙）](https://faculty.csu.edu.cn/xiaoyalong/zh_CN/index.htm), [Jie Feng（冯杰）](https://faculty.csu.edu.cn/fengjie1/zh_CN/index.htm). In Cooperation with: Bin Dai（戴斌）, [Yifeng Chen（陈奕丰）](https://chen-yifeng.github.io), Hao Feng（冯皓）, Jiayi Ding（丁佳仪）.
+<br>Tutors During undergraduate period: [Chengzhang Zhu（朱承璋）](https://faculty.csu.edu.cn/zhuchengzhang/zh_CN/index.htm), [Yalong Xiao（肖亚龙）](https://faculty.csu.edu.cn/xiaoyalong/zh_CN/index.htm), [Jie Feng（冯杰）](https://faculty.csu.edu.cn/fengjie1/zh_CN/index.htm). In Cooperation with: Bin Dai（戴斌）, [Yifeng Chen（陈奕丰）](https://chen-yifeng.github.io), Hao Feng（冯皓）, Jiayi Ding（丁佳仪）.
 
 
 # 🔥 News
-- *2023.03*: &nbsp;🎉🎉 Paper accepted by IAMCR 2023. 
+- None. 
 
 
 # 📝 Publications 
 ## Conference Paper
 - Chengzhang Zhu, **Jiajun Tang**, Yalong Xiao, Jie Feng*. "How the Major Powers Persuade on Social Media: a Clue from Metadiscourse". ["IAMCR 2023 (Lyon23 and OCP23)"](https://iamcr.org/lyon2023). 2023.
-- 冯杰*、**唐嘉骏**、肖亚龙、贺天琪、陶玥竹. ”中美政治话语互动中的框架争夺“. [“第九届政治传播与社会发展论坛”暨“第六届政治与传播研究生论坛”](https://media.ucass.edu.cn/info/1018/1511.htm). 2022.
+- 冯杰*、**唐嘉骏**、肖亚龙、贺天琪、陶玥竹. ”中美政治话语互动中的框架争夺“. [第九届“政治传播与社会发展论坛”暨第六届“政治与传播研究生论坛”](https://media.ucass.edu.cn/info/1018/1511.htm). 2022.
 
 
 # 🎖 Honors and Awards
+- *2023.05*, 2023届中南大学优秀毕业生
 - *2022.12*, 国家励志奖学金
-- *2022.12*, 中南大学一等奖学金. 
-- *2022.12*, 中南大学优秀学生.
+- *2022.12*, 中南大学一等奖学金
+- *2022.12*, 中南大学优秀学生
 - *2021.12*, 中南大学“华宇创新“奖学金
 - *2021.12*, 中南大学二等奖学金
 - *2021.12*, 中南大学优秀学生
@@ -45,7 +46,7 @@ I'm now an undergraduate student in [Central South University](https://en.csu.ed
 
 # 🎓 Educations
 - *2023.09 **(admission with exam exemption/推免)***, School of Information Management, Nanjing University. 
-- *2019.09 - 2023.06 **(now)***, School of Literature and Journalism, Central South University, Bachelor of Arts. 
+- *2019.09 - 2023.06*, School of Literature and Journalism, Central South University, Bachelor of Arts. 
 
 # 🎒 Student Works
 - *2021.09 - 2022.06*, 中南大学文学与新闻传播学院朋辈心理互助会副会长. 
