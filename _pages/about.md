@@ -18,9 +18,10 @@ redirect_from:
 <span class='anchor' id='about-me'></span>
 
 # About Me
-I got a B.A. in [Central South University](https://en.csu.edu.cn). At the same time, I was also a student member in the Center for Intelligent Media and Communication Research leading by my tutor. I'm now studying in [Nanjing University](https://www.nju.edu.cn/en/) as a postgraduate student. My main research areas include information and data science, communication and media study.
+I'm now studying in [Nanjing University](https://www.nju.edu.cn/en/) as a postgraduate student. I got a B.A. in [Central South University](https://en.csu.edu.cn). At the same time, I was also a student member in the Center for Intelligent Media and Communication Research leading by my tutor. My main research areas include information and data science, communication and media study.
 <br>I'm working on the issue dynamics in international communication. If you're interested in this topic, welcome to contact me!
-<br>Tutors During undergraduate period: [Chengzhang Zhu（朱承璋）](https://faculty.csu.edu.cn/zhuchengzhang/zh_CN/index.htm), [Yalong Xiao（肖亚龙）](https://faculty.csu.edu.cn/xiaoyalong/zh_CN/index.htm), [Jie Feng（冯杰）](https://faculty.csu.edu.cn/fengjie1/zh_CN/index.htm). In Cooperation with: Bin Dai（戴斌）, [Yifeng Chen（陈奕丰）](https://chen-yifeng.github.io), Hao Feng（冯皓）, Jiayi Ding（丁佳仪）.
+<br>Current Tutor: Bin Zhang（张斌）
+<br>Tutors During undergraduate period: [Chengzhang Zhu（朱承璋）](https://faculty.csu.edu.cn/zhuchengzhang/zh_CN/index.htm), [Yalong Xiao（肖亚龙）](https://faculty.csu.edu.cn/xiaoyalong/zh_CN/index.htm), [Jie Feng（冯杰）](https://faculty.csu.edu.cn/fengjie1/zh_CN/index.htm). Cooperated with: Bin Dai（戴斌）, [Yifeng Chen（陈奕丰）](https://chen-yifeng.github.io), Hao Feng（冯皓）, Jiayi Ding（丁佳仪）.
 
 
 # 🔥 News
