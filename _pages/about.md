@@ -35,6 +35,7 @@ I'm now studying in [Nanjing University](https://www.nju.edu.cn/en/) as a postgr
 
 
 # 🎖 Honors and Awards
+- *2023.11*, 南京大学研究生学业奖学金一等
 - *2023.05*, 2023届中南大学优秀毕业生
 - *2022.12*, 国家励志奖学金
 - *2022.12*, 中南大学一等奖学金
@@ -56,5 +57,6 @@ I'm now studying in [Nanjing University](https://www.nju.edu.cn/en/) as a postgr
 - *2019.09 - 2020.06*, 中南大学文学与新闻传播学院朋辈心理互助会活动部干事.
 
 # 💻 Internships and Projects
+- *2024.01-2024.02*, 南京大学2024年寒假社会实践项目，主持人.
 - *2022.05 - 2023.03*, 湖南省大学生创新创业项目. 主持人.
 - *2022.08 - 2022.11*, [Hunan Daily Press](https://hnrbjt.voc.com.cn/about/bsjj.html). Intern Editor. China.
