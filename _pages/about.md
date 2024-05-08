@@ -25,7 +25,7 @@ I'm now studying in [Nanjing University](https://www.nju.edu.cn/en/) as a postgr
 
 
 # 🔥 News
-- None. 
+- Invited by SICSS 2024 Singapore. 
 
 
 # 📝 Publications 
@@ -47,8 +47,10 @@ I'm now studying in [Nanjing University](https://www.nju.edu.cn/en/) as a postgr
 - *2020.12*, 中南大学优秀学生
 
 # 🎓 Educations
-- *2023.09 **(admission with exam exemption/推免)***, School of Information Management, Nanjing University. 
-- *2019.09 - 2023.06*, School of Literature and Journalism, Central South University, Bachelor of Arts. 
+- *2023.09 **(admission with postgraduate recommedation/推免)***, School of Information Management, Nanjing University. 
+- *2019.09 - 2023.06*, School of Literature and Journalism, Central South University, Bachelor of Arts.
+**Other Experiences**:
+- *2024.06 *, SICSS (Summer Institute in Computational Social Science) 2024 Singapore, National University of Singapre. 
 
 # 🎒 Student Works
 - *2021.09 - 2022.06*, 中南大学文学与新闻传播学院朋辈心理互助会副会长. 
@@ -57,6 +59,7 @@ I'm now studying in [Nanjing University](https://www.nju.edu.cn/en/) as a postgr
 - *2019.09 - 2020.06*, 中南大学文学与新闻传播学院朋辈心理互助会活动部干事.
 
 # 💻 Internships and Projects
+- *2024.05 - 2025.05*, 南京大学2024年大学生创业训练计划项目（一般项目），主持人.
 - *2024.01 - 2024.02*, 南京大学2024年寒假社会实践项目，主持人.
 - *2022.05 - 2023.03*, 湖南省大学生创新创业项目. 主持人.
 - *2022.08 - 2022.11*, [Hunan Daily Press](https://hnrbjt.voc.com.cn/about/bsjj.html). Intern Editor. China.
