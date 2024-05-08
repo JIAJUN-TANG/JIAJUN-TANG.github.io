@@ -49,8 +49,9 @@ I'm now studying in [Nanjing University](https://www.nju.edu.cn/en/) as a postgr
 # 🎓 Educations
 - *2023.09 **(admission with postgraduate recommedation/推免)***, School of Information Management, Nanjing University. 
 - *2019.09 - 2023.06*, School of Literature and Journalism, Central South University, Bachelor of Arts.
+
 **Other Experiences**:
-- *2024.06 *, SICSS (Summer Institute in Computational Social Science) 2024 Singapore, National University of Singapre. 
+- *2024.06*, SICSS (Summer Institute in Computational Social Science) 2024 Singapore, National University of Singapre. 
 
 # 🎒 Student Works
 - *2021.09 - 2022.06*, 中南大学文学与新闻传播学院朋辈心理互助会副会长. 
