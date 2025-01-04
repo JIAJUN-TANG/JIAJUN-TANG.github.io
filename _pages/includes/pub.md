@@ -100,8 +100,8 @@ Jinglin Liu, Chengxi Li, **Yi Ren**, Feiyang Chen, Zhou Zhao
 
 ## Publishing Studies
 
-- `DPR 2025` Jiajun Tang, Hailin Yang, Zihan Ma. [The Concepts, Applications, Impacts and Measures of Artificial Intelligence in Publishing Industry: A Systematic Literature Review](https://szcb.cbpt.cnki.net/WKA/WebPublication/index.aspx?mid=SZCB). Digital Publishing Research. 2025. (Accepted). **Data**（The data that supports the research is available upon inquiry).
-- `ICLR 2023` [GeneFace: Generalized and High-Fidelity Audio-Driven 3D Talking Face Synthesis](https://openreview.net/forum?id=YfwMIDhPccD), Zhenhui Ye, Ziyue Jiang, **Yi Ren**, et al.
+- `DPR 2025` **Jiajun Tang***, Hailin Yang, Zihan Ma. [The Concepts, Applications, Impacts and Measures of Artificial Intelligence in Publishing Industry: A Systematic Literature Review](https://szcb.cbpt.cnki.net/WKA/WebPublication/index.aspx?mid=SZCB)[J]. Digital Publishing Research. 2025. (Accepted). **Data**（The data that supports the research is available upon inquiry).
+- `CDP 2025` Jiayi Ding, **Jiajun Tang***. [Research on the Overseas Strategy of Domestic Games Based on Actor Network Theory: A Case Study of "Black Myth: Wukong"](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. China Digital Publishing. 2025. (Accepted).
 - `AAAI 2024` [AMD: Autoregressive Motion Diffusion](https://arxiv.org/abs/2305.09381), Bo Han, Hao Peng, Minjing Dong, **Yi Ren**, et al.
 - ``AAAI 2022`` [Parallel and High-Fidelity Text-to-Lip Generation](https://arxiv.org/abs/2107.06831), Jinglin Liu, Zhiying Zhu, **Yi Ren**, et al. \| [![](https://img.shields.io/github/stars/Dianezzy/ParaLip?style=social&label=ParaLip Stars)](https://github.com/Dianezzy/ParaLip)
 - ``AAAI 2022`` [Flow-based Unconstrained Lip to Speech Generation](https://ojs.aaai.org/index.php/AAAI/article/view/19966), Jinzheng He, Zhou Zhao, **Yi Ren**, et al.
