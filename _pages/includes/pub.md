@@ -100,13 +100,7 @@ Jinglin Liu, Chengxi Li, **Yi Ren**, Feiyang Chen, Zhou Zhao
 
 ## Publishing Studies
 
-<div class='paper-box'><div class='paper-box-image'><div><div class="badge">ICLR 2024</div><img src='images/real3d.png' alt="sym" width="100%"></div></div>
-<div class='paper-box-text' markdown="1">
-
-Jiajun Tang, Hailin Yang, Zihan Ma. [The Concepts, Applications, Impacts and Measures of Artificial Intelligence in Publishing Industry: A Systematic Literature Review](https://szcb.cbpt.cnki.net/WKA/WebPublication/index.aspx?mid=SZCB). Digital Publishing Research. 2025. (Accepted). **Data**（The data that supports the research is available upon inquiry).
-</div>
-</div>
-
+- `DPR 2025` Jiajun Tang, Hailin Yang, Zihan Ma. [The Concepts, Applications, Impacts and Measures of Artificial Intelligence in Publishing Industry: A Systematic Literature Review](https://szcb.cbpt.cnki.net/WKA/WebPublication/index.aspx?mid=SZCB). Digital Publishing Research. 2025. (Accepted). **Data**（The data that supports the research is available upon inquiry).
 - `ICLR 2023` [GeneFace: Generalized and High-Fidelity Audio-Driven 3D Talking Face Synthesis](https://openreview.net/forum?id=YfwMIDhPccD), Zhenhui Ye, Ziyue Jiang, **Yi Ren**, et al.
 - `AAAI 2024` [AMD: Autoregressive Motion Diffusion](https://arxiv.org/abs/2305.09381), Bo Han, Hao Peng, Minjing Dong, **Yi Ren**, et al.
 - ``AAAI 2022`` [Parallel and High-Fidelity Text-to-Lip Generation](https://arxiv.org/abs/2107.06831), Jinglin Liu, Zhiying Zhu, **Yi Ren**, et al. \| [![](https://img.shields.io/github/stars/Dianezzy/ParaLip?style=social&label=ParaLip Stars)](https://github.com/Dianezzy/ParaLip)
