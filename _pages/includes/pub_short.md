@@ -1,10 +1,10 @@
 
 # 💻 Selected Research Papers
 
-My full paper list is shown at [my personal homepage](https://rayeren.github.io).
+My full paper list is shown at [my personal homepage](https://jiajun-tang.github.io).
 
-#### 🎙 Audio and Speech Processing
-- ``ICLR 2021`` [FastSpeech 2: Fast and High-Quality End-to-End Text to Speech](https://arxiv.org/abs/2006.04558), **Yi Ren**, Chenxu Hu, Xu Tan, et al.
+#### :bookmark: Publishing Studies
+- **Jiajun Tang***, Hailin Yang, Zihan Ma. [The Concepts, Applications, Impacts and Measures of Artificial Intelligence in Publishing Industry: A Systematic Literature Review](https://jiajun-tang.github.io)[J]. Digital Publishing Research. 2024, Accepted.
 - ``NeurIPS 2019`` [FastSpeech: Fast, Robust and Controllable Text to Speech](https://papers.nips.cc/paper/8580-fastspeech-fast-robust-and-controllable-text-to-speech.pdf), **Yi Ren**, Yangjun Ruan, Xu Tan, et al.
 - `ICLR 2024` [Mega-TTS 2: Boosting Prompting Mechanisms for Zero-Shot Speech Synthesis](https://openreview.net/forum?id=mvMI3N4AvD), Ziyue Jiang, Jinglin Liu, **Yi Ren**, et al. 
 - ``AAAI 2022`` [DiffSinger: Singing Voice Synthesis via Shallow Diffusion Mechanism](https://arxiv.org/abs/2105.02446), Jinglin Liu, Chengxi Li, **Yi Ren**, et al. [**Project**](https://diffsinger.github.io/) \| [![](https://img.shields.io/github/stars/NATSpeech/NATSpeech?style=social&label=DiffSpeech+Stars)](https://github.com/NATSpeech/NATSpeech) \| [![](https://img.shields.io/github/stars/MoonInTheRiver/DiffSinger?style=social&label=DiffSinger+Stars)](https://github.com/MoonInTheRiver/DiffSinger) \| [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-blue?label=Demo)](https://huggingface.co/spaces/NATSpeech/DiffSpeech)
