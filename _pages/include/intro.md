@@ -1,0 +1,7 @@
+I am now a master's student at [School of Information Management](https://im.nju.edu.cn), [Nanjing University](https://www.nju.edu.cn), Nanjing, China. My current supervisor is [Bin Zhang （张斌）](https://im.nju.edu.cn/zb/list.htm). My joint supervisor is Bowen Jin at School of History, Nanjing University. And I collaborate with scholars from different disciplines, with Hailin Yang, Zihan Ma, Jiayi Ding, Yanxu Meng from Nanjing University. Yuezhu Tao from Xi'an Jiaotong University.
+
+I am now working on digital humanities, especially focusing on the application and impact of artificial intelligence on Humanities, such as history. To promote the application of AI in humanities, I'm currently building a platform for history research.
+
+I graduated from [School of Humanities](https://clj.csu.edu.cn), [Central South University](https://www.csu.edu.cn) with a bachelor's degree, advised by [Chengzhang Zhu （朱承璋）](https://faculty.csu.edu.cn/zhuchengzhang/zh_CN/index/31694/list/index.htm). I also collaborated with Yifeng Chen and Hao Feng from Central South University closely.  
+
+My research interest includes digital humanities, information science and communication studies. I have published 3 papers <a href='https://scholar.google.com/citations?user=cXJ2lKAAAAAJ'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https://github.com/JIAJUN-TANG/JIAJUN-TANG.github.io/blob/google-scholar-stats/gs_data_shieldsio.json&labelColor=f6f6f6&color=9cf&style=flat&label=citations"></a> on peer reviewed journals. 
