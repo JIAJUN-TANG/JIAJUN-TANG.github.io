@@ -4,7 +4,7 @@
 - *2019.09 - 2023.06*, Undergraduate, School of Humanities, Central South University, Changsha, China.
 
 # 💬 Non-Degree Programs
-- *2025.02 - 2025.06*, Exchanging student, Graduate Institute of Library, Information & Archival Studies, National Chengchi University, Taiwan, China.
+- *2025.02 - 2025.06*, Exchanging student, Graduate Institute of Library, Information & Archival Studies, National Chengchi University <img src='./images/nccu.png' style='width: 6em;'>, Taiwan, China.
 - *2024.07*, Summer Institute for Computational Social Science, National University of Singapore, Singapore, Singapore.
 
 # 💻 Research Projects
