@@ -2,7 +2,7 @@
 # 📝 Publications 
 ## 🎨 Digital Humanities
 
-- <div class="badge">Accepted</div> 姚念达. 数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例[J]. Social Sciences in Guangdong. 2025.
+- <div class='paper-box'><div class="badge">Accepted</div> <div class='paper-box-text' markdown="1">姚念达. 数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例[J]. Social Sciences in Guangdong. 2025. </div></div>
 - `Oral Presentation` 姚念达, **唐嘉骏**. 数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例[C]. “国际组织与现代世界的形成”：第一届国际组织史学术研讨会. Zhuhai, China, 2024.
 ## 🔖 Publishing Studies
 
