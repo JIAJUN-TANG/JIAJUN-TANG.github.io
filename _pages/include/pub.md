@@ -19,7 +19,7 @@
 
 [Persuasion Strategies of The Major Powers on Social Media: An Analysis of The Metadiscourse from The Chinese and American Spokespersons’ Tweets](https://journals.sagepub.com/doi/10.1177/27523543241283645)
 
-Jie Feng, **Jiajun Tang**, Yalong Xiao, Chengzhang Zhu*. 2024.
+Jie Feng, **Jiajun Tang**, Yalong Xiao, Chengzhang Zhu*. 2024, Vol. 2(4) 698–723.
 
 [**Emerging Media: Technology, Industry and Society**](https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&user=cXJ2lKAAAAAJ&citation_for_view=cXJ2lKAAAAAJ:d1gkVwhDpl0C) <strong><span class='show_paper_citations' data='cXJ2lKAAAAAJ:d1gkVwhDpl0C'></span></strong>
 </div>
