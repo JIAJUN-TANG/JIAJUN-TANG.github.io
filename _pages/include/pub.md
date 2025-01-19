@@ -12,7 +12,12 @@
 ## 🔖 Publishing Studies
 
 - `Accepted` **Jiajun Tang***, Hailin Yang, Zihan Ma. [The Concepts, Applications, Impacts and Measures of Artificial Intelligence in Publishing Industry: A Systematic Literature Review](https://szcb.cbpt.cnki.net/WKA/WebPublication/index.aspx?mid=SZCB)[J]. Digital Publishing Research. 2025. **Data**（The data that supports the research is available upon inquiry).
-- `Accepted` Jiayi Ding, **Jiajun Tang***. [Research on the Overseas Strategy of Domestic Games Based on Actor Network Theory: A Case Study of "Black Myth: Wukong"](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. China Digital Publishing. 2025.
+
+<div class='paper-box'><div class='paper-box-image'><div><div class="badge">Research Article</div><img src='images/paper3.png' alt="sym" width="100%"></div></div>
+<div class='paper-box-text' markdown="1">
+Jiayi Ding, **Jiajun Tang***. [Research on the Overseas Strategy of Domestic Games Based on Actor Network Theory: A Case Study of "Black Myth: Wukong"](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. China Digital Publishing. 2025.
+</div>
+</div>
 
 ## 📱 Information Behaviour
 - `Under Review` Zihan Ma, **Jiajun Tang**, Hailin Yang, Pengtao Wang*. Why Do We Love Reading Detective Fiction? A Study on The Reader Preferences and Reading Motivations based on Digital Excerpts[J].
