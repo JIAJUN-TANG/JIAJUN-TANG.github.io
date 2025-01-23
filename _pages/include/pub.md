@@ -11,7 +11,11 @@
 - `Oral Presentation` 姚念达, **唐嘉骏**. 数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例[C]. “国际组织与现代世界的形成”：第一届国际组织史学术研讨会. Zhuhai, China, 2024.
 ## 🔖 Publishing Studies
 
-- `Accepted` **Jiajun Tang***, Hailin Yang, Zihan Ma. [The Concepts, Applications, Impacts and Measures of Artificial Intelligence in Publishing Industry: A Systematic Literature Review](https://szcb.cbpt.cnki.net/WKA/WebPublication/index.aspx?mid=SZCB)[J]. Digital Publishing Research. 2025. **Data**（The data that supports the research is available upon inquiry).
+<div class='paper-box'><div class='paper-box-image'><div><div class="badge">Research Article</div><img src='images/paper4.png' alt="sym" width="100%"></div></div>
+<div class='paper-box-text' markdown="1">
+**Jiajun Tang***, Hailin Yang, Zihan Ma. [The Concepts, Applications, Impacts and Measures of Artificial Intelligence in Publishing Industry: A Systematic Literature Review](https://szcb.cbpt.cnki.net/WKA/WebPublication/index.aspx?mid=SZCB)[J]. Digital Publishing Research. 2025. **Data**（The data that supports the research is available upon inquiry).
+</div>
+</div>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">Research Article</div><img src='images/paper3.png' alt="sym" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
