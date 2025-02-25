@@ -11,6 +11,12 @@
 - `Oral Presentation` 姚念达, **唐嘉骏**. 数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例[C]. “国际组织与现代世界的形成”：第一届国际组织史学术研讨会. Zhuhai, China, 2024.
 ## 🔖 Publishing Studies
 
+<div class='paper-box'><div class='paper-box-image'><div><div class="badge">Research Article</div><img src='images/paper3.png' alt="sym" width="100%"></div></div>
+<div class='paper-box-text' markdown="1">
+杨海林, **唐嘉骏**, 马子寒, 王鹏涛*. [出版编辑人才胜任力模型优化研究](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. 中国数字出版. 2025.
+</div>
+</div>
+
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">Research Article</div><img src='images/paper4.png' alt="sym" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 **唐嘉骏**, 杨海林, 马子寒. [出版人工智能研究：概念、技术、影响与进路——一项系统性文献综述](https://kns.cnki.net/kcms2/article/abstract?v=_bj0XFJq-746jsaJRlnXNCWtM6Zrx23XH5i4y7Q_ZDZwUPcmE_-h8UTGJsaKje9Y25-zOZT4nRgH9MU0Cgishzns5ssomZy48igj49u3cdTs6sLDRbJ6ihTfQ5TXARRnvAFYzFODQ6d4ln7HUFkvuFWmsO4PAriy6-xFgPasLbkWpLjRkZvf0sfLuFfyUbkg&uniplatform=NZKPT&language=CHS)[J]. 数字出版研究. 2025.
