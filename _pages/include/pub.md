@@ -2,6 +2,8 @@
 # 📝 Publications 
 ## 🎨 Digital Humanities
 
+- `Under Review` **唐嘉骏**，金伯文*. “从人工到智能——AI时代的历史与人文探索”工作坊综述[J].
+
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">Research Article</div><img src='images/paper2.png' alt="sym" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 姚念达. 数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例[J]. 广东社会科学. 2025.
@@ -30,7 +32,7 @@
 </div>
 
 ## 📱 Information Behaviour
-- `Under Review` Zihan Ma, **Jiajun Tang**, Hailin Yang, Pengtao Wang*. Why Do We Love Reading Detective Fiction? A Study on The Reader Preferences and Reading Motivations based on Digital Excerpts[J].
+- `Under Review` 马子寒, **唐嘉骏**, 杨海林, 王鹏涛*. 基于数字摘录文本的文学内容阅读吸引力及作用机制研究——以推理小说为例[J].
 
 ## 🌐 International Communication
 
