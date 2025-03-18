@@ -5,4 +5,4 @@ I am now working on digital humanities, especially focusing on the application a
 I graduated from [School of Humanities](https://clj.csu.edu.cn), [Central South University](https://www.csu.edu.cn) <img src='./images/CSU.jpg' style='width: 6em;'> with a bachelor's degree, advised by [Chengzhang Zhu （朱承璋）](https://faculty.csu.edu.cn/zhuchengzhang/zh_CN/index/31694/list/index.htm). I also collaborated with Yifeng Chen（陈奕丰） and Hao Feng（冯皓） from Central South University closely.  
 
 My research interest includes digital humanities, information science and communication studies. I have published 6 papers <a href='https://scholar.google.com/citations?user=cXJ2lKAAAAAJ'><img src="https://img.shields.io/endpoint?url={{ url | url_encode }}&logo=Google%20Scholar&labelColor=f6f6f6&color=9cf&style=flat&label=citations"></a> on peer reviewed journals. 
-This profile has been viewed ![](https://komarev.com/ghpvc/?username=JIAJUN-TANG)
+This profile has been viewed ![](https://komarev.com/ghpvc/?username=JIAJUN-TANG).
