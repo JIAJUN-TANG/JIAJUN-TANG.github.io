@@ -2,7 +2,7 @@
 # 📝 Publications 
 ## 1 Digital Humanities
 
-- *Under Review* **唐嘉骏**，金伯文*. “从人工到智能——AI时代的历史与人文探索”工作坊综述[J].
+- <div class="badge">Under Review</div> **唐嘉骏**，金伯文*. “从人工到智能——AI时代的历史与人文探索”工作坊综述[J].
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">Research Article</div><img src='images/paper2.png' alt="sym" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
