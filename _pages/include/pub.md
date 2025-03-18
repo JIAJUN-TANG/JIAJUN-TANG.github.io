@@ -2,7 +2,7 @@
 # 📝 Publications 
 ## 1 Digital Humanities
 
-- <div class="badge">Under Review</div> **唐嘉骏**，金伯文*. “从人工到智能——AI时代的历史与人文探索”工作坊综述[J].
+- *(Under Review)* **唐嘉骏**，金伯文*. “从人工到智能——AI时代的历史与人文探索”工作坊综述[J].
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">Research Article</div><img src='images/paper2.png' alt="sym" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
@@ -10,7 +10,7 @@
 </div>
 </div>
 
-- *Oral Presentation* 姚念达, **唐嘉骏**. 数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例[C]. “国际组织与现代世界的形成”：第一届国际组织史学术研讨会. Zhuhai, China, 2024.
+- *(Oral Presentation)* 姚念达, **唐嘉骏**. 数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例[C]. “国际组织与现代世界的形成”：第一届国际组织史学术研讨会. Zhuhai, China, 2024.
 
 ## 2 Publishing Studies
 
@@ -34,7 +34,7 @@
 
 ## 3 Information Behaviour
 
-- *Under Review* 马子寒, **唐嘉骏**, 杨海林, 王鹏涛*. 基于数字摘录文本的文学内容阅读吸引力及作用机制研究——以推理小说为例[J].
+- *(Under Review)* 马子寒, **唐嘉骏**, 杨海林, 王鹏涛*. 基于数字摘录文本的文学内容阅读吸引力及作用机制研究——以推理小说为例[J].
 
 ## 4 International Communication
 
@@ -47,9 +47,9 @@
 </div>
 </div>
 
-- *Oral Presentation* Jie Feng, Yifeng Chen, **Jiajun Tang***. [Competition Within, Following Between: A Time-Series Analysis of Inter-media Agenda-Setting Dynamics Between Chinese and American Media](https://iamcr.org/singapore2025)[C]. Singapore, Singapore, IAMCR. 2025.
-- *Oral Presentation* Jie Feng, **Jiajun Tang**, Yalong Xiao, Chengzhang Zhu*. [How the Major Powers Pesuade on Social Media: A Clue from Metadiscourse](https://iamcr.org/lyon2023)[C]. Lyon, France, IAMCR. 2023.
-- *Oral Presentation* **唐嘉骏**, 冯杰, 肖亚龙, 朱承璋. 跨国视角下的议题竞争：对中美主流媒体推特议题动态的时间序列分析[C]. 第十七届青年传播学者论坛. Shanghai, China, 2024.
-- *Oral Presentation* 冯杰*, **唐嘉骏**, 肖亚龙, 贺天琪, 陶玥竹. [中美政治话语互动中的框架争夺](https://ky.ucass.edu.cn/info/1011/1962.htm)[C]. 第九届“政治传播与社会发展”论坛暨第六届“政治与传播”研究生论坛. Online, 2022.
+- *(Oral Presentation)* Jie Feng, Yifeng Chen, **Jiajun Tang***. [Competition Within, Following Between: A Time-Series Analysis of Inter-media Agenda-Setting Dynamics Between Chinese and American Media](https://iamcr.org/singapore2025)[C]. Singapore, Singapore, IAMCR. 2025.
+- *(Oral Presentation)* Jie Feng, **Jiajun Tang**, Yalong Xiao, Chengzhang Zhu*. [How the Major Powers Pesuade on Social Media: A Clue from Metadiscourse](https://iamcr.org/lyon2023)[C]. Lyon, France, IAMCR. 2023.
+- *(Oral Presentation)* **唐嘉骏**, 冯杰, 肖亚龙, 朱承璋. 跨国视角下的议题竞争：对中美主流媒体推特议题动态的时间序列分析[C]. 第十七届青年传播学者论坛. Shanghai, China, 2024.
+- *(Oral Presentation)* 冯杰*, **唐嘉骏**, 肖亚龙, 贺天琪, 陶玥竹. [中美政治话语互动中的框架争夺](https://ky.ucass.edu.cn/info/1011/1962.htm)[C]. 第九届“政治传播与社会发展”论坛暨第六届“政治与传播”研究生论坛. Online, 2022.
 
 ## 5 Others
