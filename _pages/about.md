@@ -24,6 +24,8 @@ redirect_from:
 
 {% include_relative include/pub.md %}
 
+{% include_relative include/conf.md %}
+
 {% include_relative include/honers.md %}
 
 {% include_relative include/others.md %}
