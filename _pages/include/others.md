@@ -1,4 +1,2 @@
 # 💻 Research Projects
 - *2024.11至今*, 人工智能技术驱动下海外中共党史资料（1921-1949）整理与数据库建设，南京大学文科人工智能交叉研究计划（AI for HASS）首批专项课题，核心成员。
-# 📱 Page Views
-Welcome to my personal page.
