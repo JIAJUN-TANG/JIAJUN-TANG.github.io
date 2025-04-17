@@ -20,3 +20,6 @@ main:
 
   - title: "Research Projects"
     url: "/#-research-projects"
+
+  - name: "博客"
+    url: "/#-blog/"
