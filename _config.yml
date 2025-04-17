@@ -161,23 +161,8 @@ compress_html:
   ignore:
     envs: development
 
-permalink: /:categories/:title/
-defaults:
-  - scope:
-      path: ""
-      type: posts
-    values:
-      permalink: /blog/:year/:month/:day/:title/
-
 # near the top of _config.yml
 paginate: 5
 paginate_path: "/blog/page:num/"
 plugins:
   - jekyll-paginate
-
-defaults:
-  - scope:
-      path: ""
-      type: posts
-    values:
-      layout: post
