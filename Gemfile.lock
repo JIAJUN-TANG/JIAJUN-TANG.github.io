@@ -270,12 +270,14 @@ GEM
 
 PLATFORMS
   universal-darwin-19
+  universal-darwin-24
   x86_64-linux
 
 DEPENDENCIES
   github-pages
   hawkins
   jekyll-feed
+  jekyll-paginate
   jekyll-sitemap
 
 BUNDLED WITH
