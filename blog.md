@@ -1,14 +1,20 @@
 ---
 layout: default
-title: "Blogs"
+title: "博客"
 permalink: /blog/
-paginate: 5        # posts per page
+paginate: 5
 paginate_path: "/blog/page:num/"
 ---
 
-{% for post in paginator.posts %}
-  …same list markup…
-{% endfor %}
+<ul class="post-list">
+  {% for post in paginator.posts %}
+    <li>
+      <a href="{{ post.url }}">{{ post.title }}</a>
+      <small>({{ post.date | date: "%Y-%m-%d" }})</small>
+    </li>
+  {% endfor %}
+</ul>
+
 <nav class="pagination">
   {% if paginator.previous_page %}
     <a href="{{ paginator.previous_page_path }}">上一页</a>
