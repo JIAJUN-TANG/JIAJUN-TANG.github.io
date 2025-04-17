@@ -161,8 +161,18 @@ compress_html:
   ignore:
     envs: development
 
-# 启用博客功能
-collections:
-  posts:
-    output: true
-    permalink: /:collection/:name/
+permalink: /:categories/:title/
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      permalink: /blog/:year/:month/:day/:title/
+
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
