@@ -1,5 +1,7 @@
 
 # 📆 Conferences
+- *(Oral Presentation)* **Jiajun Tang**, Jiangfeng Liu, Ningyuan Song, Minghui Hu*. [Named Entity Recognition in Academic and Classical Chinese: Challenges, Methodologies, and the Role of Large Language Models](https://dheac.org/)[C]. Beijing, China, DHEAC. 2025.
+- *(Oral Presentation)* Minghui Hu, **Jiajun Tang***. [Scaling Intelligence: Large Language Models and the Translation of Classical Chinese](https://dheac.org/)[C]. Beijing, China, DHEAC. 2025.
 - *(Oral Presentation)* Jie Feng, Yifeng Chen, **Jiajun Tang***. [Competition Within, Following Between: A Time-Series Analysis of Inter-media Agenda-Setting Dynamics Between Chinese and American Media](https://iamcr.org/singapore2025)[C]. Singapore, Singapore, IAMCR. 2025.
 - *(Oral Presentation)* 姚念达, **唐嘉骏**. 数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例[C]. “国际组织与现代世界的形成”：第一届国际组织史学术研讨会. Zhuhai, China, 2024.
 - *(Oral Presentation)* **唐嘉骏**, 冯杰, 肖亚龙, 朱承璋. 跨国视角下的议题竞争：对中美主流媒体推特议题动态的时间序列分析[C]. 第十七届青年传播学者论坛. Shanghai, China, 2024.
