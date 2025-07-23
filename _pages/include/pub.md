@@ -8,14 +8,13 @@
 ## 2 Publishing Studies
 
 
-- *(Accepted)* 杨海林, **唐嘉骏**, 马子寒, 王鹏涛*. [出版编辑人才胜任力模型优化研究](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. 中国数字出版. 2025.
+- *(Accepted)* 杨海林, **唐嘉骏**, 马子寒, 王鹏涛*. [数智时代出版编辑人才胜任力模型优化研究](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. 中国数字出版. 2025.
 - **唐嘉骏**, 杨海林, 马子寒. [出版人工智能研究：概念、技术、影响与进路——一项系统性文献综述](https://kns.cnki.net/kcms2/article/abstract?v=_bj0XFJq-746jsaJRlnXNCWtM6Zrx23XH5i4y7Q_ZDZwUPcmE_-h8UTGJsaKje9Y25-zOZT4nRgH9MU0Cgishzns5ssomZy48igj49u3cdTs6sLDRbJ6ihTfQ5TXARRnvAFYzFODQ6d4ln7HUFkvuFWmsO4PAriy6-xFgPasLbkWpLjRkZvf0sfLuFfyUbkg&uniplatform=NZKPT&language=CHS)[J]. 数字出版研究. 2025.
-
 - 丁佳仪, **唐嘉骏***. [基于行动者网络理论的国产游戏国际传播策略研究:以《黑神话：悟空》为例](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. 中国数字出版. 2025.
 
 ## 3 Information Behaviour
 
-- *(Under Review)* 马子寒, **唐嘉骏**, 杨海林, 王鹏涛*. 基于数字摘录文本的文学内容阅读吸引力及作用机制研究——以推理小说为例[J].
+- *(Under Review)* **唐嘉骏**, 杨海林, 马子寒*, 宋宁远. 叙事内容如何引起阅读沉浸——基于推理小说用户摘录文本的阅读痕迹实证分析[J].
 
 ## 4 International Communication
 
