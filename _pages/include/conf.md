@@ -1,6 +1,7 @@
 
 # 📆 Conferences
-- *(Oral Presentation)* **唐嘉骏**, 杨海林, 宋宁远. 基于“主题-情感”联合分析的国产游戏海外平台在线评论研究[C]. 第五届全国出版学博士生学术论坛. Zhengzhou, China, 2025.
+- *(Poster Presentation)* **唐嘉骏**, 宋宁远. 人工智能如何进行道德选择：互动叙事游戏中大语言模型与人类决策行为差异研究[C]. 2025年中国情报学年会暨情报学与情报工作发展论坛、第十五届全国情报学博士生学术论坛. Xi'an, China, 2025.
+- *(Oral Presentation)* **唐嘉骏**, 杨海林, 宋宁远. 基于“主题-情感”联合分析的国产游戏海外平台在线评论研究[C]. 第五届全国出版学博士生学术论坛. Zhengzhou, China, 2025. **（优秀论文）**
 - *(Oral Presentation)* **Jiajun Tang**, Jiangfeng Liu, Ningyuan Song, Minghui Hu*. [Named Entity Recognition in Academic and Classical Chinese: Challenges, Methodologies, and the Role of Large Language Models](https://dheac.org/)[C]. Beijing, China, DHEAC. 2025.
 - *(Oral Presentation)* Minghui Hu, **Jiajun Tang***. [Scaling Intelligence: Large Language Models and the Translation of Classical Chinese](https://dheac.org/)[C]. Beijing, China, DHEAC. 2025.
 - *(Oral Presentation)* Jie Feng, Yifeng Chen, **Jiajun Tang***. [Competition Within, Following Between: A Time-Series Analysis of Inter-media Agenda-Setting Dynamics Between Chinese and American Media](https://iamcr.org/singapore2025)[C]. Singapore, Singapore, IAMCR. 2025.
