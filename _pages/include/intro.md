@@ -1,4 +1,4 @@
-I am now a master's student at [School of Information Management](https://im.nju.edu.cn), [Nanjing University](https://www.nju.edu.cn) <img src='./images/NJU.png' style='width: 6em;'>, Nanjing, China. My current supervisor is [Bin Zhang （张斌）](https://im.nju.edu.cn/zb/list.htm). My joint supervisor is Ningyuan Song （宋宁远） at the School of Information Management, Nanjing University. And I collaborate with scholars from different disciplines, with Jingjia Ding （丁靖佳）, Hailin Yang（杨海林）, Zihan Ma（马子寒）, Jiayi Ding（丁佳仪） from Nanjing University and Han Zheng from Wuhan University.
+I am now a master's student at [School of Information Management](https://im.nju.edu.cn), [Nanjing University](https://www.nju.edu.cn) <img src='./images/NJU.png' style='width: 6em;'>, Nanjing, China. My current supervisor is [Bin Zhang （张斌）](https://im.nju.edu.cn/zb/list.htm).
 
 I am interested in video game research, so we are currently developing games for HCI research.
 
