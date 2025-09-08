@@ -2,7 +2,7 @@
 # 📝 Publications
 ## 1 Research Articles
 
-- *(Accepted)* 杨海林, **唐嘉骏**, 马子寒, 王鹏涛*. [数智时代出版编辑人才胜任力模型优化研究](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. 中国数字出版. 2025.
+- 杨海林, **唐嘉骏**, 马子寒, 王鹏涛*. [数智时代出版编辑人才胜任力模型优化研究](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. 中国数字出版. 2025.
 - **唐嘉骏**，金伯文*. “从人工到智能——AI时代的历史与人文探索”工作坊综述[J]. 数字人文研究. 2025.
 - **唐嘉骏**, 杨海林, 马子寒. [出版人工智能研究：概念、技术、影响与进路——一项系统性文献综述](https://kns.cnki.net/kcms2/article/abstract?v=_bj0XFJq-746jsaJRlnXNCWtM6Zrx23XH5i4y7Q_ZDZwUPcmE_-h8UTGJsaKje9Y25-zOZT4nRgH9MU0Cgishzns5ssomZy48igj49u3cdTs6sLDRbJ6ihTfQ5TXARRnvAFYzFODQ6d4ln7HUFkvuFWmsO4PAriy6-xFgPasLbkWpLjRkZvf0sfLuFfyUbkg&uniplatform=NZKPT&language=CHS)[J]. 数字出版研究. 2025.
 - 丁佳仪, **唐嘉骏***. [基于行动者网络理论的国产游戏国际传播策略研究:以《黑神话：悟空》为例](https://qikan.cqvip.com/Qikan/journal/Detail?kind=0&id=27763&from=Qikan_Journal_Detail)[J]. 中国数字出版. 2025.
