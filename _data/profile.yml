@@ -40,6 +40,7 @@ education:
     School of Humanities <br/>
     B.A.
   date: Sep. 2019 - Jul. 2023
+- divider: true
 - name: National Chengchi University
   logo: /assets/images/badges/PKU_red.png
   position: >-
