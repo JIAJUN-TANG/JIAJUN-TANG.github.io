@@ -23,13 +23,13 @@ short_bio: >-
     Jiajun (Griffin) TANG is a Master's student at the School of Information Management, Nanjing University. His research interests include computational social science and digital humanities.
   </p>
 
-portrait_url: /assets/images/photos/portrait.jpeg
+portrait_url: /assets/images/photos/portrait.jpg
 portrait_caption: >-
   Photo by Jiajun TANG.
 
 education:
 - name: Nanjing University
-  logo: /assets/images/badges/Nanjing_University.jpeg
+  logo: /assets/images/badges/Nanjing_University.png
   position: >- 
     School of Information Management <br/>
     Master's Student in LIS
