@@ -36,14 +36,18 @@ education:
   date: Sep. 2023 - present
 - name: Central South University
   logo: /assets/images/badges/PKU_red.png
-  position: B.A.
+  position: >-
+    School of Humanities
+    B.A.
   date: Sep. 2019 - Jul. 2023
 
-# experience:
-# - name: Peking University
-#   logo: /assets/images/badges/PKU_red.png
-#   position: Research Intern
-#   date: Sep. 2019 - Jul. 2021
+Non-Degree Experiences:
+- name: National Chengchi University
+  logo: /assets/images/badges/PKU_red.png
+  position: >-
+    Graduate Institute of Library and Information Studies
+    Exchange Student
+  date: Feb. 2025 - Jun. 2025
 
 awards:
 - name: 南京大学学业奖学金（一等）
