@@ -8,6 +8,6 @@ date: 2025-09-16 00:01:00 +0800
     <h5>Review Experience</h5>
     <hr />
     <p>
-        Reviewer for *Journal of Open Humanities Data*.
+        Reviewer for <em>Journal of Open Humanities Data</em>.
     </p>
 </div>
