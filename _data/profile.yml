@@ -44,8 +44,13 @@ education:
   logo: /assets/images/badges/National_Chengchi_University.png
   position: >-
     Graduate Institute of Library, Information and Archival Studies <br/>
-    Exchange Student
+    Exchanging Student
   date: Feb. 2025 - Jun. 2025
+experience:
+- name: National University of Singapore
+  # logo: /assets/images/badges/PKU_red.png
+  position: Visiting Student
+  date: Jun. 2014 - Jun. 2024
 
 awards:
 - name: 南京大学学业奖学金（一等）
@@ -54,5 +59,9 @@ awards:
   date: 2023
 - name: 中南大学一等奖学金
   date: 2023
-- name: 中南大学华宇创新奖学金
+- name: 中南大学优秀学生
   date: 2022
+- name: 国家励志奖学金
+  date: 2022
+- name: 中南大学华宇创新奖学金
+  date: 2021
