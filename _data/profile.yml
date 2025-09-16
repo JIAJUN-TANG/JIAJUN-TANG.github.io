@@ -40,16 +40,16 @@ education:
     School of Humanities <br/>
     Bachelor in Arts
   date: Sep. 2019 - Jul. 2023
+experience:
 - name: National Chengchi University
   logo: /assets/images/badges/National_Chengchi_University.png
   position: >-
     Graduate Institute of Library, Information and Archival Studies <br/>
     Exchanging Student
   date: Feb. 2025 - Jun. 2025
-experience:
 - name: National University of Singapore
   logo: /assets/images/badges/National_University_Singapore.png
-  position: Visiting Student
+  position: Summer School
   date: Jun. 2014 - Jun. 2024
 
 awards:
