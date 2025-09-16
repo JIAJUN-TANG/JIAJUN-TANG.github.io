@@ -7,7 +7,6 @@ images:
 - src: /assets/images/photos/photo_1.jpg
   title: 南京
   desc: 对我人生影响最大的三个城市之——南京。
-  link: https://picsum.photos/
 - src: /assets/images/photos/photo_2.jpg
   title: 台北
   desc: 对我人生影响最大的三个城市之——台北。
