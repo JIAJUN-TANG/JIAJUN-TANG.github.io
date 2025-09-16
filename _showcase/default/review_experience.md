@@ -8,6 +8,9 @@ date: 2025-09-16 00:01:00 +0800
     <h5>Review Experience</h5>
     <hr />
     <p>
-        担任以下期刊审稿人：<em>Journal of Open Humanities Data</em>。
+        担任以下期刊审稿人：
+        <ol>
+        <li><em>Journal of Open Humanities Data</em></li>
+        </ol>
     </p>
 </div>
