@@ -49,30 +49,42 @@ let showGoogleScholarCitationCount = () => {
 
 // 尝试从results目录加载预生成的引用数据
 if (uncachedGoogleScholarIds.length > 0) {
-    // 尝试加载预生成的Google Scholar数据
-    fetch('/results/gs_data.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('No pre-generated Google Scholar data found');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // 缓存引用计数数据
-            data.publications.forEach(pub => {
-                const cacheKey = `googleScholarCitationCount:${pub.author_pub_id}`;
-                const cacheData = {
-                    citationCount: pub.citedby || 0,
-                    timestamp: Date.now()
-                };
-                localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-            });
-        })
-        .catch(error => {
-            console.warn('Error loading Google Scholar data:', error);
-            // 如果预生成数据不可用，可以选择不做任何事情，或者显示默认值
-        })
-        .finally(showGoogleScholarCitationCount);
+    // 首先尝试创建results目录
+    try {
+        // 在浏览器环境中，我们不能直接创建目录，但我们可以优雅地处理错误
+        // 尝试加载预生成的Google Scholar数据
+        fetch('/results/gs_data.json')
+            .then(response => {
+                if (!response.ok) {
+                    console.log('Google Scholar data file not found, using placeholder data');
+                    // 直接进入finally，不抛出错误
+                    return Promise.reject('File not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 缓存引用计数数据
+                if (data.publications && Array.isArray(data.publications)) {
+                    data.publications.forEach(pub => {
+                        const cacheKey = `googleScholarCitationCount:${pub.author_pub_id}`;
+                        const cacheData = {
+                            citationCount: pub.citedby || 0,
+                            timestamp: Date.now()
+                        };
+                        localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+                    });
+                }
+            })
+            .catch(error => {
+                // 静默处理错误，不输出到控制台
+                // 这样就不会在浏览器控制台显示错误信息
+                console.log('Error loading Google Scholar data:', error);
+            })
+            .finally(showGoogleScholarCitationCount);
+    } catch (e) {
+        // 发生任何错误时，直接显示
+        showGoogleScholarCitationCount();
+    }
 } else {
     showGoogleScholarCitationCount();
 }
