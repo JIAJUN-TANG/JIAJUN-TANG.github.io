@@ -1,51 +1,40 @@
 import { Profile, Paper, CustomCardData } from './types';
 
 export const PROFILE: Profile = {
-  name: "Dr. Elena Vance",
-  title: "Associate Professor of Computer Science",
-  affiliation: "Institute of Advanced Intelligence",
-  email: "elena.vance@uni.edu",
+  name: "Mr. JIAJUN (Griffin) TANG",
+  title: "Master's Student in Library, Information & Archival Management",
+  affiliation: "School of Information Management, Nanjing University",
+  email: "jiajuntang1101@smail.nju.edu.cn",
   avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-  bio: `I research the intersection of Generative AI and Human-Computer Interaction, creating systems that augment rather than replace human creativity. My work focuses on controllable generation, interpretive interfaces, and the cognitive impacts of AI collaboration.`,
+  bio: `I research the intersection of Intelligent Communication and International Communication, creating systems that augment rather than replace human creativity. My work focuses on human-computer interaction, human-centered design, and the cognitive impacts of AI.`,
   socials: {
-    github: "https://github.com",
-    scholar: "https://scholar.google.com",
-    twitter: "https://twitter.com"
+    github: "https://github.com/JIAJUN-TANG",
+    scholar: "https://scholar.google.com/citations?user=cXJ2lKAAAAAJ&hl=en",
   },
   education: [
-    {
-      degree: "Ph.D. in Computer Science",
-      institution: "Stanford University",
-      year: "2018"
+        {
+      degree: "Exchange Student",
+      institution: "National Chenchi University",
+      year: "2025"
     },
     {
-      degree: "B.S. in Mathematics",
-      institution: "MIT",
-      year: "2013"
+      degree: "B.A. in Communication",
+      institution: "Central South University",
+      year: "2019"
     }
   ],
   experience: [
     {
-      role: "Associate Professor",
-      institution: "Institute of Advanced Intelligence",
+      role: "Master's Student",
+      institution: "School of Information Management, Nanjing University",
       period: "2023 - Present"
     },
-    {
-      role: "Assistant Professor",
-      institution: "University of Tech",
-      period: "2019 - 2023"
-    },
-    {
-      role: "Postdoctoral Researcher",
-      institution: "Google Research",
-      period: "2018 - 2019"
-    }
   ],
   news: [
     {
       id: "n1",
-      date: "Oct 2024",
-      title: "Best Paper Award at UIST 2024 for work on Generative UI",
+      date: "Nov 2025",
+      title: "南京大学学业奖学金（一等）",
       category: "Award"
     },
     {
