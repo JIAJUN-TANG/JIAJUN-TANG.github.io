@@ -141,7 +141,7 @@ Error generating stack: `+i.message+`
 
 I believe in **tools for thought**. Technology should expand our mental capacity. 
 
-* "The computer is the most remarkable tool that we have ever come up with." - Steve Jobs`,title:"Philosophy"},{id:"c2",type:"paper-tracker",title:"Attention Is All You Need",content:"Tracking specific seminal papers in the field.",citationCount:null,lastUpdated:new Date().toLocaleDateString()},{id:"c3",type:"markdown",content:`### Upcoming Talks
+* "The computer is the most remarkable tool that we have ever come up with." - Steve Jobs`,title:"Philosophy"},{id:"c2",type:"paper-tracker",title:"Persuasion Strategies of the Major Powers on Social Media: An Analysis of the Metadiscourse from the Chinese and American Spokespersons' Tweets",content:"Newest Citation",citationCount:2,lastUpdated:new Date().toLocaleDateString()},{id:"c3",type:"markdown",content:`### Upcoming Talks
 
 - **Oct 15**: Keynote at AI4UI
 - **Nov 02**: Guest Lecture at Stanford
