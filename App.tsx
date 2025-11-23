@@ -9,15 +9,12 @@ import {
   Twitter, 
   Mail, 
   GraduationCap, 
-  Search, 
-  RefreshCw,
   ExternalLink,
   Briefcase,
   Sparkles
 } from 'lucide-react';
 import { Tab, Paper, CustomCardData } from './types';
 import { PROFILE, INITIAL_PAPERS, INITIAL_CARDS } from './constants';
-import { fetchCitationCount } from './utils/gemini';
 
 // --- Components ---
 
@@ -173,13 +170,7 @@ const HomeTab = () => (
 );
 
 const PublicationsTab = () => {
-  const [papers, setPapers] = useState<Paper[]>(INITIAL_PAPERS);
-
-  const handleFetchCitation = async (id: string, title: string) => {
-    setPapers(prev => prev.map(p => p.id === id ? { ...p, loadingCitation: true } : p));
-    const count = await fetchCitationCount(title);
-    setPapers(prev => prev.map(p => p.id === id ? { ...p, citationCount: count, loadingCitation: false } : p));
-  };
+  const [papers] = useState<Paper[]>(INITIAL_PAPERS);
 
   return (
     <motion.div 
@@ -216,33 +207,37 @@ const PublicationsTab = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-4 border-t border-slate-50 pt-4">
-               <div className="flex items-center gap-2">
-                 <button 
-                    onClick={() => handleFetchCitation(paper.id, paper.title)}
-                    className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-indigo-600 transition-colors"
-                    disabled={paper.loadingCitation}
-                 >
-                   {paper.loadingCitation ? (
-                     <RefreshCw className="animate-spin" size={14} />
-                   ) : (
-                     <Search size={14} />
-                   )}
-                   {paper.citationCount !== undefined && paper.citationCount !== null 
-                     ? `${paper.citationCount} Citations` 
-                     : "Check Citations"}
-                 </button>
-                 {paper.citationCount !== undefined && paper.citationCount !== null && (
-                    <span className="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded border border-green-100">
-                      Verified via Google Scholar
-                    </span>
+            <div className="grid grid-cols-2 gap-4 mt-4 border-t border-slate-50 pt-4">
+               {/* 第一列：原文URL */}
+               <div className="col-span-1">
+                 {paper.url ? (
+                   <a 
+                     href={paper.url} 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     className="ml-2 text-xs text-indigo-600 hover:underline flex items-center gap-1.5"
+                   >
+                     <ExternalLink size={12} />
+                     原文链接
+                   </a>
+                 ) : (
+                   <span className="ml-2 text-xs text-slate-300">Not available</span>
                  )}
                </div>
-               {paper.url && (
-                 <a href={paper.url} className="text-slate-400 hover:text-slate-900">
-                   <ExternalLink size={16} />
-                 </a>
-               )}
+               
+               {/* 第二列：引用数 */}
+               <div className="col-span-1 flex items-center gap-2 justify-start">
+                 {paper.citationCount !== undefined && paper.citationCount !== null ? (
+                   <span className="flex items-center gap-1.5 text-xs font-medium text-slate-700">
+                     {paper.citationCount} Citations
+                   </span>
+                 ) : (
+                   <span className="text-xs text-slate-400">No citation data</span>
+                 )}
+                 <span className={`text-[10px] px-1.5 py-0.5 rounded border ${paper.type === 'cn' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
+                   {paper.type === 'cn' ? 'Verified Through CNKI' : 'Verified Through Google Scholar'}
+                 </span>
+               </div>
             </div>
           </motion.div>
         ))}
@@ -252,30 +247,7 @@ const PublicationsTab = () => {
 };
 
 const DashboardTab = () => {
-  const [cards, setCards] = useState<CustomCardData[]>(INITIAL_CARDS);
-  const [newTitle, setNewTitle] = useState("");
-
-  const handleUpdateTracker = async (id: string, title?: string) => {
-    if (!title) return;
-    setCards(prev => prev.map(c => c.id === id ? { ...c, loadingCitation: true } : c));
-    const count = await fetchCitationCount(title);
-    setCards(prev => prev.map(c => c.id === id ? { ...c, citationCount: count, loadingCitation: false, lastUpdated: new Date().toLocaleDateString() } : c));
-  };
-
-  const addTracker = () => {
-    if(!newTitle.trim()) return;
-    const newCard: CustomCardData = {
-      id: Date.now().toString(),
-      type: 'paper-tracker',
-      title: newTitle,
-      content: 'Tracking citations for this paper.',
-      citationCount: null,
-      lastUpdated: new Date().toLocaleDateString()
-    };
-    setCards([...cards, newCard]);
-    setNewTitle("");
-    handleUpdateTracker(newCard.id, newCard.title);
-  };
+  const [cards] = useState<CustomCardData[]>(INITIAL_CARDS);
 
   return (
     <motion.div 
@@ -283,24 +255,7 @@ const DashboardTab = () => {
       animate={{ opacity: 1 }}
       className="max-w-5xl mx-auto px-4 py-8"
     >
-       <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
-        <h2 className="text-3xl font-serif font-bold text-slate-900">Research Notes & Trackers</h2>
-        <div className="flex gap-2 w-full md:w-auto">
-          <input 
-            type="text" 
-            placeholder="Add paper to track..." 
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-64"
-          />
-          <button 
-            onClick={addTracker}
-            className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors"
-          >
-            Add
-          </button>
-        </div>
-      </div>
+       <h2 className="text-3xl font-serif font-bold text-slate-900 mb-8">Trackers</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cards.map((card, i) => (
@@ -322,15 +277,6 @@ const DashboardTab = () => {
                 }`}>
                   {card.type === 'paper-tracker' ? 'Citation Tracker' : 'Note'}
                 </span>
-                {card.type === 'paper-tracker' && (
-                  <button 
-                    onClick={() => handleUpdateTracker(card.id, card.title)}
-                    className="text-slate-400 hover:text-indigo-600"
-                    disabled={card.loadingCitation}
-                  >
-                    <RefreshCw className={card.loadingCitation ? "animate-spin" : ""} size={16} />
-                  </button>
-                )}
               </div>
 
               {card.type === 'paper-tracker' ? (
@@ -342,7 +288,7 @@ const DashboardTab = () => {
                      </span>
                      <span className="text-sm text-slate-500 font-medium">citations</span>
                    </div>
-                   <p className="text-xs text-slate-400 mt-2">Source: Google Scholar</p>
+                   <p className="text-xs text-slate-400 mt-2">Source: {card.type === 'paper-tracker' && card.id === 'c2' ? 'Google Scholar' : 'Manual Entry'}</p>
                 </div>
               ) : (
                 <div className="markdown-body text-sm text-slate-600">
@@ -387,7 +333,7 @@ export default function App() {
             current={activeTab} 
             onClick={setActiveTab} 
             icon={Grid} 
-            label="Research" 
+            label="Trackers" 
           />
         </div>
       </nav>

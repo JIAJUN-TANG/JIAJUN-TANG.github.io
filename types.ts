@@ -14,6 +14,7 @@ export interface Paper {
   abstract?: string;
   citationCount?: number | null;
   loadingCitation?: boolean;
+  type?: 'cn' | 'gs';
 }
 
 export interface CustomCardData {
