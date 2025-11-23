@@ -5,11 +5,12 @@ export const PROFILE: Profile = {
   title: "Master's Student in Library, Information & Archival Management",
   affiliation: "School of Information Management, Nanjing University",
   email: "jiajuntang1101@smail.nju.edu.cn",
-  avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+  avatarUrl: "./image/avatar.jpeg",
   bio: `I research the intersection of Intelligent Communication and International Communication, creating systems that augment rather than replace human creativity. My work focuses on human-computer interaction, human-centered design, and the cognitive impacts of AI.`,
   socials: {
     github: "https://github.com/JIAJUN-TANG",
     scholar: "https://scholar.google.com/citations?user=cXJ2lKAAAAAJ&hl=en",
+    orcid: "https://orcid.org/0000-0003-2620-2789"
   },
   education: [
         {
@@ -39,13 +40,13 @@ export const PROFILE: Profile = {
     },
     {
       id: "n2",
-      date: "Sep 2024",
-      title: "Keynote: 'The Future of Co-Creativity' at AI4UI Conference",
-      category: "Talk"
+      date: "Aug 2025",
+      title: "Conference: 'The Future of Co-Creativity' at AI4UI Conference",
+      category: "News"
     },
     {
       id: "n3",
-      date: "Aug 2024",
+      date: "Aug 2025",
       title: "New paper on 'LLM Agents in IDEs' accepted to NeurIPS",
       category: "Publication"
     }

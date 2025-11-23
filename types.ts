@@ -57,6 +57,7 @@ export interface Profile {
     twitter?: string;
     github?: string;
     scholar?: string;
+    orcid?: string;
   };
   education: Education[];
   experience: Experience[];

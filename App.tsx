@@ -102,6 +102,7 @@ const HomeTab = () => (
       <div className="flex justify-center gap-4 mb-16">
         {PROFILE.socials.github && <SocialLink href={PROFILE.socials.github} icon={Github} />}
         {PROFILE.socials.scholar && <SocialLink href={PROFILE.socials.scholar} icon={GraduationCap} />}
+        {PROFILE.socials.orcid && <SocialLink href={PROFILE.socials.orcid} icon={BookOpen} />}
         {PROFILE.socials.twitter && <SocialLink href={PROFILE.socials.twitter} icon={Twitter} />}
         <SocialLink href={`mailto:${PROFILE.email}`} icon={Mail} />
       </div>
