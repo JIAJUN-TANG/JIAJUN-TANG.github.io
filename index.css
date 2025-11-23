@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#fafafa] text-slate-800 antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom Markdown Styles */
+.markdown-body h1, .markdown-body h2 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.markdown-body h1 { font-size: 1.5rem; }
+.markdown-body h2 { font-size: 1.25rem; }
+.markdown-body p { margin-bottom: 0.75rem; line-height: 1.6; }
+.markdown-body ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+.markdown-body a { color: #4f46e5; text-decoration: underline; }
+
+/* Empty root fix */
+#root:empty::before {
+  content: '';
+  display: block;
+  height: 100vh;
+  width: 100vw;
+  background: #fafafa;
+}
