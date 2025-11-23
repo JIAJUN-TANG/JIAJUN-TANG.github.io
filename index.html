@@ -4,61 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dr. Elena Vance | Scholar</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
-            },
-            colors: {
-              paper: '#fdfbf7',
-              ink: '#1e293b',
-              accent: '#4f46e5',
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      body {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        background-color: #fafafa;
-        color: #1e293b;
-        margin: 0;
-      }
-      /* Markdown Styles */
-      .markdown-body h1, .markdown-body h2 {
-        font-family: 'Playfair Display', serif;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-      }
-      .markdown-body h1 { font-size: 1.5rem; }
-      .markdown-body h2 { font-size: 1.25rem; }
-      .markdown-body p { margin-bottom: 0.75rem; line-height: 1.6; }
-      .markdown-body ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
-      .markdown-body a { color: #4f46e5; text-decoration: underline; }
-      
-      .glass-card {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-      }
-      
-      #root:empty::before {
-        content: '';
-        display: block;
-        height: 100vh;
-        width: 100vw;
-        background: #fafafa;
-      }
-    </style>
   <script type="importmap">
 {
   "imports": {
@@ -77,7 +25,6 @@
 </head>
   <body>
     <div id="root"></div>
-    <!-- Use relative path ./index.tsx to ensure it works in subdirectories -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
