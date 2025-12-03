@@ -119,7 +119,8 @@ const HomeTab = () => (
             <div key={`exp-${i}`} className="relative group">
                <span className="absolute -left-[39px] top-1.5 w-3 h-3 bg-white border-2 border-indigo-600 rounded-full group-hover:scale-125 transition-transform" />
                <h4 className="font-medium text-slate-900 leading-none mb-1.5">{exp.role}</h4>
-               <p className="text-slate-600 text-sm">{exp.institution}</p>
+               {exp.department && <p className="text-slate-600 text-sm">{exp.department}</p>}
+               <p className="text-slate-600 text-sm">{exp.university}</p>
                <p className="text-slate-400 text-xs font-mono mt-1">{exp.period}</p>
             </div>
           ))}
@@ -130,7 +131,8 @@ const HomeTab = () => (
              <div key={`edu-${i}`} className="relative group">
                <span className="absolute -left-[39px] top-1.5 w-3 h-3 bg-white border-2 border-slate-300 rounded-full group-hover:border-indigo-400 group-hover:scale-125 transition-all" />
                <h4 className="font-medium text-slate-900 leading-none mb-1.5">{edu.degree}</h4>
-               <p className="text-slate-600 text-sm">{edu.institution}</p>
+               {edu.department && <p className="text-slate-600 text-sm">{edu.department}</p>}
+               <p className="text-slate-600 text-sm">{edu.university}</p>
                <p className="text-slate-400 text-xs font-mono mt-1">{edu.year}</p>
             </div>
           ))}
@@ -201,7 +203,7 @@ const PublicationsTab = () => {
                 </div>
                 {paper.abstract && (
                   <p className="text-slate-500 text-sm leading-relaxed mb-4 border-l-2 border-slate-100 pl-3">
-                    {paper.abstract}
+                    {paper.abstract.length > 100 ? paper.abstract.substring(0, 100) + '...' : paper.abstract}
                   </p>
                 )}
               </div>
@@ -218,7 +220,7 @@ const PublicationsTab = () => {
                      className="ml-2 text-xs text-indigo-600 hover:underline flex items-center gap-1.5"
                    >
                      <ExternalLink size={12} />
-                     原文链接
+                     Fulltext Link
                    </a>
                  ) : (
                    <span className="ml-2 text-xs text-slate-300">Not available</span>
