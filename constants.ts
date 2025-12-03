@@ -15,7 +15,7 @@ export const PROFILE: Profile = {
     orcid: "https://orcid.org/0000-0003-2620-2789"
   },
   education: [
-        {
+    {
       degree: "Exchange Student",
       department: "Graduate Institute of Library, Information & Archival Studies",
       university: "National Chengchi University",
@@ -112,7 +112,8 @@ export const INITIAL_PAPERS: Paper[] = [
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zu1QCH3Fvq3Uh363nj646dMcAVFZYeIUe-XxuWqp26dDyzroN6yXJjUOH3IofKDTj_UdBeYxJ4x91FvO-BK5Oh-rhOamA-CmUUhKvtcwv2KYe4PU4gwNuJ7WbWwRwyGvyvcsYSsG4ZZ_sKaxdQdlWCoUXo4hk1uB_d2QvdBnIrgl5klhoBEyOndhT68w6BkHhen5etMlVc6EQ==&uniplatform=NZKPT&language=CHS",
     abstract: "Despite the significant progress in studies on metadiscourse, scarce attention has been paid to it in the digital context. Social media platforms including Twitter have become arenas for the current Sino-U.S. discourse competition. In this regard, Twitter can be used to observe the diverse usage of metadiscourse by different political figures and uncover the underlying mechanisms. Combining computer-aided metadiscourse extraction and critical discourse analysis, the paper explores metadiscourse markers from the Chinese and American spokespersons’ tweets to reveal their rhetoric and social functions based on Foucault's “power discourse theory.” The results show that the American spokespersons are more inclined to use emotional persuasion and define some specific objects, which is part of the division & rejection system. In contrast, utterances of the Chinese spokespersons constitute a semantic terrain to …",
     citationCount: 2,
-    type: 'gs'
+    type: 'gs',
+    googleScholarId: 'cXJ2lKAAAAAJ:d1gkVwhDpl0C'
   }
 ];
 

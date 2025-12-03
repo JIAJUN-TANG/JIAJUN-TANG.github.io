@@ -15,6 +15,7 @@ export interface Paper {
   citationCount?: number | null;
   loadingCitation?: boolean;
   type?: 'cn' | 'gs';
+  googleScholarId?: string;
 }
 
 export interface CustomCardData {
