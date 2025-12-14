@@ -67,7 +67,7 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2025,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zv1NxqOzzrx3b--0XjL4oIKreoKNHMvJt_wTmXOeGBGlF0xw83mQb9bs7mhSa-vTLf1bz7rIFfTNJsYn9Xhud5mGTCoNPd5WY_wk90CYgMxWZ7cVAcRj_HSFVpQ3YUpIEhFCZwIjJUOsCWX6RtMa4yonefU8MlUneWoq2QPwzRZjCLeHX2dYVfI39KkXEjD4j8=&uniplatform=NZKPT&language=CHS",
     abstract: "新一轮科学和产业革命背景下，出版编辑的人才培养是出版学研究的重点方向之一。文章基于文献内容和招聘数据的双重分析，对出版学业界的胜任力模型要素进行了梳理并呈现，以帮助弥合学业界共同培养人才的信息差。分析结果构建了出版编辑人才胜任力要素6个一级指标，22个二级指标，并提出价值观要求和知识业务能力是出版编辑的核心要素；个人背景和工作经历是出版编辑的基础要素；数字意识和数字能力是出版编辑不可或缺的关键性要素。本研究填补了行业对胜任力模型的空白，为出版企业在职业评定、人才选拔和培养上提供一定参考依据，并帮助学界优化人才培养目标以实现人岗匹配。",
-    citationCount: 1,
+    citationCount: 0,
     type: 'cn'
   },
   {
