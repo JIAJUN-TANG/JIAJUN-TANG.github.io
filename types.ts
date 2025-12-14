@@ -29,13 +29,15 @@ export interface CustomCardData {
 
 export interface Education {
   degree: string;
-  institution: string;
+  department: string;
+  university: string;
   year: string;
 }
 
 export interface Experience {
   role: string;
-  institution: string;
+  department: string;
+  university: string;
   period: string;
 }
 

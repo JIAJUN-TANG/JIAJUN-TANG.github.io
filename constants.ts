@@ -17,19 +17,22 @@ export const PROFILE: Profile = {
   education: [
         {
       degree: "Exchange Student",
-      institution: "National Chengchi University",
+      department: "Graduate Institute of Library, Information & Archival Studies",
+      university: "National Chengchi University",
       year: "2025"
     },
     {
       degree: "B.A. in Communication",
-      institution: "Central South University",
+      department: "School of Humanities",
+      university: "Central South University",
       year: "2019"
     }
   ],
   experience: [
     {
       role: "M.M. In Library, Information & Archival Management",
-      institution: "School of Information Management, Nanjing University",
+      department: "School of Information Management",
+      university: "Nanjing University",
       period: "2023 - Present"
     },
   ],
@@ -43,7 +46,7 @@ export const PROFILE: Profile = {
     {
       id: "n2",
       date: "Aug 2025",
-      title: "Conference: Forum on Games.",
+      title: "Conference: Presented at the Forum on Games.",
       category: "News"
     },
     {
@@ -131,7 +134,13 @@ export const INITIAL_CARDS: CustomCardData[] = [
   {
     id: 'c3',
     type: 'markdown',
-    content: `### Upcoming Talks\n\n- **Oct 15**: Keynote at AI4UI\n- **Nov 02**: Guest Lecture at Stanford\n\nCheck back for slides!`,
+    content: `### Upcoming Events\n\n- None`,
     title: "Schedule"
+  },
+  {
+    id: 'c3',
+    type: 'markdown',
+    content: `**Platform Development**\n\n- [南京大学数智文献平台](https://digitalilab.cn)\n\n- DocuManager\n\n**Available Dataset**\n\n- [Tweets Dataset of 4 Chinese and US spokespersons](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)`,
+    title: "Public Contributions"
   }
 ];
