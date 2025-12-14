@@ -16,6 +16,7 @@ export interface Paper {
   loadingCitation?: boolean;
   type?: 'cn' | 'gs';
   googleScholarId?: string;
+  tags?: { text: string; color: string }[];
 }
 
 export interface CustomCardData {
