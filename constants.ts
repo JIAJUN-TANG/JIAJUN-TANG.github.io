@@ -100,7 +100,7 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2025,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zu1QCH3Fvq3Uh363nj646dMcAVFZYeIUe-XxuWqp26dDyzroN6yXJjUOH3IofKDTj_UdBeYxJ4x91FvO-BK5Oh-rhOamA-CmUUhKvtcwv2KYe4PU4gwNuJ7WbWwRwyGvyvcsYSsG4ZZ_sKaxdQdlWCoUXo4hk1uB_d2QvdBnIrgl5klhoBEyOndhT68w6BkHhen5etMlVc6EQ==&uniplatform=NZKPT&language=CHS",
     abstract: "研究基于行动者网络理论，以国产3A游戏《黑神话：悟空》成功的国际传播为例，深入探讨国产游戏海外推广的策略。在全球化背景下，中国国产游戏在国际传播过程中面临文化差异、市场准入和技术壁垒等多重挑战。通过行动者网络理论的分析框架，文章揭示政府、行业组织、研发和发行企业、出版方、游戏平台、媒体及玩家等多元行动者在游戏海外传播过程中所扮演的角色及其互动机制。特别是中华优秀传统文化和游戏技术，作为异质性行动者，在游戏文化叙事的重塑过程中发挥关键作用，推动游戏的国际化和中华优秀传统文化的深度传播。通过《黑神话：悟空》的案例，文章总结其在技术创新、文化传播和国际市场拓展方面的成功经验，以期为其他国产游戏提供可借鉴的策略和启示。构建多元化的行动者网络，优化转译机制，推动中华优秀传统文化通过游戏进行跨文化传播，这是推动中国国产游戏国际传播成功的重要途径。",
-    citationCount: 1,
+    citationCount: 0,
     type: 'cn'
   },
   {
@@ -111,7 +111,7 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2024,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zu1QCH3Fvq3Uh363nj646dMcAVFZYeIUe-XxuWqp26dDyzroN6yXJjUOH3IofKDTj_UdBeYxJ4x91FvO-BK5Oh-rhOamA-CmUUhKvtcwv2KYe4PU4gwNuJ7WbWwRwyGvyvcsYSsG4ZZ_sKaxdQdlWCoUXo4hk1uB_d2QvdBnIrgl5klhoBEyOndhT68w6BkHhen5etMlVc6EQ==&uniplatform=NZKPT&language=CHS",
     abstract: "Despite the significant progress in studies on metadiscourse, scarce attention has been paid to it in the digital context. Social media platforms including Twitter have become arenas for the current Sino-U.S. discourse competition. In this regard, Twitter can be used to observe the diverse usage of metadiscourse by different political figures and uncover the underlying mechanisms. Combining computer-aided metadiscourse extraction and critical discourse analysis, the paper explores metadiscourse markers from the Chinese and American spokespersons’ tweets to reveal their rhetoric and social functions based on Foucault's “power discourse theory.” The results show that the American spokespersons are more inclined to use emotional persuasion and define some specific objects, which is part of the division & rejection system. In contrast, utterances of the Chinese spokespersons constitute a semantic terrain to …",
-    citationCount: 2,
+    citationCount: 1,
     type: 'gs',
     googleScholarId: 'cXJ2lKAAAAAJ:d1gkVwhDpl0C'
   }
