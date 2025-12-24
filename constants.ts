@@ -127,7 +127,7 @@ export const INITIAL_CARDS: CustomCardData[] = [
   {
     id: 'c2',
     type: 'paper-tracker',
-    title: "Persuasion Strategies of the Major Powers on Social Media: An Analysis of the Metadiscourse from the Chinese and American Spokespersons' Tweets",
+    title: "出版人工智能研究：概念、技术、影响与进路——一项系统性文献综述",
     content: "Newest Citation",
     citationCount: 1,
     lastUpdated: new Date().toLocaleDateString()
