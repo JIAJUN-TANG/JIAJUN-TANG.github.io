@@ -89,7 +89,7 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2025,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zs14hJ1zFzgMVnmg7RiCWHcyIN5qsii6P08f0ptx2caGbzbeixrEkFyqd-rQARxlVHv5PcT2RgWr92iRspBCCfmnOJ6J2UiDcBsIIlMB0EmrKgmBLXOy4-2c_TADLbnl87jDrymlxDpX1uOIO7Sr9cAohYDnZ0ZsVqVLu91sRQJ-Mj15T_MLxXmdvKR0hUxtR3W7I5wSo0ntQ==&uniplatform=NZKPT&language=CHS",
     abstract: "梳理我国出版人工智能的研究现状，有助于明确出版行业的发展方向，促进出版学科自主知识体系的构建和完善。本研究采用系统性文献综述方法，检索、筛选并分析了522篇相关文献，系统归纳了出版人工智能的核心概念、技术架构、行业影响及应对进路。学界认为智能技术正深度介入出版全流程，尤其是生成式人工智能在内容创作和知识生产中的应用，为出版行业的智能化升级提供了重要支撑。但人工智能也带来伦理和实践问题，生成内容的版权归属和原创性争论尤为突出。出版业应充分发挥在内容资源上的优势，向“知识服务提供商”和“知识把关人”角色转变，探索“出版即服务”模式，努力构建以高质量知识资源为核心的智能出版新生态。",
-    citationCount: 0,
+    citationCount: 1,
     type: 'cn'
   },
   {
@@ -111,7 +111,7 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2024,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zu1QCH3Fvq3Uh363nj646dMcAVFZYeIUe-XxuWqp26dDyzroN6yXJjUOH3IofKDTj_UdBeYxJ4x91FvO-BK5Oh-rhOamA-CmUUhKvtcwv2KYe4PU4gwNuJ7WbWwRwyGvyvcsYSsG4ZZ_sKaxdQdlWCoUXo4hk1uB_d2QvdBnIrgl5klhoBEyOndhT68w6BkHhen5etMlVc6EQ==&uniplatform=NZKPT&language=CHS",
     abstract: "Despite the significant progress in studies on metadiscourse, scarce attention has been paid to it in the digital context. Social media platforms including Twitter have become arenas for the current Sino-U.S. discourse competition. In this regard, Twitter can be used to observe the diverse usage of metadiscourse by different political figures and uncover the underlying mechanisms. Combining computer-aided metadiscourse extraction and critical discourse analysis, the paper explores metadiscourse markers from the Chinese and American spokespersons’ tweets to reveal their rhetoric and social functions based on Foucault's “power discourse theory.” The results show that the American spokespersons are more inclined to use emotional persuasion and define some specific objects, which is part of the division & rejection system. In contrast, utterances of the Chinese spokespersons constitute a semantic terrain to …",
-    citationCount: 2,
+    citationCount: 1,
     type: 'gs',
     googleScholarId: 'cXJ2lKAAAAAJ:d1gkVwhDpl0C'
   }
@@ -129,7 +129,7 @@ export const INITIAL_CARDS: CustomCardData[] = [
     type: 'paper-tracker',
     title: "Persuasion Strategies of the Major Powers on Social Media: An Analysis of the Metadiscourse from the Chinese and American Spokespersons' Tweets",
     content: "Newest Citation",
-    citationCount: 2,
+    citationCount: 1,
     lastUpdated: new Date().toLocaleDateString()
   },
   {
