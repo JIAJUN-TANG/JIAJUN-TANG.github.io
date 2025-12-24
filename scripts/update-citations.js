@@ -57,7 +57,8 @@ async function fetchCitations() {
                 // googleScholarId: 'ID'
 
                 // We will replace the citationCount line preceding this specific googleScholarId
-                const blockRegex = new RegExp(`(citationCount:\\s*)(\\d+)(,[\\s\\S]*?googleScholarId:\\s*'${fullId}')`);
+                // We use a negative lookahead to ensure we capture the closest citationCount
+                const blockRegex = new RegExp(`(citationCount:\\s*)(\\d+)(,(?:(?!citationCount:)[\\s\\S])*?googleScholarId:\\s*'${fullId}')`);
 
                 if (blockRegex.test(content)) {
                     const currentBlockMatch = content.match(blockRegex);
