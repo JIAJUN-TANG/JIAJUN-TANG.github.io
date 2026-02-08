@@ -13,20 +13,15 @@ export interface Paper {
   url?: string;
   abstract?: string;
   citationCount?: number | null;
-  loadingCitation?: boolean;
-  type?: 'cn' | 'gs';
-  googleScholarId?: string;
+  type?: 'cn';
   tags?: { text: string; color: string }[];
 }
 
 export interface CustomCardData {
   id: string;
-  type: 'markdown' | 'paper-tracker';
-  title?: string; // Used for tracker paper title
+  type: 'markdown';
+  title?: string;
   content: string; // Markdown content
-  citationCount?: number | null;
-  loadingCitation?: boolean;
-  lastUpdated?: string;
 }
 
 export interface Education {

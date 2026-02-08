@@ -243,8 +243,8 @@ const PublicationsTab = () => {
                 ) : (
                   <span className="text-xs text-slate-400">No citation data</span>
                 )}
-                <span className={`text-[10px] px-1.5 py-0.5 rounded border ${paper.type === 'cn' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
-                  {paper.type === 'cn' ? 'Verified Through CNKI' : 'Verified Through Google Scholar'}
+                <span className={`text-[10px] px-1.5 py-0.5 rounded border bg-blue-50 text-blue-600 border-blue-100`}>
+                  Verified Through CNKI
                 </span>
               </div>
             </div>
@@ -273,36 +273,19 @@ const DashboardTab = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05 }}
-            className={`p-6 rounded-2xl border transition-all duration-300 flex flex-col justify-between min-h-[200px] ${card.type === 'paper-tracker'
-                ? 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100'
-                : 'bg-white border-slate-100 hover:shadow-lg'
-              }`}
+            className="p-6 rounded-2xl border transition-all duration-300 flex flex-col justify-between min-h-[200px] bg-white border-slate-100 hover:shadow-lg"
           >
             <div>
               <div className="flex justify-between items-start mb-4">
-                <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${card.type === 'paper-tracker' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'
-                  }`}>
-                  {card.type === 'paper-tracker' ? 'Citation Tracker' : 'Note'}
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-slate-100 text-slate-600">
+                  Note
                 </span>
               </div>
 
-              {card.type === 'paper-tracker' ? (
-                <div>
-                  <h3 className="font-serif font-bold text-lg leading-tight mb-4 text-slate-800">{card.title}</h3>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-indigo-600">
-                      {card.loadingCitation ? "..." : (card.citationCount ?? "—")}
-                    </span>
-                    <span className="text-sm text-slate-500 font-medium">citations</span>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-2">Source: {card.type === 'paper-tracker' && card.id === 'c2' ? 'Google Scholar' : 'Manual Entry'}</p>
-                </div>
-              ) : (
-                <div className="markdown-body text-sm text-slate-600">
-                  {card.title && <h3 className="font-serif font-bold text-lg mb-2 text-slate-900">{card.title}</h3>}
-                  <ReactMarkdown>{card.content}</ReactMarkdown>
-                </div>
-              )}
+              <div className="markdown-body text-sm text-slate-600">
+                {card.title && <h3 className="font-serif font-bold text-lg mb-2 text-slate-900">{card.title}</h3>}
+                <ReactMarkdown>{card.content}</ReactMarkdown>
+              </div>
             </div>
           </motion.div>
         ))}
