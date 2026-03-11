@@ -13,7 +13,7 @@ import {
   ChevronUp,
   BarChart3,
   FileText,
-  Languages,
+  Trophy,
   Briefcase,
   Award,
   GraduationCap,
@@ -30,7 +30,7 @@ const NavButton = ({ tab, current, onClick, icon: Icon, label }: any) => (
     onClick={() => onClick(tab)}
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
-    className={`relative flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 ${
+    className={`relative flex items-center justify-center gap-2 px-3 py-2.5 md:px-5 rounded-full transition-all duration-300 ${
       current === tab
         ? 'text-white shadow-md'
         : 'text-slate-600 hover:text-slate-900'
@@ -57,7 +57,7 @@ const NavButton = ({ tab, current, onClick, icon: Icon, label }: any) => (
       />
     )}
     <Icon size={18} className="relative z-10" />
-    <span className="text-sm font-medium relative z-10">{label}</span>
+    <span className="text-sm font-medium relative z-10 hidden md:inline">{label}</span>
   </motion.button>
 );
 
@@ -250,6 +250,25 @@ const PublicationsTab = () => {
   const totalPapers = papers.length;
   const totalCitations = papers.reduce((sum, paper) => sum + (paper.citationCount || 0), 0);
 
+  // 计算 H 指数
+  const calculateHIndex = (papers: Paper[]): number => {
+    const citations = papers
+      .map(p => p.citationCount || 0)
+      .sort((a, b) => b - a);
+    
+    let h = 0;
+    for (let i = 0; i < citations.length; i++) {
+      if (citations[i] >= i + 1) {
+        h = i + 1;
+      } else {
+        break;
+      }
+    }
+    return h;
+  };
+
+  const hIndex = calculateHIndex(papers);
+
   const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: string; value: string | number; color: string }) => (
     <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
       <div className={`p-3 rounded-lg ${color}`}>
@@ -367,9 +386,9 @@ const PublicationsTab = () => {
             color="bg-emerald-600"
           />
           <StatCard
-            icon={Languages}
-            label="Languages"
-            value={`${typeStats['en'] || 0} EN / ${typeStats['cn'] || 0} CN`}
+            icon={Trophy}
+            label="h-index"
+            value={hIndex}
             color="bg-amber-600"
           />
         </div>
@@ -377,25 +396,33 @@ const PublicationsTab = () => {
         {/* Year Distribution Chart */}
         <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm mb-6">
           <h3 className="text-lg font-serif font-semibold mb-4 text-slate-800">Publications by Year</h3>
-          <div className="flex items-end gap-4 h-40">
+          <div className="flex items-end gap-4 h-48">
             {Object.entries(yearStats)
               .sort(([a], [b]) => parseInt(a) - parseInt(b))
               .map(([year, count]) => {
-                const height = (count / maxCount) * 100;
+                // Calculate height as percentage of max count
+                const heightPercent = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                
                 return (
-                  <div key={year} className="flex-1 flex flex-col items-center gap-2">
+                  <div 
+                    key={year} 
+                    className="flex-1 flex flex-col justify-end items-center"
+                    style={{ height: '100%' }}
+                  >
                     <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${height}%` }}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: `${heightPercent}%`, opacity: 1 }}
                       transition={{ duration: 0.5, delay: 0.2 }}
-                      className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg relative group"
-                      style={{ minHeight: '8px' }}
+                      className="w-full max-w-[60px] bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg relative group"
                     >
+                      <div className="absolute inset-x-0 bottom-2 flex justify-center">
+                        <span className="text-white text-xs font-bold">{count}</span>
+                      </div>
                       <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                        {count} papers
+                        {count} papers in {year}
                       </div>
                     </motion.div>
-                    <span className="text-xs font-medium text-slate-600">{year}</span>
+                    <span className="text-xs font-medium text-slate-600 mt-2">{year}</span>
                   </div>
                 );
               })}
