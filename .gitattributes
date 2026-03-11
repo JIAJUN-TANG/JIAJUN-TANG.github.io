@@ -1,0 +1,7 @@
+*.js text/javascript
+*.mjs text/javascript
+*.css text/css
+*.html text/html
+*.json application/json
+*.wasm application/wasm
+*.map application/json

@@ -7,11 +7,16 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    // Base must be './' for GitHub Pages to support subdirectories
-    base: './',
+    // Base path for GitHub Pages
+    base: '/JIAJUNTANG.github.io/',
     build: {
       outDir: 'dist',
       emptyOutDir: true,
+      rollupOptions: {
+        output: {
+          manualChunks: undefined,
+        },
+      },
     },
     define: {
       // Polyfill process.env for the browser
