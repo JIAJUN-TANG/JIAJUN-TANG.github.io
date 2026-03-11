@@ -1,5 +1,4 @@
-import { Profile, Paper, CustomCardData } from './types';
-// 使用import导入图片，这样Vite才能正确处理和打包资源
+import { Profile, Paper, CustomCardData, ResearchProject, ConferencePaper, OtherExperience } from './types';
 import avatarImage from './image/avatar.jpeg';
 
 export const PROFILE: Profile = {
@@ -15,12 +14,6 @@ export const PROFILE: Profile = {
     orcid: "https://orcid.org/0000-0003-2620-2789"
   },
   education: [
-    {
-      degree: "Exchange Student",
-      department: "Graduate Institute of Library, Information & Archival Studies",
-      university: "National Chengchi University",
-      year: "2025"
-    },
     {
       degree: "B.A. in Communication",
       department: "School of Humanities",
@@ -67,8 +60,9 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2025,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zv1NxqOzzrx3b--0XjL4oIKreoKNHMvJt_wTmXOeGBGlF0xw83mQb9bs7mhSa-vTLf1bz7rIFfTNJsYn9Xhud5mGTCoNPd5WY_wk90CYgMxWZ7cVAcRj_HSFVpQ3YUpIEhFCZwIjJUOsCWX6RtMa4yonefU8MlUneWoq2QPwzRZjCLeHX2dYVfI39KkXEjD4j8=&uniplatform=NZKPT&language=CHS",
     abstract: "新一轮科学和产业革命背景下，出版编辑的人才培养是出版学研究的重点方向之一。文章基于文献内容和招聘数据的双重分析，对出版学业界的胜任力模型要素进行了梳理并呈现，以帮助弥合学业界共同培养人才的信息差。分析结果构建了出版编辑人才胜任力要素6个一级指标，22个二级指标，并提出价值观要求和知识业务能力是出版编辑的核心要素；个人背景和工作经历是出版编辑的基础要素；数字意识和数字能力是出版编辑不可或缺的关键性要素。本研究填补了行业对胜任力模型的空白，为出版企业在职业评定、人才选拔和培养上提供一定参考依据，并帮助学界优化人才培养目标以实现人岗匹配。",
-    citationCount: 1,
-    type: 'cn'
+    citationCount: 0,
+    type: 'cn',
+    publicationType: 'authored'
   },
   {
     id: 'p2',
@@ -80,7 +74,8 @@ export const INITIAL_PAPERS: Paper[] = [
     abstract: "“从人工到智能——AI时代的历史与人文探索”工作坊聚焦人工智能技术与历史研究的交叉领域，系统探讨了数字史学的理论框架与实践路径。工作坊围绕大语言模型在史料分析、翻译及知识生产中的应用展开深入讨论，揭示了技术赋能下历史研究在效率提升与范式转型方面的潜力。尽管生成式人工智能能够加速文献处理与模式识别，但其“幻觉问题”与缺乏历史语境理解的局限性仍需警惕。圆桌讨论强调，技术应用应服务于学术创新而非替代人文思考，需通过跨学科合作解决数据质量、版权管理及研究主体性等挑战。人工智能可成为拓展历史研究广度的工具，但批判性思维与问题意识仍是学术深度的核心保障，未来需在技术整合与学科传统间寻求平衡。",
     citationCount: 2,
     type: 'cn',
-    tags: [{ text: "IF 1.212", color: "#4A5F7E" }]
+    tags: [{ text: "IF 1.212", color: "#4A5F7E" }],
+    publicationType: 'authored'
   },
   {
     id: 'p3',
@@ -90,9 +85,10 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2025,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zs14hJ1zFzgMVnmg7RiCWHcyIN5qsii6P08f0ptx2caGbzbeixrEkFyqd-rQARxlVHv5PcT2RgWr92iRspBCCfmnOJ6J2UiDcBsIIlMB0EmrKgmBLXOy4-2c_TADLbnl87jDrymlxDpX1uOIO7Sr9cAohYDnZ0ZsVqVLu91sRQJ-Mj15T_MLxXmdvKR0hUxtR3W7I5wSo0ntQ==&uniplatform=NZKPT&language=CHS",
     abstract: "梳理我国出版人工智能的研究现状，有助于明确出版行业的发展方向，促进出版学科自主知识体系的构建和完善。本研究采用系统性文献综述方法，检索、筛选并分析了522篇相关文献，系统归纳了出版人工智能的核心概念、技术架构、行业影响及应对进路。学界认为智能技术正深度介入出版全流程，尤其是生成式人工智能在内容创作和知识生产中的应用，为出版行业的智能化升级提供了重要支撑。但人工智能也带来伦理和实践问题，生成内容的版权归属和原创性争论尤为突出。出版业应充分发挥在内容资源上的优势，向“知识服务提供商”和“知识把关人”角色转变，探索“出版即服务”模式，努力构建以高质量知识资源为核心的智能出版新生态。",
-    citationCount: 2,
+    citationCount: 3,
     type: 'cn',
-    tags: [{ text: "IF 2.21", color: "#4A5F7E" }]
+    tags: [{ text: "IF 2.21", color: "#4A5F7E" }],
+    publicationType: 'authored'
   },
   {
     id: 'p4',
@@ -103,7 +99,8 @@ export const INITIAL_PAPERS: Paper[] = [
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zu1QCH3Fvq3Uh363nj646dMcAVFZYeIUe-XxuWqp26dDyzroN6yXJjUOH3IofKDTj_UdBeYxJ4x91FvO-BK5Oh-rhOamA-CmUUhKvtcwv2KYe4PU4gwNuJ7WbWwRwyGvyvcsYSsG4ZZ_sKaxdQdlWCoUXo4hk1uB_d2QvdBnIrgl5klhoBEyOndhT68w6BkHhen5etMlVc6EQ==&uniplatform=NZKPT&language=CHS",
     abstract: "研究基于行动者网络理论，以国产3A游戏《黑神话：悟空》成功的国际传播为例，深入探讨国产游戏海外推广的策略。在全球化背景下，中国国产游戏在国际传播过程中面临文化差异、市场准入和技术壁垒等多重挑战。通过行动者网络理论的分析框架，文章揭示政府、行业组织、研发和发行企业、出版方、游戏平台、媒体及玩家等多元行动者在游戏海外传播过程中所扮演的角色及其互动机制。特别是中华优秀传统文化和游戏技术，作为异质性行动者，在游戏文化叙事的重塑过程中发挥关键作用，推动游戏的国际化和中华优秀传统文化的深度传播。通过《黑神话：悟空》的案例，文章总结其在技术创新、文化传播和国际市场拓展方面的成功经验，以期为其他国产游戏提供可借鉴的策略和启示。构建多元化的行动者网络，优化转译机制，推动中华优秀传统文化通过游戏进行跨文化传播，这是推动中国国产游戏国际传播成功的重要途径。",
     citationCount: 2,
-    type: 'cn'
+    type: 'cn',
+    publicationType: 'authored'
   },
   {
     id: 'p5',
@@ -113,8 +110,34 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2024,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zu1QCH3Fvq3Uh363nj646dMcAVFZYeIUe-XxuWqp26dDyzroN6yXJjUOH3IofKDTj_UdBeYxJ4x91FvO-BK5Oh-rhOamA-CmUUhKvtcwv2KYe4PU4gwNuJ7WbWwRwyGvyvcsYSsG4ZZ_sKaxdQdlWCoUXo4hk1uB_d2QvdBnIrgl5klhoBEyOndhT68w6BkHhen5etMlVc6EQ==&uniplatform=NZKPT&language=CHS",
     abstract: "Despite the significant progress in studies on metadiscourse, scarce attention has been paid to it in the digital context. Social media platforms including Twitter have become arenas for the current Sino-U.S. discourse competition. In this regard, Twitter can be used to observe the diverse usage of metadiscourse by different political figures and uncover the underlying mechanisms. Combining computer-aided metadiscourse extraction and critical discourse analysis, the paper explores metadiscourse markers from the Chinese and American spokespersons’ tweets to reveal their rhetoric and social functions based on Foucault's “power discourse theory.” The results show that the American spokespersons are more inclined to use emotional persuasion and define some specific objects, which is part of the division & rejection system. In contrast, utterances of the Chinese spokespersons constitute a semantic terrain to …",
+    citationCount: 4,
+    type: 'en',
+    publicationType: 'authored'
+  },
+  {
+    id: 'p6',
+    title: "数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例",
+    authors: ["姚念达"],
+    venue: "广东社会科学",
+    year: 2025,
+    url: "https://kns.cnki.net/kcms2/article/abstract?v=BkbJkO_np9MbkA7kfPWBs12e9ZxER3DYitDD_aAI31jkh2GwTddcSF7fnMb80vNAeQk5fVQD26i_lDi6f-foGvMnrSPMr9_OYTSafv-kgmjGRX9XXj-83hLBl9rocCIBuqkHgBrfZTblD-wwoOWG8Lp6kL62jNqJGur8JUybNe6zon_uudiGGg==&uniplatform=NZKPT&language=CHS",
+    abstract: "本文以《美国对外关系文件集》(FRUS)的数字化历程为案例,探讨新数字技术在史料处理中的应用潜力。FRUS的数字化历程包括从纸质文献扫描、数据库建设到档案信息细化编码的发展过程。近年来,科研团队通过开发基于编码源文件的应用项目,将档案信息结构化并引入词频统计和相似文档检索,大幅提升文献分析效率。然而,现有数字化档案的应用仍存在诸多局限,如人工标注一致性差、信息提取技术门槛高、检索功能单一等。未来,随着人工智能技术的进步,基于大语言模型的档案分类、标注和知识挖掘将更加精细,会显著提高文献检索的精准度,帮助研究者发现历史线索并提升研究效率。FRUS作为档案数字化的先驱,可以为其他档案的数字化和应用提供参考。",
     citationCount: 2,
-    type: 'cn'
+    type: 'cn',
+    tags: [{ text: "CSSCI", color: "#7e4a4aff" }, { text: "北大核心", color: "#4a7e6dff" }, { text: "IF 3.822", color: "#4A5F7E" }],
+    publicationType: 'contributed'
+  },
+  {
+    id: 'p7',
+    title: "我国出版业垂直大模型效果测评与优化策略:基于国内外10款通用大模型应用效果的实证分析",
+    authors: ["杨文蝶", "唐嘉骏", "丁靖佳", "宋宁远"],
+    venue: "中国数字出版",
+    year: 2026,
+    url: "https://kns.cnki.net/kcms2/article/abstract?v=BkbJkO_np9MbkA7kfPWBs12e9ZxER3DYitDD_aAI31jkh2GwTddcSF7fnMb80vNAeQk5fVQD26i_lDi6f-foGvMnrSPMr9_OYTSafv-kgmjGRX9XXj-83hLBl9rocCIBuqkHgBrfZTblD-wwoOWG8Lp6kL62jNqJGur8JUybNe6zon_uudiGGg==&uniplatform=NZKPT&language=CHS",
+    abstract: "研究选取国内外10款通用大模型，以少儿类、文学类、科技类图书选题策划为测试场景，通过零样本提示词与详细提示词两种设计，从准确性、完整性、创新性、市场性、实用性5个维度评估其选题策划效果。研究结果表明，当前通用大模型在出版选题策划中的整体效果普遍欠佳。10款大模型在综合评分以及准确性、完整性和实用性等基础维度上的表现未呈现显著差异，而在创新性与市场性表现存在显著差异。在提示词设计方面，详细提示词能显著提升生成方案的创新性和市场性效果。从选题类型看，少儿类选题综合表现显著优于科技类，其市场性得分也显著高于文学类和科技类。基于此，研究提出构建出版领域垂直大模型的开发路径，包括专属语料库建设、训练目标优化、场景化提示词开发及人机协同迭代机制，为大语言模型赋能出版业智能化选题策划提供理论参考与实践指引。",
+    citationCount: 0,
+    type: 'cn',
+    publicationType: 'authored'
   }
 ];
 
@@ -134,7 +157,24 @@ export const INITIAL_CARDS: CustomCardData[] = [
   {
     id: 'c3',
     type: 'markdown',
-    content: `**Platform Development**\n\n- [南京大学数智文献平台](https://digitalilab.cn)\n\n- DocuManager\n\n**Available Dataset**\n\n- [Tweets Dataset of 4 Chinese and US spokespersons](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)`,
+    content: `**Platform Development**
+
+- [南京大学数智文献平台](https://digitalilab.cn)
+
+- DocuManager
+
+**Available Dataset**
+
+- [Tweets Dataset of 4 Chinese and US spokespersons](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)`,
     title: "Public Contributions"
   }
+];
+
+export const INITIAL_PROJECTS: ResearchProject[] = [
+];
+
+export const INITIAL_CONFERENCES: ConferencePaper[] = [
+];
+
+export const INITIAL_OTHER_EXPERIENCES: OtherExperience[] = [
 ];
