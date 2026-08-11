@@ -3,8 +3,8 @@ import avatarImage from './image/avatar.jpeg';
 
 export const PROFILE: Profile = {
   name: "Mr. JIAJUN (Griffin) TANG",
-  title: "Master's Student in Library, Information & Archival Management",
-  affiliation: "School of Information Management, Nanjing University",
+  title: "PhD Student in Communication",
+  affiliation: "School of Journalism and Communication, Nanjing University",
   email: "jiajuntang1101@smail.nju.edu.cn",
   avatarUrl: avatarImage,
   bio: `I research the intersection of Intelligent Communication and International Communication, creating systems that augment rather than replace human creativity. My work focuses on human-computer interaction, human-centered design, and the cognitive impacts of AI.`,
@@ -23,10 +23,16 @@ export const PROFILE: Profile = {
   ],
   experience: [
     {
-      role: "M.M. In Library, Information & Archival Management",
+      role: "PhD in Communication",
+      department: "School of Journalism and Communication",
+      university: "Nanjing University",
+      period: "2026 - Present"
+    },
+    {
+      role: "M.M. in Library, Information & Archival Management",
       department: "School of Information Management",
       university: "Nanjing University",
-      period: "2023 - Present"
+      period: "2023 - 2026"
     },
   ],
   news: [
@@ -85,7 +91,7 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2025,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zs14hJ1zFzgMVnmg7RiCWHcyIN5qsii6P08f0ptx2caGbzbeixrEkFyqd-rQARxlVHv5PcT2RgWr92iRspBCCfmnOJ6J2UiDcBsIIlMB0EmrKgmBLXOy4-2c_TADLbnl87jDrymlxDpX1uOIO7Sr9cAohYDnZ0ZsVqVLu91sRQJ-Mj15T_MLxXmdvKR0hUxtR3W7I5wSo0ntQ==&uniplatform=NZKPT&language=CHS",
     abstract: "梳理我国出版人工智能的研究现状，有助于明确出版行业的发展方向，促进出版学科自主知识体系的构建和完善。本研究采用系统性文献综述方法，检索、筛选并分析了522篇相关文献，系统归纳了出版人工智能的核心概念、技术架构、行业影响及应对进路。学界认为智能技术正深度介入出版全流程，尤其是生成式人工智能在内容创作和知识生产中的应用，为出版行业的智能化升级提供了重要支撑。但人工智能也带来伦理和实践问题，生成内容的版权归属和原创性争论尤为突出。出版业应充分发挥在内容资源上的优势，向“知识服务提供商”和“知识把关人”角色转变，探索“出版即服务”模式，努力构建以高质量知识资源为核心的智能出版新生态。",
-    citationCount: 3,
+    citationCount: 4,
     type: 'cn',
     tags: [{ text: "IF 2.21", color: "#4A5F7E" }],
     publicationType: 'authored'
@@ -98,7 +104,7 @@ export const INITIAL_PAPERS: Paper[] = [
     year: 2025,
     url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zu1QCH3Fvq3Uh363nj646dMcAVFZYeIUe-XxuWqp26dDyzroN6yXJjUOH3IofKDTj_UdBeYxJ4x91FvO-BK5Oh-rhOamA-CmUUhKvtcwv2KYe4PU4gwNuJ7WbWwRwyGvyvcsYSsG4ZZ_sKaxdQdlWCoUXo4hk1uB_d2QvdBnIrgl5klhoBEyOndhT68w6BkHhen5etMlVc6EQ==&uniplatform=NZKPT&language=CHS",
     abstract: "研究基于行动者网络理论，以国产3A游戏《黑神话：悟空》成功的国际传播为例，深入探讨国产游戏海外推广的策略。在全球化背景下，中国国产游戏在国际传播过程中面临文化差异、市场准入和技术壁垒等多重挑战。通过行动者网络理论的分析框架，文章揭示政府、行业组织、研发和发行企业、出版方、游戏平台、媒体及玩家等多元行动者在游戏海外传播过程中所扮演的角色及其互动机制。特别是中华优秀传统文化和游戏技术，作为异质性行动者，在游戏文化叙事的重塑过程中发挥关键作用，推动游戏的国际化和中华优秀传统文化的深度传播。通过《黑神话：悟空》的案例，文章总结其在技术创新、文化传播和国际市场拓展方面的成功经验，以期为其他国产游戏提供可借鉴的策略和启示。构建多元化的行动者网络，优化转译机制，推动中华优秀传统文化通过游戏进行跨文化传播，这是推动中国国产游戏国际传播成功的重要途径。",
-    citationCount: 2,
+    citationCount: 4,
     type: 'cn',
     publicationType: 'authored'
   },
@@ -138,6 +144,19 @@ export const INITIAL_PAPERS: Paper[] = [
     citationCount: 0,
     type: 'cn',
     publicationType: 'authored'
+  },
+  {
+    id: 'p8',
+    title: "How Narrative Content Supports Reading Immersion: An Empirical Analysis of Digital Reading Traces of Detective Fiction",
+    authors: ["Jiajun Tang*", "Hailin Yang", "Zihan Ma", "Ningyuan Song"],
+    venue: "Digital Scholarship in the Humanities",
+    year: 2026,
+    url: "",
+    abstract: "This study examines how narrative content in detective fiction is associated with indicators of reading immersion, using narrative transportation theory to connect textual topics with readers' emotional and cognitive responses. The study analyses 27,999 reader-selected excerpts from 100 highly ranked detective novels on Douban, posted between February 2011 and January 2024. Latent Dirichlet allocation (LDA) was used to identify narrative topics, and a BERT classifier assigned excerpts to the resulting categories. Sentiment dictionaries and the Text Mind system generated emotional and cognitive indicators. Non-parametric tests examined temporal trends and differences across subtopics. The excerpts formed three narrative dimensions (e.g. plot, humanity, and society) and seven subtopics. Plot-related content received consistently high attention; attention to humanity-level content declined over time, whereas attention to society-level content increased. Positive and negative sentiment indicators both rose, and the seven subtopics showed distinct emotional and cognitive profiles. These patterns inform a three-stage interpretive model linking content accessibility, emotional and cognitive engagement, and intellectual extension.",
+    citationCount: 0,
+    type: 'en',
+    tags: [{ text: "IF 1.0", color: "#4A5F7E" }, { text: "SSCI Q3", color: "#5B4A8A" }],
+    publicationType: 'authored'
   }
 ];
 
@@ -155,7 +174,7 @@ export const INITIAL_CARDS: CustomCardData[] = [
     title: "Schedule"
   },
   {
-    id: 'c3',
+    id: 'c2',
     type: 'markdown',
     content: `**Platform Development**
 

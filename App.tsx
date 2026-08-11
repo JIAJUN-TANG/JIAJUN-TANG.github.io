@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import {
@@ -10,122 +10,256 @@ import {
   ExternalLink,
   Sparkles,
   ChevronDown,
-  ChevronUp,
-  BarChart3,
-  FileText,
-  Trophy,
   Briefcase,
-  Award,
   GraduationCap,
   Users,
-  MapPin
+  MapPin,
+  Sun,
+  Moon,
+  Monitor
 } from 'lucide-react';
 import { Tab, Paper, CustomCardData, ResearchProject, ConferencePaper, OtherExperience } from './types';
 import { PROFILE, INITIAL_PAPERS, INITIAL_CARDS, INITIAL_PROJECTS, INITIAL_CONFERENCES, INITIAL_OTHER_EXPERIENCES } from './constants';
 
-// --- Components ---
+// ═══════════════════════════════════════════
+// Theme System
+// ═══════════════════════════════════════════
 
-const NavButton = ({ tab, current, onClick, icon: Icon, label }: any) => (
-  <motion.button
-    onClick={() => onClick(tab)}
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-    className={`relative flex items-center justify-center gap-2 px-3 py-2.5 md:px-5 rounded-full transition-all duration-300 ${
-      current === tab
-        ? 'text-white shadow-md'
-        : 'text-slate-600 hover:text-slate-900'
-    }`}
-    style={{
-      background: current === tab
-        ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)'
-        : 'transparent',
-      boxShadow: current === tab
-        ? '0 4px 16px rgba(15, 23, 42, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-        : 'none'
-    }}
-  >
-    {current === tab && (
-      <motion.div
-        layoutId="navHighlight"
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)',
-          zIndex: -1,
-          borderRadius: '9999px'
-        }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      />
-    )}
-    <Icon size={18} className="relative z-10" />
-    <span className="text-sm font-medium relative z-10 hidden md:inline">{label}</span>
-  </motion.button>
-);
+type Theme = 'light' | 'dark' | 'system';
 
-const SocialLink = ({ href, icon: Icon }: any) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="p-3 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-all duration-300 border border-transparent hover:border-slate-200"
-  >
-    <Icon size={20} />
-  </a>
-);
+const ThemeContext = createContext<{
+  theme: Theme;
+  setTheme: (t: Theme) => void;
+  resolved: 'light' | 'dark';
+}>({
+  theme: 'system',
+  setTheme: () => {},
+  resolved: 'light',
+});
 
-// --- Animations ---
+const useTheme = () => useContext(ThemeContext);
+
+const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [theme, setTheme] = useState<Theme>(() => {
+    try {
+      return (localStorage.getItem('theme') as Theme) || 'system';
+    } catch {
+      return 'system';
+    }
+  });
+
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const resolved = theme === 'system'
+    ? (systemDark ? 'dark' : 'light')
+    : theme;
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', resolved === 'dark');
+    try { localStorage.setItem('theme', theme); } catch {}
+  }, [theme, resolved]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme, resolved }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+// ═══════════════════════════════════════════
+// Animation Variants
+// ═══════════════════════════════════════════
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2
-    }
+    transition: { staggerChildren: 0.08, delayChildren: 0.15 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.25, 0, 1] } }
 };
 
-// --- Pages ---
+// ═══════════════════════════════════════════
+// Navigation Components
+// ═══════════════════════════════════════════
+
+const NAV_ITEMS = [
+  { tab: Tab.HOME, icon: HomeIcon, label: 'Home' },
+  { tab: Tab.PUBLICATIONS, icon: BookOpen, label: 'Publications' },
+  { tab: Tab.EXPERIENCES, icon: Briefcase, label: 'Experiences' },
+  { tab: Tab.RESEARCH_NOTES, icon: Grid, label: 'Trackers' },
+];
+
+const NavItem = ({ tab, current, onClick, icon: Icon, label }: {
+  tab: Tab;
+  current: Tab;
+  onClick: (t: Tab) => void;
+  icon: React.ComponentType<{ size?: number }>;
+  label: string;
+}) => {
+  const isActive = current === tab;
+  return (
+    <button
+      onClick={() => onClick(tab)}
+      className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors duration-200 ${
+        isActive
+          ? 'text-white dark:text-primary'
+          : 'text-tertiary hover:text-primary'
+      }`}
+    >
+      {isActive && (
+        <motion.div
+          layoutId="navPill"
+          className="absolute inset-0 rounded-full"
+          style={{ backgroundColor: 'var(--nav-active-bg)' }}
+          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+        />
+      )}
+      <Icon size={15} className="relative z-10" />
+      <span className="relative z-10 hidden md:inline">{label}</span>
+    </button>
+  );
+};
+
+const ThemeToggle = () => {
+  const { theme, setTheme } = useTheme();
+
+  const cycle = () => {
+    const order: Theme[] = ['light', 'dark', 'system'];
+    const idx = order.indexOf(theme);
+    setTheme(order[(idx + 1) % 3]);
+  };
+
+  const Icon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
+
+  return (
+    <button
+      onClick={cycle}
+      className="p-2 rounded-full text-tertiary hover:text-primary transition-colors"
+      title={`Theme: ${theme}`}
+    >
+      <Icon size={15} />
+    </button>
+  );
+};
+
+const Navigation = ({ activeTab, setActiveTab }: {
+  activeTab: Tab;
+  setActiveTab: (t: Tab) => void;
+}) => (
+  <nav className="fixed top-0 inset-x-0 z-50">
+    <div
+      className="mx-auto mt-3 max-w-xl px-3 py-1.5 rounded-2xl flex items-center justify-between gap-2 border"
+      style={{
+        backgroundColor: 'var(--nav-bg)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+        borderColor: 'var(--nav-border)',
+        boxShadow: 'var(--card-shadow)',
+      }}
+    >
+      {/* Brand */}
+      <span className="font-serif text-[15px] text-primary pl-2 select-none tracking-tight">
+        Jiajun Tang
+      </span>
+
+      {/* Tab Items */}
+      <div className="flex items-center gap-0.5">
+        {NAV_ITEMS.map(item => (
+          <NavItem
+            key={item.tab}
+            tab={item.tab}
+            current={activeTab}
+            onClick={setActiveTab}
+            icon={item.icon}
+            label={item.label}
+          />
+        ))}
+      </div>
+
+      {/* Theme Toggle */}
+      <div className="pr-1">
+        <ThemeToggle />
+      </div>
+    </div>
+  </nav>
+);
+
+// ═══════════════════════════════════════════
+// Social Link
+// ═══════════════════════════════════════════
+
+const SocialLink = ({ href, icon: Icon }: { href: string; icon: React.ComponentType<{ size?: number }> }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="p-2.5 text-tertiary hover:text-primary rounded-full transition-all duration-200 border border-transparent hover:border-subtle"
+  >
+    <Icon size={18} />
+  </a>
+);
+
+// ═══════════════════════════════════════════
+// Home Page
+// ═══════════════════════════════════════════
 
 const HomeTab = () => (
   <motion.div
     variants={containerVariants}
     initial="hidden"
     animate="visible"
-    exit={{ opacity: 0, y: -20 }}
-    className="flex flex-col items-center min-h-[60vh] max-w-4xl mx-auto px-4 pb-12"
+    exit={{ opacity: 0, y: -12 }}
+    className="flex flex-col items-center max-w-4xl mx-auto px-5 pb-16"
   >
-    {/* Hero Section */}
-    <motion.div
-      variants={itemVariants}
-      className="text-center max-w-2xl mx-auto"
-    >
+    {/* Hero */}
+    <motion.div variants={itemVariants} className="text-center max-w-2xl mx-auto pt-8">
+      {/* Avatar */}
       <div className="relative mb-8 group inline-block">
-        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full opacity-20 blur-xl group-hover:opacity-30 transition-opacity duration-500" />
         <img
           src={PROFILE.avatarUrl}
           alt={PROFILE.name}
-          className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-xl relative z-10"
+          className="w-32 h-32 md:w-36 md:h-36 rounded-full object-cover border-2 shadow-lg relative z-10 transition-transform duration-500 group-hover:scale-[1.03]"
+          style={{
+            borderColor: 'var(--card-border)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.08), 0 0 0 1px var(--card-border)',
+          }}
         />
       </div>
 
-      <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4 tracking-tight">
+      {/* Name */}
+      <h1 className="text-4xl md:text-5xl font-serif font-normal text-primary mb-3 tracking-tight leading-tight">
         {PROFILE.name}
       </h1>
-      <p className="text-lg text-slate-600 mb-2 font-light">{PROFILE.title}</p>
-      <p className="text-slate-500 mb-8 font-medium bg-slate-100 px-4 py-1 rounded-full text-sm inline-block">
+
+      {/* Title */}
+      <p className="text-base text-secondary mb-2 font-normal">{PROFILE.title}</p>
+
+      {/* Affiliation */}
+      <p className="text-sm text-tertiary mb-8">
         {PROFILE.affiliation}
       </p>
 
-      <p className="text-lg text-slate-700 leading-relaxed mb-8 font-serif">
+      {/* Bio */}
+      <p className="text-base text-secondary leading-[1.8] mb-8 max-w-xl mx-auto">
         {PROFILE.bio}
       </p>
 
-      <div className="flex justify-center gap-4 mb-16">
+      {/* Social Links */}
+      <div className="flex justify-center gap-2 mb-20">
         {PROFILE.socials.github && <SocialLink href={PROFILE.socials.github} icon={Github} />}
         {PROFILE.socials.scholar && <SocialLink href={PROFILE.socials.scholar} icon={GraduationCap} />}
         {PROFILE.socials.orcid && <SocialLink href={PROFILE.socials.orcid} icon={BookOpen} />}
@@ -134,34 +268,49 @@ const HomeTab = () => (
     </motion.div>
 
     {/* Details Grid */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-4xl border-t border-slate-100 pt-12">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-16 w-full max-w-4xl">
 
-      {/* Education & Experience */}
+      {/* Background */}
       <motion.div variants={itemVariants}>
-        <h3 className="text-xl font-serif font-semibold mb-8 flex items-center gap-2 text-slate-800">
-          <Briefcase size={20} className="text-indigo-600" /> Background
+        <h3 className="text-sm font-sans font-semibold uppercase tracking-[0.15em] text-tertiary mb-6 flex items-center gap-2">
+          <Briefcase size={14} /> Background
         </h3>
 
-        <div className="space-y-8 relative border-l border-slate-200 ml-3 pl-8 pb-2">
+        <div className="space-y-7 relative border-l ml-2 pl-7 pb-2" style={{ borderColor: 'var(--color-subtle)' }}>
           {PROFILE.experience.map((exp, i) => (
-            <div key={`exp-${i}`} className="relative group">
-              <span className="absolute -left-[39px] top-1.5 w-3 h-3 bg-white border-2 border-indigo-600 rounded-full group-hover:scale-125 transition-transform" />
-              <h4 className="font-medium text-slate-900 leading-none mb-1.5">{exp.role}</h4>
-              {exp.department && <p className="text-slate-600 text-sm">{exp.department}</p>}
-              <p className="text-slate-600 text-sm">{exp.university}</p>
-              <p className="text-slate-400 text-xs font-mono mt-1">{exp.period}</p>
-            </div>
+            <React.Fragment key={`exp-${i}`}>
+              {i > 0 && PROFILE.experience[i - 1].period.includes('Present') && !exp.period.includes('Present') && (
+                <div className="my-5 border-b border-dashed" style={{ borderColor: 'var(--color-subtle)' }} />
+              )}
+              <div className="relative group">
+                <span
+                  className="absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full border-2 transition-all duration-200 group-hover:scale-125"
+                  style={{
+                    borderColor: exp.period.includes('Present') ? 'var(--color-accent)' : 'var(--color-tertiary)',
+                    backgroundColor: 'var(--color-card)',
+                  }}
+                />
+                <h4 className="font-medium text-primary text-sm leading-snug mb-1">{exp.role}</h4>
+                {exp.department && <p className="text-secondary text-xs">{exp.department}</p>}
+                <p className="text-secondary text-xs">{exp.university}</p>
+                <p className="text-tertiary text-[11px] font-mono mt-1">{exp.period}</p>
+              </div>
+            </React.Fragment>
           ))}
-
-          <div className="my-6 border-b border-dashed border-slate-200 w-full" />
 
           {PROFILE.education.map((edu, i) => (
             <div key={`edu-${i}`} className="relative group">
-              <span className="absolute -left-[39px] top-1.5 w-3 h-3 bg-white border-2 border-slate-300 rounded-full group-hover:border-indigo-400 group-hover:scale-125 transition-all" />
-              <h4 className="font-medium text-slate-900 leading-none mb-1.5">{edu.degree}</h4>
-              {edu.department && <p className="text-slate-600 text-sm">{edu.department}</p>}
-              <p className="text-slate-600 text-sm">{edu.university}</p>
-              <p className="text-slate-400 text-xs font-mono mt-1">{edu.year}</p>
+              <span
+                className="absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full border-2 transition-all duration-200 group-hover:scale-125"
+                style={{
+                  borderColor: 'var(--color-tertiary)',
+                  backgroundColor: 'var(--color-card)',
+                }}
+              />
+              <h4 className="font-medium text-primary text-sm leading-snug mb-1">{edu.degree}</h4>
+              {edu.department && <p className="text-secondary text-xs">{edu.department}</p>}
+              <p className="text-secondary text-xs">{edu.university}</p>
+              <p className="text-tertiary text-[11px] font-mono mt-1">{edu.year}</p>
             </div>
           ))}
         </div>
@@ -169,34 +318,51 @@ const HomeTab = () => (
 
       {/* Recent Highlights */}
       <motion.div variants={itemVariants}>
-        <h3 className="text-xl font-serif font-semibold mb-8 flex items-center gap-2 text-slate-800">
-          <Sparkles size={20} className="text-amber-500" /> Recent Highlights
+        <h3 className="text-sm font-sans font-semibold uppercase tracking-[0.15em] text-tertiary mb-6 flex items-center gap-2">
+          <Sparkles size={14} /> Recent Highlights
         </h3>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {PROFILE.news.map((item) => (
             <motion.div
               key={item.id}
-              whileHover={{ y: -2 }}
-              className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-default"
+              whileHover={{ y: -1 }}
+              className="p-4 rounded-xl border transition-all duration-200"
+              style={{
+                backgroundColor: 'var(--color-card)',
+                borderColor: 'var(--card-border)',
+                boxShadow: 'var(--card-shadow)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow)';
+              }}
             >
-              <div className="flex items-center gap-3 mb-2">
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${item.category === 'Award' ? 'bg-amber-100 text-amber-700' :
-                    item.category === 'Publication' ? 'bg-blue-50 text-blue-700' :
-                      'bg-slate-100 text-slate-600'
-                  }`}>
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                  item.category === 'Award'
+                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                    : item.category === 'Publication'
+                    ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400'
+                    : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'
+                }`}>
                   {item.category}
                 </span>
-                <span className="text-xs text-slate-400 font-mono">{item.date}</span>
+                <span className="text-[11px] text-tertiary font-mono">{item.date}</span>
               </div>
-              <p className="font-medium text-slate-800 leading-relaxed text-sm">{item.title}</p>
+              <p className="font-medium text-primary text-sm leading-relaxed">{item.title}</p>
             </motion.div>
           ))}
         </div>
       </motion.div>
-
     </div>
   </motion.div>
 );
+
+// ═══════════════════════════════════════════
+// Publications Page
+// ═══════════════════════════════════════════
 
 const PublicationsTab = () => {
   const [papers] = useState<Paper[]>(INITIAL_PAPERS);
@@ -215,146 +381,167 @@ const PublicationsTab = () => {
     return false;
   };
 
+  const getIF = (paper: Paper): number => {
+    const ifTag = paper.tags?.find(t => t.text.startsWith('IF'));
+    return ifTag ? parseFloat(ifTag.text.replace('IF ', '')) : 0;
+  };
+
   const sortPapers = (papersToSort: Paper[]): Paper[] => {
     return [...papersToSort].sort((a, b) => {
-      if (b.year !== a.year) {
-        return b.year - a.year;
-      }
-      if (a.type !== b.type) {
-        return a.type === 'en' ? -1 : 1;
-      }
+      if (b.year !== a.year) return b.year - a.year;
+      const bIF = getIF(b);
+      const aIF = getIF(a);
+      if (aIF !== bIF) return bIF - aIF;
       const aIsFirst = isFirstAuthor(a);
       const bIsFirst = isFirstAuthor(b);
-      if (aIsFirst !== bIsFirst) {
-        return aIsFirst ? -1 : 1;
-      }
+      if (aIsFirst !== bIsFirst) return aIsFirst ? -1 : 1;
       return a.title.localeCompare(b.title);
     });
   };
 
-  const authoredPapers = sortPapers(papers.filter(p => p.publicationType === 'authored'));
-  const contributedPapers = sortPapers(papers.filter(p => p.publicationType === 'contributed'));
+  // Year filter
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const availableYears = [...new Set(papers.map(p => p.year))].sort((a, b) => b - a);
 
-  const yearStats = papers.reduce((acc, paper) => {
-    acc[paper.year] = (acc[paper.year] || 0) + 1;
-    return acc;
-  }, {} as Record<number, number>);
+  const authoredPapers = sortPapers(
+    papers.filter(p => p.publicationType === 'authored' && (selectedYear === null || p.year === selectedYear))
+  );
+  const contributedPapers = sortPapers(
+    papers.filter(p => p.publicationType === 'contributed' && (selectedYear === null || p.year === selectedYear))
+  );
 
-  const typeStats = papers.reduce((acc, paper) => {
-    const type = paper.type || 'other';
-    acc[type] = (acc[type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const totalPapers = authoredPapers.length;
+  const totalCitations = authoredPapers.reduce((sum, paper) => sum + (paper.citationCount || 0), 0);
 
-  const maxCount = Math.max(...Object.values(yearStats));
-  const totalPapers = papers.length;
-  const totalCitations = papers.reduce((sum, paper) => sum + (paper.citationCount || 0), 0);
-
-  // 计算 H 指数
   const calculateHIndex = (papers: Paper[]): number => {
-    const citations = papers
-      .map(p => p.citationCount || 0)
-      .sort((a, b) => b - a);
-    
+    const citations = papers.map(p => p.citationCount || 0).sort((a, b) => b - a);
     let h = 0;
     for (let i = 0; i < citations.length; i++) {
-      if (citations[i] >= i + 1) {
-        h = i + 1;
-      } else {
-        break;
-      }
+      if (citations[i] >= i + 1) h = i + 1;
+      else break;
     }
     return h;
   };
 
-  const hIndex = calculateHIndex(papers);
-
-  const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: string; value: string | number; color: string }) => (
-    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
-      <div className={`p-3 rounded-lg ${color}`}>
-        <Icon size={20} className="text-white" />
-      </div>
-      <div>
-        <p className="text-xs text-slate-500 uppercase tracking-wider">{label}</p>
-        <p className="text-2xl font-bold text-slate-900">{value}</p>
-      </div>
-    </div>
-  );
+  const hIndex = calculateHIndex(authoredPapers);
 
   const PaperCard = ({ paper, index }: { paper: Paper; index: number }) => (
     <motion.div
       key={paper.id}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="group relative bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300"
+      transition={{ delay: index * 0.06, duration: 0.4, ease: [0.25, 0.25, 0, 1] }}
+      className="group p-5 md:p-6 rounded-xl border transition-all duration-200"
+      style={{
+        backgroundColor: 'var(--color-card)',
+        borderColor: 'var(--card-border)',
+        boxShadow: 'var(--card-shadow)',
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow-hover)';
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow)';
+      }}
     >
-      <div className="flex justify-between items-start gap-4">
-        <div className="flex-1">
-          <h3 className="text-xl font-serif font-semibold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-            {paper.title}
-          </h3>
-          <p className="text-slate-600 italic mb-2 text-sm">{paper.authors.join(", ")}</p>
-          <div className="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-            <span className="bg-slate-100 px-2 py-1 rounded text-slate-600">{paper.venue}</span>
-            {paper.tags?.map((tag, tagIndex) => (
-              <span
-                key={tagIndex}
-                className="px-2 py-1 rounded text-white"
-                style={{ backgroundColor: tag.color }}
-              >
-                {tag.text}
-              </span>
-            ))}
-            <span>{paper.year}</span>
-          </div>
-          {paper.abstract && (
-            <p className="text-slate-500 text-sm leading-relaxed mb-4 border-l-2 border-slate-100 pl-3">
-              {paper.abstract.length > 100 ? paper.abstract.substring(0, 100) + '...' : paper.abstract}
-            </p>
-          )}
-        </div>
+      {/* Title */}
+      <h3 className="text-lg font-serif font-semibold text-primary mb-2 leading-snug group-hover:text-accent transition-colors duration-200">
+        {paper.title}
+      </h3>
+
+      {/* Authors */}
+      <p className="text-secondary text-sm mb-3 leading-relaxed">
+        {paper.authors.map((author, i) => {
+          const isCorresponding = author.includes('*');
+          const cleanName = author.replace('*', '').trim();
+          const isUser = cleanName.includes('唐嘉骏') || cleanName.includes('Jiajun Tang');
+          return (
+            <span key={i}>
+              {i > 0 && ', '}
+              {isUser ? (
+                <strong className="font-semibold text-primary">{cleanName}{isCorresponding ? '*' : ''}</strong>
+              ) : (
+                <>{cleanName}{isCorresponding ? '*' : ''}</>
+              )}
+            </span>
+          );
+        })}
+      </p>
+
+      {/* Meta Row */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span className="text-[11px] font-medium px-2 py-0.5 rounded-md" style={{ backgroundColor: 'var(--color-subtle)', color: 'var(--color-secondary)' }}>
+          {paper.venue}
+        </span>
+        <span className="text-[11px] text-tertiary font-mono">{paper.year}</span>
+        {paper.tags?.map((tag, tagIndex) => (
+          <span
+            key={tagIndex}
+            className="text-[10px] font-semibold px-2 py-0.5 rounded-md text-white"
+            style={{ backgroundColor: tag.color }}
+          >
+            {tag.text}
+          </span>
+        ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mt-4 border-t border-slate-50 pt-4">
-        {/* 第一列：原文 URL */}
-        <div className="col-span-1">
-          {paper.url ? (
-            <a
-              href={paper.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-2 text-xs text-indigo-600 hover:underline flex items-center gap-1.5"
-            >
-              <ExternalLink size={12} />
-              Fulltext Link
-            </a>
-          ) : (
-            <span className="ml-2 text-xs text-slate-300">Not available</span>
-          )}
-        </div>
+      {/* Abstract */}
+      {paper.abstract && (
+        <p className="text-tertiary text-sm leading-relaxed mb-4 pl-3 border-l-2" style={{ borderColor: 'var(--color-subtle)' }}>
+          {paper.abstract.length > 200 ? paper.abstract.substring(0, 200) + '...' : paper.abstract}
+        </p>
+      )}
 
-        {/* 第二列：引用数 */}
-        <div className="col-span-1 flex items-center gap-2 justify-start">
-          {paper.citationCount !== undefined && paper.citationCount !== null ? (
-            <span className="flex items-center gap-1.5 text-xs font-medium text-slate-700">
-              {paper.citationCount} Citations
-            </span>
-          ) : (
-            <span className="text-xs text-slate-400">No citation data</span>
-          )}
-          {paper.type === 'cn' ? (
-            <span className="text-[10px] px-1.5 py-0.5 rounded border bg-blue-50 text-blue-600 border-blue-100">
-              Verified Through CNKI
-            </span>
-          ) : paper.type === 'en' ? (
-            <span className="text-[10px] px-1.5 py-0.5 rounded border bg-green-50 text-green-600 border-green-100">
-              Verified Through Google Scholar
-            </span>
-          ) : null}
-        </div>
+      {/* Footer */}
+      <div className="flex flex-wrap items-center gap-4 pt-3 border-t" style={{ borderColor: 'var(--card-border)' }}>
+        {paper.url ? (
+          <a
+            href={paper.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12px] text-accent hover:underline flex items-center gap-1 transition-opacity"
+          >
+            <ExternalLink size={11} />
+            Fulltext
+          </a>
+        ) : (
+          <span className="text-[12px] text-tertiary">Not available</span>
+        )}
+
+        {paper.citationCount !== undefined && paper.citationCount !== null && (
+          <span className="text-[12px] text-secondary">
+            {paper.citationCount} citations
+          </span>
+        )}
+
+        {paper.type === 'cn' && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded border bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">
+            CNKI
+          </span>
+        )}
+        {paper.type === 'en' && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded border bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">
+            Google Scholar
+          </span>
+        )}
       </div>
     </motion.div>
+  );
+
+  const SectionHeader = ({ title, expanded, onToggle }: { title: string; expanded: boolean; onToggle: () => void }) => (
+    <button onClick={onToggle} className="w-full flex items-center justify-between mb-4 group py-1">
+      <h2 className="text-xl font-serif font-semibold text-primary group-hover:text-accent transition-colors duration-200">
+        {title}
+      </h2>
+      <motion.div
+        animate={{ rotate: expanded ? 180 : 0 }}
+        transition={{ duration: 0.25 }}
+        className="p-1.5 rounded-full transition-colors"
+        style={{ backgroundColor: 'var(--color-subtle)' }}
+      >
+        <ChevronDown size={18} className="text-secondary" />
+      </motion.div>
+    </button>
   );
 
   return (
@@ -362,185 +549,76 @@ const PublicationsTab = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="max-w-5xl mx-auto px-4 py-8"
+      className="max-w-4xl mx-auto px-5 py-8"
     >
-      {/* Statistics Overview */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-serif font-bold mb-6 text-slate-900 flex items-center gap-2">
-          <BarChart3 size={24} className="text-indigo-600" />
-          Publication Statistics
-        </h2>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <StatCard
-            icon={FileText}
-            label="Total Publications"
-            value={totalPapers}
-            color="bg-indigo-600"
-          />
-          <StatCard
-            icon={BarChart3}
-            label="Total Citations"
-            value={totalCitations}
-            color="bg-emerald-600"
-          />
-          <StatCard
-            icon={Trophy}
-            label="h-index"
-            value={hIndex}
-            color="bg-amber-600"
-          />
+      {/* Overview Stats — minimal inline */}
+      <div className="flex items-center gap-6 mb-3 pb-6 border-b" style={{ borderColor: 'var(--color-subtle)' }}>
+        <div>
+          <span className="text-2xl font-serif font-semibold text-primary">{totalPapers}</span>
+          <span className="text-xs text-tertiary ml-1.5 uppercase tracking-wide">Papers</span>
         </div>
-
-        {/* Year Distribution Chart */}
-        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm mb-6">
-          <h3 className="text-lg font-serif font-semibold mb-4 text-slate-800">Publications by Year</h3>
-          <div className="flex items-end gap-4 h-48">
-            {Object.entries(yearStats)
-              .sort(([a], [b]) => parseInt(a) - parseInt(b))
-              .map(([year, count]) => {
-                // Calculate height as percentage of max count
-                const heightPercent = maxCount > 0 ? (count / maxCount) * 100 : 0;
-                
-                return (
-                  <div 
-                    key={year} 
-                    className="flex-1 flex flex-col justify-end items-center"
-                    style={{ height: '100%' }}
-                  >
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: `${heightPercent}%`, opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                      className="w-full max-w-[60px] bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg relative group"
-                    >
-                      <div className="absolute inset-x-0 bottom-2 flex justify-center">
-                        <span className="text-white text-xs font-bold">{count}</span>
-                      </div>
-                      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                        {count} papers in {year}
-                      </div>
-                    </motion.div>
-                    <span className="text-xs font-medium text-slate-600 mt-2">{year}</span>
-                  </div>
-                );
-              })}
-          </div>
+        <div className="w-px h-6" style={{ backgroundColor: 'var(--color-subtle)' }} />
+        <div>
+          <span className="text-2xl font-serif font-semibold text-primary">{totalCitations}</span>
+          <span className="text-xs text-tertiary ml-1.5 uppercase tracking-wide">Citations</span>
         </div>
-
-        {/* Type Distribution */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-            <h3 className="text-lg font-serif font-semibold mb-4 text-slate-800">Publication Type</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                  <span className="text-sm text-slate-600">English</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${totalPapers > 0 ? ((typeStats['en'] || 0) / totalPapers) * 100 : 0}%` }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      className="h-full bg-emerald-500"
-                    />
-                  </div>
-                  <span className="text-sm font-semibold text-slate-900 w-8 text-right">{typeStats['en'] || 0}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-blue-500" />
-                  <span className="text-sm text-slate-600">Chinese</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${totalPapers > 0 ? ((typeStats['cn'] || 0) / totalPapers) * 100 : 0}%` }}
-                      transition={{ duration: 0.5, delay: 0.4 }}
-                      className="h-full bg-blue-500"
-                    />
-                  </div>
-                  <span className="text-sm font-semibold text-slate-900 w-8 text-right">{typeStats['cn'] || 0}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-            <h3 className="text-lg font-serif font-semibold mb-4 text-slate-800">Author Contribution</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-indigo-500" />
-                  <span className="text-sm text-slate-600">Authored</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${totalPapers > 0 ? (authoredPapers.length / totalPapers) * 100 : 0}%` }}
-                      transition={{ duration: 0.5, delay: 0.5 }}
-                      className="h-full bg-indigo-500"
-                    />
-                  </div>
-                  <span className="text-sm font-semibold text-slate-900 w-8 text-right">{authoredPapers.length}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-slate-400" />
-                  <span className="text-sm text-slate-600">Contributed</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${totalPapers > 0 ? (contributedPapers.length / totalPapers) * 100 : 0}%` }}
-                      transition={{ duration: 0.5, delay: 0.6 }}
-                      className="h-full bg-slate-400"
-                    />
-                  </div>
-                  <span className="text-sm font-semibold text-slate-900 w-8 text-right">{contributedPapers.length}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="w-px h-6" style={{ backgroundColor: 'var(--color-subtle)' }} />
+        <div>
+          <span className="text-2xl font-serif font-semibold text-primary">{hIndex}</span>
+          <span className="text-xs text-tertiary ml-1.5 uppercase tracking-wide">h-index</span>
         </div>
       </div>
+      <p className="text-[11px] text-tertiary mb-8 -mt-2">
+        * Corresponding author. Statistics count authored publications only.
+      </p>
 
-      {/* Authored Publications Section */}
-      <div className="mb-8">
+      {/* Year Filter */}
+      <div className="flex items-center gap-2 mb-8 flex-wrap">
+        <span className="text-xs text-tertiary uppercase tracking-wider mr-1">Year</span>
         <button
-          onClick={() => setAuthoredExpanded(!authoredExpanded)}
-          className="w-full flex items-center justify-between mb-4 group"
+          onClick={() => setSelectedYear(null)}
+          className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
+            selectedYear === null
+              ? 'bg-primary text-white dark:bg-primary dark:text-page'
+              : 'text-tertiary hover:text-primary'
+          }`}
+          style={selectedYear === null ? {} : { backgroundColor: 'var(--color-subtle)' }}
         >
-          <h2 className="text-3xl font-serif font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-            Authored Publications
-          </h2>
-          <motion.div
-            animate={{ rotate: authoredExpanded ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
-            className="p-2 rounded-full bg-slate-100 group-hover:bg-indigo-100 transition-colors"
-          >
-            {authoredExpanded ? <ChevronUp size={24} className="text-slate-600" /> : <ChevronDown size={24} className="text-slate-600" />}
-          </motion.div>
+          All
         </button>
+        {availableYears.map(year => (
+          <button
+            key={year}
+            onClick={() => setSelectedYear(year)}
+            className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
+              selectedYear === year
+                ? 'bg-primary text-white dark:bg-primary dark:text-page'
+                : 'text-tertiary hover:text-primary'
+            }`}
+            style={selectedYear === year ? {} : { backgroundColor: 'var(--color-subtle)' }}
+          >
+            {year}
+          </button>
+        ))}
+      </div>
 
+      {/* Authored Publications */}
+      <div className="mb-10">
+        <SectionHeader
+          title="Authored Publications"
+          expanded={authoredExpanded}
+          onToggle={() => setAuthoredExpanded(!authoredExpanded)}
+        />
         <AnimatePresence>
           {authoredExpanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.25, 0, 1] }}
               className="overflow-hidden"
             >
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {authoredPapers.map((paper, index) => (
                   <PaperCard key={paper.id} paper={paper} index={index} />
                 ))}
@@ -550,34 +628,23 @@ const PublicationsTab = () => {
         </AnimatePresence>
       </div>
 
-      {/* Contributed Publications Section */}
+      {/* Contributed Publications */}
       <div className="mb-8">
-        <button
-          onClick={() => setContributedExpanded(!contributedExpanded)}
-          className="w-full flex items-center justify-between mb-4 group"
-        >
-          <h2 className="text-3xl font-serif font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-            Contributed Publications
-          </h2>
-          <motion.div
-            animate={{ rotate: contributedExpanded ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
-            className="p-2 rounded-full bg-slate-100 group-hover:bg-indigo-100 transition-colors"
-          >
-            {contributedExpanded ? <ChevronUp size={24} className="text-slate-600" /> : <ChevronDown size={24} className="text-slate-600" />}
-          </motion.div>
-        </button>
-
+        <SectionHeader
+          title="Contributed Publications"
+          expanded={contributedExpanded}
+          onToggle={() => setContributedExpanded(!contributedExpanded)}
+        />
         <AnimatePresence>
           {contributedExpanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.25, 0, 1] }}
               className="overflow-hidden"
             >
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {contributedPapers.map((paper, index) => (
                   <PaperCard key={paper.id} paper={paper} index={index} />
                 ))}
@@ -590,37 +657,54 @@ const PublicationsTab = () => {
   );
 };
 
-const DashboardTab = () => {
+// ═══════════════════════════════════════════
+// Trackers Page
+// ═══════════════════════════════════════════
+
+const TrackersTab = () => {
   const [cards] = useState<CustomCardData[]>(INITIAL_CARDS);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="max-w-5xl mx-auto px-4 py-8"
+      exit={{ opacity: 0 }}
+      className="max-w-5xl mx-auto px-5 py-8"
     >
-      <h2 className="text-3xl font-serif font-bold text-slate-900 mb-8">Trackers</h2>
+      <h2 className="text-xl font-serif font-semibold text-primary mb-8">Trackers</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {cards.map((card, i) => (
           <motion.div
             key={card.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.05 }}
-            className="p-6 rounded-2xl border transition-all duration-300 flex flex-col justify-between min-h-[200px] bg-white border-slate-100 hover:shadow-lg"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.06, duration: 0.4 }}
+            className="p-5 rounded-xl border transition-all duration-200 flex flex-col min-h-[180px]"
+            style={{
+              backgroundColor: 'var(--color-card)',
+              borderColor: 'var(--card-border)',
+              boxShadow: 'var(--card-shadow)',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow-hover)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow)';
+            }}
           >
-            <div>
-              <div className="flex justify-between items-start mb-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-slate-100 text-slate-600">
-                  Note
-                </span>
-              </div>
+            <div className="flex justify-between items-start mb-3">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: 'var(--color-subtle)', color: 'var(--color-tertiary)' }}>
+                Note
+              </span>
+            </div>
 
-              <div className="markdown-body text-sm text-slate-600">
-                {card.title && <h3 className="font-serif font-bold text-lg mb-2 text-slate-900">{card.title}</h3>}
-                <ReactMarkdown>{card.content}</ReactMarkdown>
-              </div>
+            <div className="markdown-body text-sm flex-1">
+              {card.title && (
+                <h3 className="font-serif font-semibold text-base mb-2 text-primary">{card.title}</h3>
+              )}
+              <ReactMarkdown>{card.content}</ReactMarkdown>
             </div>
           </motion.div>
         ))}
@@ -628,6 +712,10 @@ const DashboardTab = () => {
     </motion.div>
   );
 };
+
+// ═══════════════════════════════════════════
+// Experiences Page
+// ═══════════════════════════════════════════
 
 const ExperienceTab = () => {
   const [projects] = useState<ResearchProject[]>(INITIAL_PROJECTS);
@@ -638,35 +726,24 @@ const ExperienceTab = () => {
   const [conferencesExpanded, setConferencesExpanded] = useState(true);
   const [othersExpanded, setOthersExpanded] = useState(true);
 
-  const SectionCard = ({ 
-    icon: Icon, 
-    title, 
-    expanded, 
-    onToggle, 
-    children, 
-    color 
-  }: { 
-    icon: any; 
-    title: string; 
-    expanded: boolean; 
-    onToggle: () => void; 
+  const SectionCard = ({ title, expanded, onToggle, children }: {
+    title: string;
+    expanded: boolean;
+    onToggle: () => void;
     children: React.ReactNode;
-    color: string;
   }) => (
-    <div className="mb-8">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between mb-4 group"
-      >
-        <h2 className="text-3xl font-serif font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+    <div>
+      <button onClick={onToggle} className="w-full flex items-center justify-between mb-4 group py-1">
+        <h2 className="text-xl font-serif font-semibold text-primary group-hover:text-accent transition-colors duration-200">
           {title}
         </h2>
         <motion.div
           animate={{ rotate: expanded ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
-          className="p-2 rounded-full bg-slate-100 group-hover:bg-indigo-100 transition-colors"
+          transition={{ duration: 0.25 }}
+          className="p-1.5 rounded-full transition-colors"
+          style={{ backgroundColor: 'var(--color-subtle)' }}
         >
-          {expanded ? <ChevronUp size={24} className="text-slate-600" /> : <ChevronDown size={24} className="text-slate-600" />}
+          <ChevronDown size={18} className="text-secondary" />
         </motion.div>
       </button>
 
@@ -676,10 +753,10 @@ const ExperienceTab = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.25, 0, 1] }}
             className="overflow-hidden"
           >
-            <div className="space-y-6">
+            <div className="space-y-4">
               {children}
             </div>
           </motion.div>
@@ -688,17 +765,9 @@ const ExperienceTab = () => {
     </div>
   );
 
-  const ExperienceCard = ({ 
-    title, 
-    subtitle, 
-    metadata, 
-    description, 
-    badge, 
-    badgeColor,
-    index 
-  }: { 
-    title: string; 
-    subtitle?: string; 
+  const ExperienceCard = ({ title, subtitle, metadata, description, badge, badgeColor, index }: {
+    title: string;
+    subtitle?: string;
     metadata?: React.ReactNode;
     description?: string;
     badge?: string;
@@ -707,31 +776,40 @@ const ExperienceTab = () => {
   }) => (
     <motion.div
       key={index}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="group relative bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300"
+      transition={{ delay: index * 0.06, duration: 0.4 }}
+      className="group p-5 md:p-6 rounded-xl border transition-all duration-200"
+      style={{
+        backgroundColor: 'var(--color-card)',
+        borderColor: 'var(--card-border)',
+        boxShadow: 'var(--card-shadow)',
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow-hover)';
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow)';
+      }}
     >
       <div className="flex justify-between items-start gap-4">
         <div className="flex-1">
-          <h3 className="text-xl font-serif font-semibold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
+          <h3 className="text-base font-semibold text-primary mb-1.5 group-hover:text-accent transition-colors duration-200">
             {title}
           </h3>
-          {subtitle && (
-            <p className="text-slate-600 italic mb-2 text-sm">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-secondary text-sm mb-2">{subtitle}</p>}
           {metadata && (
-            <div className="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
+            <div className="flex flex-wrap items-center gap-3 text-[11px] text-tertiary uppercase tracking-wider mb-3">
               {metadata}
             </div>
           )}
           {badge && (
-            <span className={`text-xs px-2 py-1 rounded-full ${badgeColor}`}>
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeColor}`}>
               {badge}
             </span>
           )}
           {description && (
-            <p className="text-slate-500 text-sm leading-relaxed mb-4 border-l-2 border-slate-100 pl-3 mt-3">
+            <p className="text-tertiary text-sm leading-relaxed mt-3 pl-3 border-l-2" style={{ borderColor: 'var(--color-subtle)' }}>
               {description}
             </p>
           )}
@@ -744,18 +822,16 @@ const ExperienceTab = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="max-w-4xl mx-auto px-4 py-8"
+      exit={{ opacity: 0 }}
+      className="max-w-4xl mx-auto px-5 py-8"
     >
-      <h2 className="text-3xl font-serif font-bold mb-8 text-slate-900">Experiences</h2>
+      <h2 className="text-xl font-serif font-semibold text-primary mb-8">Experiences</h2>
 
-      <div className="space-y-6">
-        {/* Research Projects */}
+      <div className="space-y-10">
         <SectionCard
-          icon={Briefcase}
           title="Research Projects"
           expanded={projectsExpanded}
           onToggle={() => setProjectsExpanded(!projectsExpanded)}
-          color="bg-indigo-600"
         >
           {projects.map((project, index) => (
             <ExperienceCard
@@ -764,35 +840,29 @@ const ExperienceTab = () => {
               title={project.title}
               metadata={
                 <>
-                  <span className="flex items-center gap-1">
-                    <Users size={14} />
-                    {project.role}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <GraduationCap size={14} />
-                    {project.institution}
-                  </span>
+                  <span className="flex items-center gap-1"><Users size={12} /> {project.role}</span>
+                  <span className="flex items-center gap-1"><GraduationCap size={12} /> {project.institution}</span>
                   <span>{project.period}</span>
                 </>
               }
               badge={project.status === 'ongoing' ? 'Ongoing' : 'Completed'}
               badgeColor={
                 project.status === 'ongoing'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-slate-200 text-slate-600'
+                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+                  : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'
               }
               description={project.description}
             />
           ))}
+          {projects.length === 0 && (
+            <p className="text-sm text-tertiary py-4 text-center">No research projects listed yet.</p>
+          )}
         </SectionCard>
 
-        {/* Conference Papers */}
         <SectionCard
-          icon={FileText}
           title="Conference Papers"
           expanded={conferencesExpanded}
           onToggle={() => setConferencesExpanded(!conferencesExpanded)}
-          color="bg-emerald-600"
         >
           {conferences.map((conference, index) => (
             <ExperienceCard
@@ -803,30 +873,27 @@ const ExperienceTab = () => {
               metadata={
                 <>
                   <span>{conference.conference}</span>
-                  <span className="flex items-center gap-1">
-                    <MapPin size={14} />
-                    {conference.location}
-                  </span>
+                  <span className="flex items-center gap-1"><MapPin size={12} /> {conference.location}</span>
                   <span>{conference.year}</span>
                 </>
               }
               badge={conference.type === 'oral' ? 'Oral' : 'Poster'}
               badgeColor={
                 conference.type === 'oral'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-amber-100 text-amber-700'
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                  : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
               }
             />
           ))}
+          {conferences.length === 0 && (
+            <p className="text-sm text-tertiary py-4 text-center">No conference papers listed yet.</p>
+          )}
         </SectionCard>
 
-        {/* Other Experiences */}
         <SectionCard
-          icon={Award}
           title="Awards & Activities"
           expanded={othersExpanded}
           onToggle={() => setOthersExpanded(!othersExpanded)}
-          color="bg-amber-600"
         >
           {otherExperiences.map((exp, index) => (
             <ExperienceCard
@@ -845,100 +912,72 @@ const ExperienceTab = () => {
                 exp.type === 'certification' ? 'Certification' : 'Other'
               }
               badgeColor={
-                exp.type === 'award' ? 'bg-amber-100 text-amber-700' :
-                exp.type === 'workshop' ? 'bg-purple-100 text-purple-700' :
-                exp.type === 'certification' ? 'bg-cyan-100 text-cyan-700' :
-                'bg-slate-100 text-slate-600'
+                exp.type === 'award' ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400' :
+                exp.type === 'workshop' ? 'bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400' :
+                exp.type === 'certification' ? 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-400' :
+                'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'
               }
               description={exp.description}
             />
           ))}
+          {otherExperiences.length === 0 && (
+            <p className="text-sm text-tertiary py-4 text-center">No awards or activities listed yet.</p>
+          )}
         </SectionCard>
       </div>
     </motion.div>
   );
 };
 
-// --- Main App ---
+// ═══════════════════════════════════════════
+// Main App
+// ═══════════════════════════════════════════
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.HOME);
 
   return (
-    <div className="min-h-screen pb-20 bg-[#fafafa]">
-      {/* Navigation */}
-      <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-        <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, type: 'spring', stiffness: 200, damping: 25 }}
-          className="flex items-center gap-1 px-2 py-2 rounded-[24px] backdrop-blur-2xl shadow-2xl border border-white/40 ring-1 ring-black/5"
-          style={{
-            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.85) 100%)',
-            boxShadow: `
-              0 8px 32px rgba(0, 0, 0, 0.12),
-              0 2px 8px rgba(0, 0, 0, 0.08),
-              inset 0 1px 0 rgba(255, 255, 255, 0.8),
-              inset 0 -1px 0 rgba(0, 0, 0, 0.05)
-            `
-          }}
-        >
-          <NavButton
-            tab={Tab.HOME}
-            current={activeTab}
-            onClick={setActiveTab}
-            icon={HomeIcon}
-            label="Home"
-          />
-          <NavButton
-            tab={Tab.PUBLICATIONS}
-            current={activeTab}
-            onClick={setActiveTab}
-            icon={BookOpen}
-            label="Publications"
-          />
-          <NavButton
-            tab={Tab.EXPERIENCES}
-            current={activeTab}
-            onClick={setActiveTab}
-            icon={Briefcase}
-            label="Experiences"
-          />
-          <NavButton
-            tab={Tab.RESEARCH_NOTES}
-            current={activeTab}
-            onClick={setActiveTab}
-            icon={Grid}
-            label="Trackers"
-          />
-        </motion.div>
-      </nav>
+    <ThemeProvider>
+      <div className="min-h-screen bg-page transition-colors duration-300">
+        {/* Subtle noise texture */}
+        <div className="noise-overlay" />
 
-      {/* Content */}
-      <main className="pt-12 md:pt-20">
-        <AnimatePresence mode="wait">
-          {activeTab === Tab.HOME && (
-            <motion.div key="home">
-              <HomeTab />
-            </motion.div>
-          )}
-          {activeTab === Tab.PUBLICATIONS && (
-            <motion.div key="publications">
-              <PublicationsTab />
-            </motion.div>
-          )}
-          {activeTab === Tab.EXPERIENCES && (
-            <motion.div key="experiences">
-              <ExperienceTab />
-            </motion.div>
-          )}
-          {activeTab === Tab.RESEARCH_NOTES && (
-            <motion.div key="notes">
-              <DashboardTab />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-    </div>
+        {/* Navigation */}
+        <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
+
+        {/* Content */}
+        <main className="pt-20">
+          <AnimatePresence mode="wait">
+            {activeTab === Tab.HOME && (
+              <motion.div key="home">
+                <HomeTab />
+              </motion.div>
+            )}
+            {activeTab === Tab.PUBLICATIONS && (
+              <motion.div key="publications">
+                <PublicationsTab />
+              </motion.div>
+            )}
+            {activeTab === Tab.EXPERIENCES && (
+              <motion.div key="experiences">
+                <ExperienceTab />
+              </motion.div>
+            )}
+            {activeTab === Tab.RESEARCH_NOTES && (
+              <motion.div key="notes">
+                <TrackersTab />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
+
+        {/* Footer */}
+        <footer className="pb-8 pt-4 text-center">
+          <p className="text-[11px] text-tertiary tracking-wide">
+            &copy; {new Date().getFullYear()} Jiajun Tang. All rights reserved.
+          </p>
+        </footer>
+      </div>
+    </ThemeProvider>
   );
 }
