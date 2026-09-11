@@ -19,7 +19,9 @@ import {
   Monitor
 } from 'lucide-react';
 import { Tab, Paper, CustomCardData, ResearchProject, ConferencePaper, OtherExperience } from './types';
-import { PROFILE, INITIAL_PAPERS, INITIAL_CARDS, INITIAL_PROJECTS, INITIAL_CONFERENCES, INITIAL_OTHER_EXPERIENCES } from './constants';
+import { PROFILE, INITIAL_PAPERS, INITIAL_CARDS, INITIAL_PROJECTS, INITIAL_CONFERENCES, INITIAL_OTHER_EXPERIENCES, SCHOLAR_STATS } from './constants';
+import { GitHubActivityCard, GitHubSectionHeading } from './GitHubActivity';
+import { timeAgo } from './github';
 
 // ═══════════════════════════════════════════
 // Theme System
@@ -95,6 +97,9 @@ const itemVariants = {
 // ═══════════════════════════════════════════
 // Navigation Components
 // ═══════════════════════════════════════════
+
+const GITHUB_LOGIN =
+  PROFILE.socials.github?.replace(/\/+$/, '').split('/').pop() || 'JIAJUN-TANG';
 
 const NAV_ITEMS = [
   { tab: Tab.HOME, icon: HomeIcon, label: 'Home' },
@@ -355,6 +360,9 @@ const HomeTab = () => (
             </motion.div>
           ))}
         </div>
+
+        <GitHubSectionHeading />
+        <GitHubActivityCard login={GITHUB_LOGIN} />
       </motion.div>
     </div>
   </motion.div>
@@ -568,9 +576,16 @@ const PublicationsTab = () => {
           <span className="text-xs text-tertiary ml-1.5 uppercase tracking-wide">h-index</span>
         </div>
       </div>
-      <p className="text-[11px] text-tertiary mb-8 -mt-2">
-        * Corresponding author. Statistics count authored publications only.
-      </p>
+      <div className="flex items-center justify-between gap-4 mb-8 -mt-2">
+        <p className="text-[11px] text-tertiary">
+          * Corresponding author. Statistics count authored publications only.
+        </p>
+        {SCHOLAR_STATS.updated && (
+          <span className="text-[10px] text-tertiary font-mono shrink-0">
+            Scholar synced {timeAgo(SCHOLAR_STATS.updated)}
+          </span>
+        )}
+      </div>
 
       {/* Year Filter */}
       <div className="flex items-center gap-2 mb-8 flex-wrap">

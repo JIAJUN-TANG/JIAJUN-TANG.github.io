@@ -145,3 +145,29 @@
   width: 100vw;
   background: var(--color-page);
 }
+
+/* ═══════════════════════════════════════════
+   Live Indicator
+   ═══════════════════════════════════════════ */
+
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+}
+
+.live-dot {
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot {
+    animation: none;
+  }
+}

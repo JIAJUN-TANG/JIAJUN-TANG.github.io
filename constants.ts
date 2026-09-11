@@ -1,5 +1,57 @@
 import { Profile, Paper, CustomCardData, ResearchProject, ConferencePaper, OtherExperience } from './types';
 import avatarImage from './image/avatar.jpeg';
+import scholarData from './data/scholar.json';
+
+/**
+ * Citation counts are refreshed by .github/workflows/update-citations.yml, which
+ * rewrites data/scholar.json. A paper is matched by its Scholar publication id when
+ * `scholarPubId` is set, otherwise by a normalised title comparison (punctuation,
+ * spacing and case are stripped so CNKI/Scholar title variants still line up).
+ * Any paper that cannot be matched keeps its hand-maintained `citationCount`, so a
+ * failed crawl can never blank out numbers on the site.
+ */
+interface ScholarPublication {
+  pub_id?: string;
+  title?: string;
+  citations?: number;
+}
+
+const normalizeTitle = (title: string) =>
+  title.toLowerCase().replace(/[^0-9a-z\u4e00-\u9fff]/g, '');
+
+const scholarPublications = (scholarData.publications ?? []) as unknown as ScholarPublication[];
+
+const citationsByTitle = new Map<string, number>();
+const citationsByPubId = new Map<string, number>();
+scholarPublications.forEach((pub) => {
+  const citations = pub.citations ?? 0;
+  if (pub.title) citationsByTitle.set(normalizeTitle(pub.title), citations);
+  if (pub.pub_id) citationsByPubId.set(pub.pub_id, citations);
+});
+
+const applyScholarCitations = (papers: Paper[]): Paper[] =>
+  papers.map((paper) => {
+    const live = paper.scholarPubId
+      ? citationsByPubId.get(paper.scholarPubId)
+      : citationsByTitle.get(normalizeTitle(paper.title));
+    return live === undefined ? paper : { ...paper, citationCount: live };
+  });
+
+const scholarProfile = scholarData.profile as unknown as {
+  total_citations: number;
+  h_index: number;
+  i10_index: number;
+  citations_per_year: Record<string, number>;
+};
+
+export const SCHOLAR_STATS = {
+  updated: (scholarData.updated ?? null) as string | null,
+  scholarId: scholarData.scholar_id as string,
+  totalCitations: scholarProfile.total_citations ?? 0,
+  hIndex: scholarProfile.h_index ?? 0,
+  i10Index: scholarProfile.i10_index ?? 0,
+  citationsPerYear: scholarProfile.citations_per_year ?? {},
+};
 
 export const PROFILE: Profile = {
   name: "Mr. JIAJUN (Griffin) TANG",
@@ -57,7 +109,7 @@ export const PROFILE: Profile = {
   ]
 };
 
-export const INITIAL_PAPERS: Paper[] = [
+export const INITIAL_PAPERS: Paper[] = applyScholarCitations([
   {
     id: 'p1',
     title: "数字时代出版编辑人才胜任力模型优化研究",
@@ -158,7 +210,7 @@ export const INITIAL_PAPERS: Paper[] = [
     tags: [{ text: "IF 1.0", color: "#4A5F7E" }, { text: "SSCI Q3", color: "#5B4A8A" }],
     publicationType: 'authored'
   }
-];
+]);
 
 export const INITIAL_CARDS: CustomCardData[] = [
   {

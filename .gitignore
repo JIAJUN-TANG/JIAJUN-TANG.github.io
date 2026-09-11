@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# WorkBuddy local state
+.workbuddy/
+
+# Python
+__pycache__/
+*.pyc

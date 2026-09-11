@@ -17,6 +17,9 @@ export interface Paper {
   type?: 'cn' | 'en';
   tags?: { text: string; color: string }[];
   publicationType?: 'authored' | 'contributed';
+  /** Google Scholar publication id, e.g. "cXJ2lKAAAAAJ:u-x6o8ySG0sC".
+   *  Optional: without it the paper is matched by normalised title. */
+  scholarPubId?: string;
 }
 
 export interface ResearchProject {

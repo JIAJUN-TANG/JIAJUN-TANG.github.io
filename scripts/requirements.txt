@@ -1,0 +1,8 @@
+# Installed from git main on purpose: the PyPI release (1.7.11) dates back to
+# 2023 and no longer parses the current Google Scholar markup.
+git+https://github.com/scholarly-python-package/scholarly.git
+
+# scholarly declares an unpinned `bibtexparser`. Since 2.x that resolves to a
+# version without `bibtexparser.bibdatabase`, and `import scholarly` then dies
+# with ModuleNotFoundError. Pin below 2 until upstream fixes it.
+bibtexparser<2
