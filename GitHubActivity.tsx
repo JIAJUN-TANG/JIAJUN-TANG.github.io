@@ -13,7 +13,8 @@ import {
   Trash2,
   Circle,
 } from 'lucide-react';
-import { GithubEvent, timeAgo, useGithubActivity } from './github';
+import { GithubEvent, formatGithubEvent, useGithubActivity } from './github';
+import { followerUnit, repoUnit, syncedLabel, timeAgoI18n, useLang } from './i18n';
 
 const EVENT_ICON: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   PushEvent: GitCommit,
@@ -30,6 +31,7 @@ const EVENT_ICON: Record<string, React.ComponentType<{ size?: number; className?
 const iconFor = (type: string) => EVENT_ICON[type] ?? Circle;
 
 const EventRow: React.FC<{ event: GithubEvent; index: number }> = ({ event, index }) => {
+  const { lang, tr } = useLang();
   const Icon = iconFor(event.type);
   const Wrapper = event.url ? 'a' : 'div';
   const wrapperProps = event.url
@@ -42,19 +44,16 @@ const EventRow: React.FC<{ event: GithubEvent; index: number }> = ({ event, inde
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 * index, duration: 0.35, ease: [0.25, 0.25, 0, 1] }}
     >
-      <Wrapper
-        {...wrapperProps}
-        className="flex items-start gap-2.5 py-2 group"
-      >
+      <Wrapper {...wrapperProps} className="flex items-start gap-2.5 py-2 group">
         <Icon size={13} className="text-tertiary mt-0.5 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="text-[13px] text-secondary leading-snug truncate group-hover:text-primary transition-colors duration-200">
-            {event.message}
+            {formatGithubEvent(event, lang)}
           </p>
           <p className="text-[11px] text-tertiary font-mono truncate mt-0.5">{event.repo}</p>
         </div>
         <span className="text-[10px] text-tertiary font-mono shrink-0 mt-0.5">
-          {timeAgo(event.createdAt)}
+          {timeAgoI18n(event.createdAt, lang)}
         </span>
       </Wrapper>
     </motion.div>
@@ -76,6 +75,7 @@ const Skeleton: React.FC = () => (
 );
 
 export const GitHubActivityCard: React.FC<{ login: string }> = ({ login }) => {
+  const { lang, t } = useLang();
   const { data, loading, error, refresh } = useGithubActivity(login);
 
   // Nothing cached and the API is unreachable or rate limited: render nothing.
@@ -99,14 +99,18 @@ export const GitHubActivityCard: React.FC<{ login: string }> = ({ login }) => {
             />
           </span>
           <span className="text-[11px] font-mono text-tertiary">
-            {error ? 'offline' : loading ? 'syncing' : `synced ${timeAgo(data?.fetchedAt)}`}
+            {error
+              ? t('ghOffline')
+              : loading
+              ? t('ghSyncing')
+              : syncedLabel(data?.fetchedAt, lang)}
           </span>
         </div>
 
         <button
           onClick={refresh}
           disabled={loading}
-          aria-label="Refresh GitHub activity"
+          aria-label={t('ghRefresh')}
           className="p-1 rounded-md text-tertiary hover:text-primary transition-colors duration-200 disabled:opacity-40"
         >
           <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
@@ -121,7 +125,8 @@ export const GitHubActivityCard: React.FC<{ login: string }> = ({ login }) => {
             rel="noopener noreferrer"
             className="text-[11px] text-tertiary hover:text-accent transition-colors duration-200"
           >
-            <span className="text-sm font-serif font-semibold text-primary">{data.publicRepos}</span> repos
+            <span className="text-sm font-serif font-semibold text-primary">{data.publicRepos}</span>{' '}
+            {repoUnit(data.publicRepos, lang)}
           </a>
           <a
             href={`${data.profileUrl}?tab=followers`}
@@ -129,7 +134,8 @@ export const GitHubActivityCard: React.FC<{ login: string }> = ({ login }) => {
             rel="noopener noreferrer"
             className="text-[11px] text-tertiary hover:text-accent transition-colors duration-200"
           >
-            <span className="text-sm font-serif font-semibold text-primary">{data.followers}</span> followers
+            <span className="text-sm font-serif font-semibold text-primary">{data.followers}</span>{' '}
+            {followerUnit(data.followers, lang)}
           </a>
         </div>
       )}
@@ -141,7 +147,7 @@ export const GitHubActivityCard: React.FC<{ login: string }> = ({ login }) => {
           {data?.events.length ? (
             data.events.map((event, i) => <EventRow key={event.id} event={event} index={i} />)
           ) : (
-            <p className="text-[12px] text-tertiary py-2">No public activity yet.</p>
+            <p className="text-[12px] text-tertiary py-2">{t('ghNoActivity')}</p>
           )}
         </div>
       )}
@@ -149,8 +155,13 @@ export const GitHubActivityCard: React.FC<{ login: string }> = ({ login }) => {
   );
 };
 
-export const GitHubSectionHeading: React.FC = () => (
-  <h3 className="text-sm font-sans font-semibold uppercase tracking-[0.15em] text-tertiary mb-6 flex items-center gap-2">
-    <Github size={14} /> Open Source
-  </h3>
-);
+export const GitHubSectionHeading: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const { t } = useLang();
+  return (
+    <h3
+      className={`text-sm font-sans font-semibold uppercase tracking-[0.15em] text-tertiary mb-6 flex items-center gap-2 ${className}`}
+    >
+      <Github size={14} /> {t('homeOpenSource')}
+    </h3>
+  );
+};

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>内容中台 · 本地管理</title>
+    <link rel="icon" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">内容中台 <small>本地管理</small></div>
+      <div class="spacer"></div>
+      <button class="chip" id="git-chip" title="查看仓库状态">
+        <span class="dot"></span><span id="git-text">读取中…</span>
+      </button>
+      <button class="btn" id="btn-backup">快照</button>
+      <button class="btn" id="btn-commit">提交</button>
+      <button class="btn primary" id="btn-push">推送</button>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-label">内容分区</div>
+        <nav class="nav" id="nav"></nav>
+        <div class="side-label">工具</div>
+        <div class="nav">
+          <button class="tool-item" data-tool="orcid"><span class="ico">🔗</span>ORCID 同步</button>
+          <button class="tool-item" data-tool="bibtex"><span class="ico">📥</span>BibTeX 导入</button>
+          <button class="tool-item" data-tool="scholar"><span class="ico">🎓</span>引用同步</button>
+          <button class="tool-item" data-tool="backups"><span class="ico">🕘</span>备份与回滚</button>
+        </div>
+      </aside>
+
+      <main class="main" id="main"></main>
+    </div>
+
+    <div class="savebar" id="savebar">
+      <span class="msg" id="savebar-msg">有未保存的改动</span>
+      <button class="btn sm" id="btn-discard">放弃</button>
+      <button class="btn sm primary" id="btn-save">保存</button>
+    </div>
+
+    <div class="modal-root" id="modal-root"></div>
+    <div class="toast-stack" id="toasts"></div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

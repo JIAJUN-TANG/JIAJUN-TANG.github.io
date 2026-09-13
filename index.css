@@ -135,6 +135,86 @@
 }
 
 /* ═══════════════════════════════════════════
+   University Crests
+   ═══════════════════════════════════════════ */
+
+/* Fixed watermark layer — sits above the page background but below all content. */
+.crest-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.crest {
+  position: absolute;
+  height: auto;
+  opacity: 0.055;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity 0.4s ease;
+}
+
+.crest-nju {
+  width: clamp(200px, 24vw, 330px);
+  top: 9vh;
+  left: -5vw;
+}
+
+.crest-csu {
+  width: clamp(180px, 22vw, 310px);
+  bottom: 6vh;
+  right: -5vw;
+}
+
+/* The emblems are dark single-colour art, so dark mode lifts them into the light. */
+.dark .crest {
+  opacity: 0.1;
+  filter: brightness(1.7) saturate(1.05);
+}
+
+@media (max-width: 767px) {
+  .crest {
+    opacity: 0.04;
+  }
+  .crest-nju {
+    width: 150px;
+    top: 7vh;
+    left: -3.5rem;
+  }
+  .crest-csu {
+    width: 140px;
+    bottom: 4vh;
+    right: -3rem;
+  }
+  .dark .crest {
+    opacity: 0.075;
+  }
+}
+
+/* Small crest shown beside education entries. */
+.crest-badge {
+  flex-shrink: 0;
+  object-fit: contain;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+/* Colour emblems (NCCU, NUS) already carry their own contrast. */
+.crest-badge.is-colour {
+  opacity: 0.85;
+}
+
+.group:hover .crest-badge {
+  opacity: 1;
+}
+
+.dark .crest-badge {
+  filter: brightness(1.5) saturate(1.05);
+}
+
+/* ═══════════════════════════════════════════
    Empty Root Fix
    ═══════════════════════════════════════════ */
 

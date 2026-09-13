@@ -33,6 +33,18 @@ npm run build
 
 The built artifacts will be in the `dist` directory.
 
+## Content
+
+Site content (publications, talks, projects, academic experience, awards, books, software, news) lives in `data/content.json` and is edited through a local admin console that ships with the repo:
+
+```bash
+npm run admin     # 打开 http://127.0.0.1:4399/
+```
+
+The console edits the JSON, validates it before writing, keeps timestamped snapshots for rollback, and can commit + push for you. It also pulls publications from **ORCID**, imports **BibTeX**, and syncs **Google Scholar** citation counts.
+
+See [docs/content-management.md](docs/content-management.md) for the full workflow. Google Scholar citations are additionally refreshed daily by [`.github/workflows/update-citations.yml`](.github/workflows/update-citations.yml) into `data/scholar.json`.
+
 ## Previewing Production Build
 
 To preview the production build locally:

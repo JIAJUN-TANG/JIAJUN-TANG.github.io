@@ -26,6 +26,9 @@ dist-ssr
 # WorkBuddy local state
 .workbuddy/
 
+# 内容中台的本地快照（每次保存自动生成，只在本机有用）
+data/backups/
+
 # Python
 __pycache__/
 *.pyc

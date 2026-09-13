@@ -1,15 +1,29 @@
-import { Profile, Paper, CustomCardData, ResearchProject, ConferencePaper, OtherExperience } from './types';
+import {
+  Profile,
+  Paper,
+  CustomCardData,
+  ResearchProject,
+  ConferencePaper,
+  AcademicExperience,
+  OtherExperience,
+  NewsItem,
+  Experience,
+} from './types';
 import avatarImage from './image/avatar.jpeg';
 import scholarData from './data/scholar.json';
+import content from './data/content.json';
 
-/**
- * Citation counts are refreshed by .github/workflows/update-citations.yml, which
- * rewrites data/scholar.json. A paper is matched by its Scholar publication id when
- * `scholarPubId` is set, otherwise by a normalised title comparison (punctuation,
- * spacing and case are stripped so CNKI/Scholar title variants still line up).
- * Any paper that cannot be matched keeps its hand-maintained `citationCount`, so a
- * failed crawl can never blank out numbers on the site.
- */
+/* ═══════════════════════════════════════════════
+   Google Scholar 引用合并
+
+   引用数由 .github/workflows/update-citations.yml 抓取，写入 data/scholar.json。
+   匹配时优先用论文的 scholarPubId，没有就按归一化标题比对（去掉标点、空格与
+   大小写，所以 CNKI 与 Scholar 的标题变体仍能对上）。中英两个标题都会试，
+   因此中文论文挂在英文标题下也能匹配。
+   匹配不上的论文保留自己手填的 citationCount，所以抓取失败绝不会让站点上的
+   数字变成空白或 0。
+   ═══════════════════════════════════════════════ */
+
 interface ScholarPublication {
   pub_id?: string;
   title?: string;
@@ -31,10 +45,15 @@ scholarPublications.forEach((pub) => {
 
 const applyScholarCitations = (papers: Paper[]): Paper[] =>
   papers.map((paper) => {
-    const live = paper.scholarPubId
-      ? citationsByPubId.get(paper.scholarPubId)
-      : citationsByTitle.get(normalizeTitle(paper.title));
-    return live === undefined ? paper : { ...paper, citationCount: live };
+    if (paper.scholarPubId) {
+      const byId = citationsByPubId.get(paper.scholarPubId);
+      if (byId !== undefined) return { ...paper, citationCount: byId };
+    }
+    for (const candidate of [paper.title.zh, paper.title.en]) {
+      const live = citationsByTitle.get(normalizeTitle(candidate));
+      if (live !== undefined) return { ...paper, citationCount: live };
+    }
+    return paper;
   });
 
 const scholarProfile = scholarData.profile as unknown as {
@@ -53,199 +72,102 @@ export const SCHOLAR_STATS = {
   citationsPerYear: scholarProfile.citations_per_year ?? {},
 };
 
+/* ═══════════════════════════════════════════════
+   内容数据
+
+   下面的条目全部来自 data/content.json，该文件由飞书多维表格同步生成
+   （见 .github/workflows/sync-content.yml）。要改内容请到多维表格里改，
+   不要直接编辑 JSON —— 下次同步会覆盖。
+
+   个人简介、社交链接与首页卡片属于低频内容，仍然写在代码里。
+   ═══════════════════════════════════════════════ */
+
+export const INITIAL_PAPERS: Paper[] = applyScholarCitations(content.papers as Paper[]);
+export const INITIAL_CONFERENCES: ConferencePaper[] = content.conferences as ConferencePaper[];
+export const INITIAL_PROJECTS: ResearchProject[] = content.projects as ResearchProject[];
+export const INITIAL_ACADEMIC: AcademicExperience[] = content.academic as AcademicExperience[];
+export const INITIAL_NEWS: NewsItem[] = content.news as NewsItem[];
+
+/** 荣誉奖励、学术著作、系统开发共用 OtherExperience，按 type 区分。 */
+export const INITIAL_OTHER_EXPERIENCES: OtherExperience[] = [
+  ...(content.awards as OtherExperience[]),
+  ...(content.books as OtherExperience[]),
+  ...(content.software as OtherExperience[]),
+];
+
+/* ═══════════════════════════════════════════════
+   个人信息
+   ═══════════════════════════════════════════════ */
+
+/**
+ * 首页「教育与经历」直接取学习经历表里的学位条目，不再单独维护一份，
+ * 避免同一段经历要在两个地方各改一次。
+ */
+const degreeToExperience = (entry: AcademicExperience): Experience => ({
+  role: entry.degree,
+  department: entry.department,
+  university: entry.university,
+  period: entry.period,
+  crest: entry.crest,
+});
+
 export const PROFILE: Profile = {
-  name: "Mr. JIAJUN (Griffin) TANG",
-  title: "PhD Student in Communication",
-  affiliation: "School of Journalism and Communication, Nanjing University",
-  email: "jiajuntang1101@smail.nju.edu.cn",
-  avatarUrl: avatarImage,
-  bio: `I research the intersection of Intelligent Communication and International Communication, creating systems that augment rather than replace human creativity. My work focuses on human-computer interaction, human-centered design, and the cognitive impacts of AI.`,
-  socials: {
-    github: "https://github.com/JIAJUN-TANG",
-    scholar: "https://scholar.google.com/citations?user=cXJ2lKAAAAAJ&hl=en",
-    orcid: "https://orcid.org/0000-0003-2620-2789"
+  name: { zh: '唐嘉骏', en: 'Jiajun Tang' },
+  title: {
+    zh: '博士研究生',
+    en: 'PhD Student in Communication',
   },
-  education: [
-    {
-      degree: "B.A. in Communication",
-      department: "School of Humanities",
-      university: "Central South University",
-      year: "2019"
-    }
-  ],
-  experience: [
-    {
-      role: "PhD in Communication",
-      department: "School of Journalism and Communication",
-      university: "Nanjing University",
-      period: "2026 - Present"
-    },
-    {
-      role: "M.M. in Library, Information & Archival Management",
-      department: "School of Information Management",
-      university: "Nanjing University",
-      period: "2023 - 2026"
-    },
-  ],
-  news: [
-    {
-      id: "n1",
-      date: "Nov 2025",
-      title: "南京大学学业奖学金（一等）",
-      category: "Award"
-    },
-    {
-      id: "n2",
-      date: "Aug 2025",
-      title: "Conference: Presented at the Forum on Games.",
-      category: "News"
-    },
-    {
-      id: "n3",
-      date: "Aug 2025",
-      title: "One paper is accepted.",
-      category: "Publication"
-    }
-  ]
+  affiliation: {
+    zh: '南京大学新闻传播学院',
+    en: 'School of Journalism and Communication, Nanjing University',
+  },
+  email: 'jiajuntang1101@smail.nju.edu.cn',
+  avatarUrl: avatarImage,
+  bio: {
+    zh: '研究聚焦智能传播与国际传播的交叉领域，致力于构建增强而非替代人类创造力的系统。主要关注人机交互、以人为中心的设计，以及人工智能带来的认知影响。',
+    en: 'I research the intersection of Intelligent Communication and International Communication, creating systems that augment rather than replace human creativity. My work focuses on human-computer interaction, human-centered design, and the cognitive impacts of AI.',
+  },
+  socials: {
+    github: 'https://github.com/JIAJUN-TANG',
+    scholar: 'https://scholar.google.com/citations?user=cXJ2lKAAAAAJ&hl=en',
+    orcid: 'https://orcid.org/0000-0003-2620-2789',
+  },
+  experience: INITIAL_ACADEMIC.filter((entry) => entry.kind === 'degree').map(degreeToExperience),
+  // 学位条目已并入上面的时间线，这里留空即可（渲染时为无内容）。
+  education: [],
+  news: INITIAL_NEWS,
 };
 
-export const INITIAL_PAPERS: Paper[] = applyScholarCitations([
-  {
-    id: 'p1',
-    title: "数字时代出版编辑人才胜任力模型优化研究",
-    authors: ["杨海林", "唐嘉骏", "马子寒", "王鹏涛"],
-    venue: "中国数字出版",
-    year: 2025,
-    url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zv1NxqOzzrx3b--0XjL4oIKreoKNHMvJt_wTmXOeGBGlF0xw83mQb9bs7mhSa-vTLf1bz7rIFfTNJsYn9Xhud5mGTCoNPd5WY_wk90CYgMxWZ7cVAcRj_HSFVpQ3YUpIEhFCZwIjJUOsCWX6RtMa4yonefU8MlUneWoq2QPwzRZjCLeHX2dYVfI39KkXEjD4j8=&uniplatform=NZKPT&language=CHS",
-    abstract: "新一轮科学和产业革命背景下，出版编辑的人才培养是出版学研究的重点方向之一。文章基于文献内容和招聘数据的双重分析，对出版学业界的胜任力模型要素进行了梳理并呈现，以帮助弥合学业界共同培养人才的信息差。分析结果构建了出版编辑人才胜任力要素6个一级指标，22个二级指标，并提出价值观要求和知识业务能力是出版编辑的核心要素；个人背景和工作经历是出版编辑的基础要素；数字意识和数字能力是出版编辑不可或缺的关键性要素。本研究填补了行业对胜任力模型的空白，为出版企业在职业评定、人才选拔和培养上提供一定参考依据，并帮助学界优化人才培养目标以实现人岗匹配。",
-    citationCount: 0,
-    type: 'cn',
-    publicationType: 'authored'
-  },
-  {
-    id: 'p2',
-    title: "“从人工到智能——AI时代的历史与人文探索”工作坊综述",
-    authors: ["唐嘉骏", "金伯文"],
-    venue: "数字人文研究",
-    year: 2025,
-    url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67ztzCaLcjqodBUT-di3nfKoVExJg-8UgZsnh_wUCsHdWxi-KsijdhYuWqdKVjIt3VJTOcpvgkNBVRtIG3t9Nap-c62yXzMOssE0k21Fp-upxQJhiB2-QQJIa4a55OWQrXR1Vz3NN47IbZk5avh4wXeWjzV_jHalCskJGuWKTVfCHtKEf5-9yiTdHWamA7yCdd9d84xeodxcmgQ==&uniplatform=NZKPT&language=CHS",
-    abstract: "“从人工到智能——AI时代的历史与人文探索”工作坊聚焦人工智能技术与历史研究的交叉领域，系统探讨了数字史学的理论框架与实践路径。工作坊围绕大语言模型在史料分析、翻译及知识生产中的应用展开深入讨论，揭示了技术赋能下历史研究在效率提升与范式转型方面的潜力。尽管生成式人工智能能够加速文献处理与模式识别，但其“幻觉问题”与缺乏历史语境理解的局限性仍需警惕。圆桌讨论强调，技术应用应服务于学术创新而非替代人文思考，需通过跨学科合作解决数据质量、版权管理及研究主体性等挑战。人工智能可成为拓展历史研究广度的工具，但批判性思维与问题意识仍是学术深度的核心保障，未来需在技术整合与学科传统间寻求平衡。",
-    citationCount: 2,
-    type: 'cn',
-    tags: [{ text: "IF 1.212", color: "#4A5F7E" }],
-    publicationType: 'authored'
-  },
-  {
-    id: 'p3',
-    title: "出版人工智能研究：概念、技术、影响与进路——一项系统性文献综述",
-    authors: ["唐嘉骏", "杨海林", "马子寒"],
-    venue: "数字出版研究",
-    year: 2025,
-    url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zs14hJ1zFzgMVnmg7RiCWHcyIN5qsii6P08f0ptx2caGbzbeixrEkFyqd-rQARxlVHv5PcT2RgWr92iRspBCCfmnOJ6J2UiDcBsIIlMB0EmrKgmBLXOy4-2c_TADLbnl87jDrymlxDpX1uOIO7Sr9cAohYDnZ0ZsVqVLu91sRQJ-Mj15T_MLxXmdvKR0hUxtR3W7I5wSo0ntQ==&uniplatform=NZKPT&language=CHS",
-    abstract: "梳理我国出版人工智能的研究现状，有助于明确出版行业的发展方向，促进出版学科自主知识体系的构建和完善。本研究采用系统性文献综述方法，检索、筛选并分析了522篇相关文献，系统归纳了出版人工智能的核心概念、技术架构、行业影响及应对进路。学界认为智能技术正深度介入出版全流程，尤其是生成式人工智能在内容创作和知识生产中的应用，为出版行业的智能化升级提供了重要支撑。但人工智能也带来伦理和实践问题，生成内容的版权归属和原创性争论尤为突出。出版业应充分发挥在内容资源上的优势，向“知识服务提供商”和“知识把关人”角色转变，探索“出版即服务”模式，努力构建以高质量知识资源为核心的智能出版新生态。",
-    citationCount: 4,
-    type: 'cn',
-    tags: [{ text: "IF 2.21", color: "#4A5F7E" }],
-    publicationType: 'authored'
-  },
-  {
-    id: 'p4',
-    title: "基于行动者网络理论的国产游戏国际传播策略研究——以《黑神话：悟空》为例",
-    authors: ["丁佳仪", "唐嘉骏*"],
-    venue: "中国数字出版",
-    year: 2025,
-    url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zu1QCH3Fvq3Uh363nj646dMcAVFZYeIUe-XxuWqp26dDyzroN6yXJjUOH3IofKDTj_UdBeYxJ4x91FvO-BK5Oh-rhOamA-CmUUhKvtcwv2KYe4PU4gwNuJ7WbWwRwyGvyvcsYSsG4ZZ_sKaxdQdlWCoUXo4hk1uB_d2QvdBnIrgl5klhoBEyOndhT68w6BkHhen5etMlVc6EQ==&uniplatform=NZKPT&language=CHS",
-    abstract: "研究基于行动者网络理论，以国产3A游戏《黑神话：悟空》成功的国际传播为例，深入探讨国产游戏海外推广的策略。在全球化背景下，中国国产游戏在国际传播过程中面临文化差异、市场准入和技术壁垒等多重挑战。通过行动者网络理论的分析框架，文章揭示政府、行业组织、研发和发行企业、出版方、游戏平台、媒体及玩家等多元行动者在游戏海外传播过程中所扮演的角色及其互动机制。特别是中华优秀传统文化和游戏技术，作为异质性行动者，在游戏文化叙事的重塑过程中发挥关键作用，推动游戏的国际化和中华优秀传统文化的深度传播。通过《黑神话：悟空》的案例，文章总结其在技术创新、文化传播和国际市场拓展方面的成功经验，以期为其他国产游戏提供可借鉴的策略和启示。构建多元化的行动者网络，优化转译机制，推动中华优秀传统文化通过游戏进行跨文化传播，这是推动中国国产游戏国际传播成功的重要途径。",
-    citationCount: 4,
-    type: 'cn',
-    publicationType: 'authored'
-  },
-  {
-    id: 'p5',
-    title: "Persuasion Strategies of the Major Powers on Social Media: An Analysis of the Metadiscourse from the Chinese and American Spokespersons' Tweets",
-    authors: ["Jie Feng", "Jiajun Tang", "Yalong Xiao", "Chengzhang Zhu"],
-    venue: "Emerging Media",
-    year: 2024,
-    url: "https://kns.cnki.net/kcms2/article/abstract?v=35M_ufc67zu1QCH3Fvq3Uh363nj646dMcAVFZYeIUe-XxuWqp26dDyzroN6yXJjUOH3IofKDTj_UdBeYxJ4x91FvO-BK5Oh-rhOamA-CmUUhKvtcwv2KYe4PU4gwNuJ7WbWwRwyGvyvcsYSsG4ZZ_sKaxdQdlWCoUXo4hk1uB_d2QvdBnIrgl5klhoBEyOndhT68w6BkHhen5etMlVc6EQ==&uniplatform=NZKPT&language=CHS",
-    abstract: "Despite the significant progress in studies on metadiscourse, scarce attention has been paid to it in the digital context. Social media platforms including Twitter have become arenas for the current Sino-U.S. discourse competition. In this regard, Twitter can be used to observe the diverse usage of metadiscourse by different political figures and uncover the underlying mechanisms. Combining computer-aided metadiscourse extraction and critical discourse analysis, the paper explores metadiscourse markers from the Chinese and American spokespersons’ tweets to reveal their rhetoric and social functions based on Foucault's “power discourse theory.” The results show that the American spokespersons are more inclined to use emotional persuasion and define some specific objects, which is part of the division & rejection system. In contrast, utterances of the Chinese spokespersons constitute a semantic terrain to …",
-    citationCount: 4,
-    type: 'en',
-    publicationType: 'authored'
-  },
-  {
-    id: 'p6',
-    title: "数字史学视角下史料处理方法的演进与展望——以《美国对外关系文件集》为例",
-    authors: ["姚念达"],
-    venue: "广东社会科学",
-    year: 2025,
-    url: "https://kns.cnki.net/kcms2/article/abstract?v=BkbJkO_np9MbkA7kfPWBs12e9ZxER3DYitDD_aAI31jkh2GwTddcSF7fnMb80vNAeQk5fVQD26i_lDi6f-foGvMnrSPMr9_OYTSafv-kgmjGRX9XXj-83hLBl9rocCIBuqkHgBrfZTblD-wwoOWG8Lp6kL62jNqJGur8JUybNe6zon_uudiGGg==&uniplatform=NZKPT&language=CHS",
-    abstract: "本文以《美国对外关系文件集》(FRUS)的数字化历程为案例,探讨新数字技术在史料处理中的应用潜力。FRUS的数字化历程包括从纸质文献扫描、数据库建设到档案信息细化编码的发展过程。近年来,科研团队通过开发基于编码源文件的应用项目,将档案信息结构化并引入词频统计和相似文档检索,大幅提升文献分析效率。然而,现有数字化档案的应用仍存在诸多局限,如人工标注一致性差、信息提取技术门槛高、检索功能单一等。未来,随着人工智能技术的进步,基于大语言模型的档案分类、标注和知识挖掘将更加精细,会显著提高文献检索的精准度,帮助研究者发现历史线索并提升研究效率。FRUS作为档案数字化的先驱,可以为其他档案的数字化和应用提供参考。",
-    citationCount: 2,
-    type: 'cn',
-    tags: [{ text: "CSSCI", color: "#7e4a4aff" }, { text: "北大核心", color: "#4a7e6dff" }, { text: "IF 3.822", color: "#4A5F7E" }],
-    publicationType: 'contributed'
-  },
-  {
-    id: 'p7',
-    title: "我国出版业垂直大模型效果测评与优化策略:基于国内外10款通用大模型应用效果的实证分析",
-    authors: ["杨文蝶", "唐嘉骏", "丁靖佳", "宋宁远"],
-    venue: "中国数字出版",
-    year: 2026,
-    url: "https://kns.cnki.net/kcms2/article/abstract?v=BkbJkO_np9MbkA7kfPWBs12e9ZxER3DYitDD_aAI31jkh2GwTddcSF7fnMb80vNAeQk5fVQD26i_lDi6f-foGvMnrSPMr9_OYTSafv-kgmjGRX9XXj-83hLBl9rocCIBuqkHgBrfZTblD-wwoOWG8Lp6kL62jNqJGur8JUybNe6zon_uudiGGg==&uniplatform=NZKPT&language=CHS",
-    abstract: "研究选取国内外10款通用大模型，以少儿类、文学类、科技类图书选题策划为测试场景，通过零样本提示词与详细提示词两种设计，从准确性、完整性、创新性、市场性、实用性5个维度评估其选题策划效果。研究结果表明，当前通用大模型在出版选题策划中的整体效果普遍欠佳。10款大模型在综合评分以及准确性、完整性和实用性等基础维度上的表现未呈现显著差异，而在创新性与市场性表现存在显著差异。在提示词设计方面，详细提示词能显著提升生成方案的创新性和市场性效果。从选题类型看，少儿类选题综合表现显著优于科技类，其市场性得分也显著高于文学类和科技类。基于此，研究提出构建出版领域垂直大模型的开发路径，包括专属语料库建设、训练目标优化、场景化提示词开发及人机协同迭代机制，为大语言模型赋能出版业智能化选题策划提供理论参考与实践指引。",
-    citationCount: 0,
-    type: 'cn',
-    publicationType: 'authored'
-  },
-  {
-    id: 'p8',
-    title: "How Narrative Content Supports Reading Immersion: An Empirical Analysis of Digital Reading Traces of Detective Fiction",
-    authors: ["Jiajun Tang*", "Hailin Yang", "Zihan Ma", "Ningyuan Song"],
-    venue: "Digital Scholarship in the Humanities",
-    year: 2026,
-    url: "",
-    abstract: "This study examines how narrative content in detective fiction is associated with indicators of reading immersion, using narrative transportation theory to connect textual topics with readers' emotional and cognitive responses. The study analyses 27,999 reader-selected excerpts from 100 highly ranked detective novels on Douban, posted between February 2011 and January 2024. Latent Dirichlet allocation (LDA) was used to identify narrative topics, and a BERT classifier assigned excerpts to the resulting categories. Sentiment dictionaries and the Text Mind system generated emotional and cognitive indicators. Non-parametric tests examined temporal trends and differences across subtopics. The excerpts formed three narrative dimensions (e.g. plot, humanity, and society) and seven subtopics. Plot-related content received consistently high attention; attention to humanity-level content declined over time, whereas attention to society-level content increased. Positive and negative sentiment indicators both rose, and the seven subtopics showed distinct emotional and cognitive profiles. These patterns inform a three-stage interpretive model linking content accessibility, emotional and cognitive engagement, and intellectual extension.",
-    citationCount: 0,
-    type: 'en',
-    tags: [{ text: "IF 1.0", color: "#4A5F7E" }, { text: "SSCI Q3", color: "#5B4A8A" }],
-    publicationType: 'authored'
-  }
-]);
+/* ═══════════════════════════════════════════════
+   首页卡片（Markdown 自由文本，不放进多维表格）
+   ═══════════════════════════════════════════════ */
 
 export const INITIAL_CARDS: CustomCardData[] = [
   {
     id: 'c1',
     type: 'markdown',
-    content: `## Research Philosophy\n\nI believe in **tools for thought**. Technology should expand our mental capacity. \n\n* "The computer is the most remarkable tool that we have ever come up with." - Steve Jobs`,
-    title: "Philosophy"
+    title: { zh: '研究理念', en: 'Philosophy' },
+    content: {
+      zh: '## 研究理念\n\n我相信**思考的工具**。技术应当拓展我们的心智，而不是取代它。\n\n* “计算机是我们创造出的最非凡的工具。”——史蒂夫·乔布斯',
+      en: '## Research Philosophy\n\nI believe in **tools for thought**. Technology should expand our mental capacity. \n\n* "The computer is the most remarkable tool that we have ever come up with." - Steve Jobs',
+    },
   },
   {
     id: 'c3',
     type: 'markdown',
-    content: `### Upcoming Events\n\n- None`,
-    title: "Schedule"
+    title: { zh: '近期安排', en: 'Schedule' },
+    content: {
+      zh: '### 暂无',
+      en: '### None',
+    },
   },
   {
     id: 'c2',
     type: 'markdown',
-    content: `**Platform Development**
-
-- [南京大学数智文献平台](https://digitalilab.cn)
-
-- DocuManager
-
-**Available Dataset**
-
-- [Tweets Dataset of 4 Chinese and US spokespersons](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)`,
-    title: "Public Contributions"
-  }
-];
-
-export const INITIAL_PROJECTS: ResearchProject[] = [
-];
-
-export const INITIAL_CONFERENCES: ConferencePaper[] = [
-];
-
-export const INITIAL_OTHER_EXPERIENCES: OtherExperience[] = [
+    title: { zh: '公开成果', en: 'Public Contributions' },
+    content: {
+      zh: '**平台开发**\n\n- [南京大学数智文献平台](https://digitalilab.cn)\n\n- DocuManager\n\n**开放数据集**\n\n- [中美四位发言人推文数据集](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)',
+      en: '**Platform Development**\n\n- [南京大学数智文献平台](https://digitalilab.cn)\n\n- DocuManager\n\n**Available Dataset**\n\n- [Tweets Dataset of 4 Chinese and US spokespersons](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)',
+    },
+  },
 ];
