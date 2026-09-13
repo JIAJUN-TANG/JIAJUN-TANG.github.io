@@ -1,7 +1,21 @@
-*.js text/javascript
-*.mjs text/javascript
-*.css text/css
-*.html text/html
-*.json application/json
-*.wasm application/wasm
-*.map application/json
+# Git 只认 `text` / `binary` 这类属性名，写成 `text/javascript` 会被判为非法属性并刷警告。
+# 行尾交给 git 自己判断，这里只标出哪些是文本、哪些是二进制。
+*.js text
+*.mjs text
+*.cjs text
+*.ts text
+*.tsx text
+*.css text
+*.html text
+*.json text
+*.map text
+*.svg text
+*.md text
+*.yml text
+*.yaml text
+*.py text
+*.wasm binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary

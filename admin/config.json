@@ -1,0 +1,6 @@
+{
+  "port": 4399,
+  "orcidId": "0000-0003-2620-2789",
+  "scholarId": "cXJ2lKAAAAAJ",
+  "_note": "本地管理中台配置。orcidId 用于 ORCID 作品同步（公共接口，无需 token），scholarId 用于 Google Scholar 引用同步。改完保存即可，不需要重启服务。"
+}

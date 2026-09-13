@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { Lang } from './types';
 
 /**
  * Live GitHub activity for the homepage.
@@ -7,20 +8,36 @@ import { useCallback, useEffect, useState } from 'react';
  * to 60 requests/hour per IP. Results are cached in localStorage so switching tabs
  * or reloading does not burn through that budget. If the request fails the page
  * simply renders without this card - the site never depends on a third party.
+ *
+ * Events are cached as *structured* data and only turned into sentences at render
+ * time, so a single cache entry serves both the Chinese and the English page.
  */
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const EVENT_LIMIT = 6;
+
+export interface GithubEventData {
+  /** Number of commits in a push. */
+  count?: number;
+  /** Last commit message, tag name, or other free-form detail. */
+  detail?: string;
+  branch?: string;
+  refType?: string;
+  ref?: string;
+  action?: string;
+  /** Fork target, e.g. "user/repo". */
+  target?: string;
+}
 
 export interface GithubEvent {
   id: string;
   type: string;
   repo: string;
   repoUrl: string;
-  message: string;
   url: string | null;
   createdAt: string;
+  data: GithubEventData;
 }
 
 export interface GithubActivity {
@@ -40,7 +57,7 @@ function readCache(login: string): GithubActivity | null {
     const raw = localStorage.getItem(cacheKey(login));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as GithubActivity;
-    if (!parsed || typeof parsed.fetchedAt !== 'number') return null;
+    if (!parsed || typeof parsed.fetchedAt !== 'number' || !Array.isArray(parsed.events)) return null;
     return parsed;
   } catch {
     return null;
@@ -55,58 +72,116 @@ function writeCache(login: string, data: GithubActivity) {
   }
 }
 
-function describeEvent(event: any): { message: string; url: string | null } {
+function extractEvent(event: any): { data: GithubEventData; url: string | null } {
   const repo = event.repo?.name ?? '';
   const payload = event.payload ?? {};
 
   switch (event.type) {
     case 'PushEvent': {
       const commits = payload.commits ?? [];
-      const count = payload.size ?? commits.length ?? 0;
-      const last = commits[commits.length - 1]?.message ?? '';
-      const branch = (payload.ref ?? '').replace('refs/heads/', '');
+      const branch = String(payload.ref ?? '').replace('refs/heads/', '');
       return {
-        message: count > 0
-          ? `${count} commit${count === 1 ? '' : 's'} · ${last.split('\n')[0]}`
-          : `Pushed to ${branch}`,
+        data: {
+          count: payload.size ?? commits.length ?? 0,
+          detail: String(commits[commits.length - 1]?.message ?? '').split('\n')[0],
+          branch,
+        },
         url: branch ? `https://github.com/${repo}/commits/${branch}` : `https://github.com/${repo}`,
       };
     }
     case 'WatchEvent':
-      return { message: 'Starred', url: `https://github.com/${repo}` };
+      return { data: {}, url: `https://github.com/${repo}` };
     case 'ForkEvent':
       return {
-        message: `Forked to ${payload.forkee?.full_name ?? 'a new repo'}`,
+        data: { target: payload.forkee?.full_name ?? '' },
         url: payload.forkee?.html_url ?? null,
       };
     case 'CreateEvent':
       return {
-        message: `Created ${payload.ref_type ?? 'repository'}${payload.ref ? ` ${payload.ref}` : ''}`,
+        data: { refType: payload.ref_type ?? 'repository', ref: payload.ref ?? '' },
         url: `https://github.com/${repo}`,
       };
     case 'DeleteEvent':
-      return { message: `Deleted ${payload.ref_type} ${payload.ref ?? ''}`, url: null };
+      return { data: { refType: payload.ref_type ?? '', ref: payload.ref ?? '' }, url: null };
     case 'IssuesEvent':
-      return { message: `${payload.action ?? 'updated'} an issue`, url: payload.issue?.html_url ?? null };
+      return { data: { action: payload.action ?? 'updated' }, url: payload.issue?.html_url ?? null };
     case 'PullRequestEvent':
       return {
-        message: `${payload.action ?? 'updated'} a pull request`,
+        data: { action: payload.action ?? 'updated' },
         url: payload.pull_request?.html_url ?? null,
       };
     case 'ReleaseEvent':
       return {
-        message: `Released ${payload.release?.tag_name ?? ''}`,
+        data: { detail: payload.release?.tag_name ?? '' },
         url: payload.release?.html_url ?? null,
       };
     case 'IssueCommentEvent':
-      return { message: 'Commented on an issue', url: payload.comment?.html_url ?? null };
+      return { data: {}, url: payload.comment?.html_url ?? null };
     case 'PublicEvent':
-      return { message: 'Made repository public', url: `https://github.com/${repo}` };
+      return { data: {}, url: `https://github.com/${repo}` };
     default:
-      return {
-        message: event.type.replace(/Event$/, '').replace(/([A-Z])/g, ' $1').trim(),
-        url: null,
+      return { data: {}, url: null };
+  }
+}
+
+/** Build the human-readable label for an event in the given language. */
+export function formatGithubEvent(event: GithubEvent, lang: Lang): string {
+  const zh = lang === 'zh';
+  const d = event.data ?? {};
+  const repo = event.repo || '-';
+
+  switch (event.type) {
+    case 'PushEvent': {
+      if ((d.count ?? 0) > 0) {
+        const head = zh ? `${d.count} 次提交` : `${d.count} commit${d.count === 1 ? '' : 's'}`;
+        return d.detail ? `${head} · ${d.detail}` : head;
+      }
+      return zh ? `推送到 ${d.branch || repo}` : `Pushed to ${d.branch || repo}`;
+    }
+    case 'WatchEvent':
+      return zh ? '标星' : 'Starred';
+    case 'ForkEvent':
+      return zh
+        ? `复刻至 ${d.target || '新仓库'}`
+        : `Forked to ${d.target || 'a new repo'}`;
+    case 'CreateEvent': {
+      const kind = d.refType === 'tag' ? (zh ? '标签' : 'tag') : d.refType === 'branch' ? (zh ? '分支' : 'branch') : (zh ? '仓库' : 'repository');
+      return zh
+        ? `新建${kind}${d.ref ? ` ${d.ref}` : ''}`
+        : `Created ${kind}${d.ref ? ` ${d.ref}` : ''}`;
+    }
+    case 'DeleteEvent': {
+      const kind = d.refType === 'branch' ? (zh ? '分支' : 'branch') : (zh ? '标签' : 'tag');
+      return zh ? `删除${kind} ${d.ref || ''}` : `Deleted ${kind} ${d.ref || ''}`.trim();
+    }
+    case 'IssuesEvent': {
+      const map: Record<string, [string, string]> = {
+        opened: ['创建了 issue', 'opened an issue'],
+        closed: ['关闭了 issue', 'closed an issue'],
+        reopened: ['重新打开 issue', 'reopened an issue'],
+        updated: ['更新了 issue', 'updated an issue'],
       };
+      const hit = map[d.action ?? 'updated'] ?? map.updated;
+      return zh ? hit[0] : hit[1];
+    }
+    case 'PullRequestEvent': {
+      const map: Record<string, [string, string]> = {
+        opened: ['创建了拉取请求', 'opened a pull request'],
+        closed: ['合并/关闭了拉取请求', 'closed a pull request'],
+        reopened: ['重新打开拉取请求', 'reopened a pull request'],
+        updated: ['更新了拉取请求', 'updated a pull request'],
+      };
+      const hit = map[d.action ?? 'updated'] ?? map.updated;
+      return zh ? hit[0] : hit[1];
+    }
+    case 'ReleaseEvent':
+      return zh ? `发布 ${d.detail || ''}`.trim() : `Released ${d.detail || ''}`.trim();
+    case 'IssueCommentEvent':
+      return zh ? '评论了 issue' : 'Commented on an issue';
+    case 'PublicEvent':
+      return zh ? '仓库转为公开' : 'Made repository public';
+    default:
+      return event.type.replace(/Event$/, '').replace(/([A-Z])/g, ' $1').trim();
   }
 }
 
@@ -130,15 +205,15 @@ export async function fetchGithubActivity(login: string): Promise<GithubActivity
   ]);
 
   const parsed: GithubEvent[] = (Array.isArray(events) ? events : []).map((event: any) => {
-    const { message, url } = describeEvent(event);
+    const { data, url } = extractEvent(event);
     return {
       id: String(event.id ?? `${event.type}-${event.created_at}`),
       type: event.type ?? 'UnknownEvent',
       repo: event.repo?.name ?? '',
       repoUrl: `https://github.com/${event.repo?.name ?? ''}`,
-      message,
       url,
       createdAt: event.created_at ?? new Date().toISOString(),
+      data,
     };
   });
 
@@ -195,28 +270,4 @@ export function useGithubActivity(login: string) {
   }, [login, nonce]);
 
   return { data, loading, error, refresh };
-}
-
-export function timeAgo(iso: string | number | null | undefined): string {
-  if (!iso) return '';
-  const ts = typeof iso === 'number' ? iso : new Date(iso).getTime();
-  if (Number.isNaN(ts)) return '';
-
-  const diff = Date.now() - ts;
-  if (diff < 0) return 'just now';
-
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
-
-  return `${Math.floor(months / 12)}y ago`;
 }
