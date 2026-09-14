@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   BookOpen,
   Home as HomeIcon,
@@ -18,6 +19,11 @@ import {
   Sun,
   Moon,
   Monitor,
+  ArrowLeft,
+  ArrowUp,
+  Clock,
+  ListTree,
+  PenLine,
   type LucideIcon
 } from 'lucide-react';
 import {
@@ -31,6 +37,7 @@ import {
   CrestKey,
   Lang,
   NewsItem,
+  BlogPost,
 } from './types';
 import {
   PROFILE,
@@ -44,7 +51,23 @@ import {
 } from './constants';
 import { GitHubActivityCard, GitHubSectionHeading } from './GitHubActivity';
 import { CrestBackground, CrestBadge } from './CrestBackground';
-import { LangProvider, useLang, syncedLabel, type UIKey } from './i18n';
+import {
+  LangProvider,
+  useLang,
+  syncedLabel,
+  formatPostDate,
+  readingMinutes,
+  type UIKey,
+} from './i18n';
+import { BLOG_POSTS, findPost } from './blog';
+import {
+  extractHeadings,
+  nodeText,
+  normalizeHeadingText,
+  scrollToHeading,
+  useHeadingSpy,
+  type TocHeading,
+} from './toc';
 
 // ═══════════════════════════════════════════
 // Theme System
@@ -130,6 +153,7 @@ const NAV_ITEMS: { tab: Tab; icon: LucideIcon; key: UIKey }[] = [
   { tab: Tab.HOME, icon: HomeIcon, key: 'navHome' },
   { tab: Tab.PUBLICATIONS, icon: BookOpen, key: 'navPublications' },
   { tab: Tab.EXPERIENCES, icon: Briefcase, key: 'navExperiences' },
+  { tab: Tab.BLOG, icon: PenLine, key: 'navBlog' },
   { tab: Tab.RESEARCH_NOTES, icon: Grid, key: 'navTrackers' },
 ];
 
@@ -808,11 +832,417 @@ const TrackersTab = () => {
               {card.title && (
                 <h3 className="font-serif font-semibold text-base mb-2 text-primary">{tr(card.title)}</h3>
               )}
-              <ReactMarkdown>{tr(card.content)}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{tr(card.content)}</ReactMarkdown>
             </div>
           </motion.div>
         ))}
       </div>
+    </motion.div>
+  );
+};
+
+// ═══════════════════════════════════════════
+// Blog Page
+// ═══════════════════════════════════════════
+
+/** Tiny pill used for the post language and its tags. */
+const MetaPill = ({ children }: { children: React.ReactNode }) => (
+  <span
+    className="text-[10px] font-medium uppercase tracking-[0.12em] px-2 py-0.5 rounded-full"
+    style={{ backgroundColor: 'var(--color-subtle)', color: 'var(--color-secondary)' }}
+  >
+    {children}
+  </span>
+);
+
+/* ── Table of contents ───────────────────────── */
+
+/** One clickable line of the outline. Indented by heading depth. */
+const TocEntry = ({
+  heading,
+  active,
+  onJump,
+  itemRef,
+}: {
+  heading: TocHeading;
+  active: boolean;
+  onJump: (id: string) => void;
+  itemRef?: React.Ref<HTMLButtonElement>;
+}) => (
+  <button
+    ref={active ? itemRef : undefined}
+    onClick={() => onJump(heading.id)}
+    title={heading.text}
+    aria-current={active ? 'location' : undefined}
+    className={`toc-item${active ? ' is-active' : ''}`}
+    style={{ paddingLeft: `${12 + (heading.level - 1) * 11}px` }}
+  >
+    <span className="toc-marker" style={{ transform: active ? 'scaleY(1)' : 'scaleY(0)' }} />
+    {heading.text}
+  </button>
+);
+
+/**
+ * Sticky rail on the left of an open post: reading progress, the outline of the
+ * article, the other posts, and a way back to the top. Hidden on narrow screens,
+ * where `TocMobile` takes over.
+ */
+const TocRail = ({
+  headings,
+  active,
+  progress,
+  onJump,
+  otherPosts,
+  onOpenPost,
+}: {
+  headings: TocHeading[];
+  active: string | null;
+  progress: number;
+  onJump: (id: string) => void;
+  otherPosts: BlogPost[];
+  onOpenPost: (slug: string) => void;
+}) => {
+  const { t } = useLang();
+  const activeRef = React.useRef<HTMLButtonElement | null>(null);
+
+  // A long outline scrolls inside the rail - keep the current section in view.
+  React.useEffect(() => {
+    activeRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [active]);
+
+  const backToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  };
+
+  return (
+    <aside className="hidden lg:block">
+      <div className="sticky top-24">
+        <div className="flex items-baseline justify-between gap-2 mb-2">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-tertiary">
+            <ListTree size={12} />
+            {t('blogToc')}
+          </span>
+          <span className="text-[10px] tabular-nums text-tertiary">
+            {Math.round(progress * 100)}%
+          </span>
+        </div>
+
+        {/* Reading progress for the whole page. */}
+        <div
+          className="h-[2px] w-full rounded-full overflow-hidden mb-4"
+          style={{ backgroundColor: 'var(--color-subtle)' }}
+        >
+          <div
+            className="toc-progress h-full rounded-full"
+            style={{ width: `${progress * 100}%`, backgroundColor: 'var(--color-accent)' }}
+          />
+        </div>
+
+        <nav className="toc-list toc-scroll max-h-[calc(100vh-17rem)] overflow-y-auto">
+          {headings.length === 0 ? (
+            <p className="pl-3 py-1 text-[12px] text-tertiary">{t('blogTocEmpty')}</p>
+          ) : (
+            headings.map((heading) => (
+              <TocEntry
+                key={heading.id}
+                heading={heading}
+                active={active === heading.id}
+                onJump={onJump}
+                itemRef={activeRef}
+              />
+            ))
+          )}
+        </nav>
+
+        {otherPosts.length > 0 && (
+          <div className="mt-5 pt-4" style={{ borderTop: '1px solid var(--color-subtle)' }}>
+            <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-tertiary">
+              {t('blogMorePosts')}
+            </span>
+            <div className="mt-2 space-y-0.5">
+              {otherPosts.slice(0, 4).map((post) => (
+                <button
+                  key={post.slug}
+                  onClick={() => onOpenPost(post.slug)}
+                  title={post.title}
+                  className="toc-item"
+                  style={{ paddingLeft: '12px' }}
+                >
+                  {post.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={backToTop}
+          className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-tertiary hover:text-accent transition-colors"
+        >
+          <ArrowUp size={12} />
+          {t('blogBackToTop')}
+        </button>
+      </div>
+    </aside>
+  );
+};
+
+/** Collapsible outline for narrow screens, sitting right under the title. */
+const TocMobile = ({
+  headings,
+  active,
+  onJump,
+}: {
+  headings: TocHeading[];
+  active: string | null;
+  onJump: (id: string) => void;
+}) => {
+  const { t } = useLang();
+  const [open, setOpen] = React.useState(false);
+
+  if (headings.length === 0) return null;
+
+  /**
+   * Collapse first, jump second. Scrolling while the panel animates shut makes
+   * the browser cancel the smooth scroll, because the page height changes
+   * underneath it mid-flight. The delay matches the exit animation.
+   */
+  const jump = (id: string) => {
+    setOpen(false);
+    window.setTimeout(() => onJump(id), 260);
+  };
+
+  return (
+    <div
+      className="lg:hidden mb-8 rounded-xl border overflow-hidden"
+      style={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--card-border)' }}
+    >
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-2 px-4 py-2.5"
+      >
+        <span className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-tertiary">
+          <ListTree size={12} />
+          {t('blogToc')}
+        </span>
+        <ChevronDown
+          size={14}
+          className="text-tertiary transition-transform duration-200"
+          style={{ transform: open ? 'rotate(180deg)' : 'none' }}
+        />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="overflow-hidden"
+          >
+            <div className="toc-list mx-4 mb-3 pl-1">
+              {headings.map((heading) => (
+                <TocEntry
+                  key={heading.id}
+                  heading={heading}
+                  active={active === heading.id}
+                  onJump={jump}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+/** A single post: outline rail, header meta and the rendered Markdown body. */
+const BlogPostView = ({
+  post,
+  onBack,
+  onOpenPost,
+}: {
+  post: BlogPost;
+  onBack: () => void;
+  onOpenPost: (slug: string) => void;
+}) => {
+  const { t, lang } = useLang();
+
+  // Opening a post should feel like a new page, not a jump into the middle of one.
+  React.useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [post.slug]);
+
+  const headings = React.useMemo(() => extractHeadings(post.body), [post.body]);
+  const ids = React.useMemo(() => headings.map((h) => h.id), [headings]);
+  const { active, progress } = useHeadingSpy(ids);
+
+  // Same pass as `extractHeadings`, so rendered headings and outline links agree.
+  const idByText = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const heading of headings) if (!map.has(heading.text)) map.set(heading.text, heading.id);
+    return map;
+  }, [headings]);
+
+  const components = React.useMemo(() => {
+    const make = (tag: 'h1' | 'h2' | 'h3') => {
+      const Heading = ({ children }: { children?: React.ReactNode }) => {
+        const id = idByText.get(normalizeHeadingText(nodeText(children)));
+        const Tag = tag;
+        return <Tag id={id}>{children}</Tag>;
+      };
+      return Heading;
+    };
+    return { h1: make('h1'), h2: make('h2'), h3: make('h3') };
+  }, [idByText]);
+
+  const others = BLOG_POSTS.filter((p) => p.slug !== post.slug);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="max-w-5xl mx-auto px-5 py-8"
+    >
+      <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
+        <TocRail
+          headings={headings}
+          active={active}
+          progress={progress}
+          onJump={scrollToHeading}
+          otherPosts={others}
+          onOpenPost={onOpenPost}
+        />
+
+        <div className="min-w-0">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-[13px] text-tertiary hover:text-accent transition-colors mb-8"
+          >
+            <ArrowLeft size={14} />
+            {t('blogBack')}
+          </button>
+
+          <header className="mb-8 pb-6" style={{ borderBottom: '1px solid var(--color-subtle)' }}>
+            <h1 className="font-serif text-2xl md:text-3xl font-semibold text-primary leading-snug mb-3">
+              {post.title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-tertiary">
+              {post.date && <time dateTime={post.date}>{formatPostDate(post.date, lang)}</time>}
+              <span className="inline-flex items-center gap-1">
+                <Clock size={12} />
+                {readingMinutes(post.body)} {t('blogMinRead')}
+              </span>
+              {post.lang && (
+                <MetaPill>{post.lang === 'zh' ? t('postLangZh') : t('postLangEn')}</MetaPill>
+              )}
+            </div>
+          </header>
+
+          <TocMobile headings={headings} active={active} onJump={scrollToHeading} />
+
+          <div className="markdown-body blog-body text-[15px]">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+              {post.body}
+            </ReactMarkdown>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const BlogTab = () => {
+  const { t, lang } = useLang();
+  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const open = openSlug ? findPost(openSlug) : undefined;
+
+  if (open) {
+    return (
+      <BlogPostView post={open} onBack={() => setOpenSlug(null)} onOpenPost={setOpenSlug} />
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="max-w-3xl mx-auto px-5 py-8"
+    >
+      <h2 className="text-xl font-serif font-semibold text-primary">{t('blogTitle')}</h2>
+      <p className="text-sm text-tertiary mt-2 mb-8">{t('blogIntro')}</p>
+
+      {BLOG_POSTS.length === 0 ? (
+        <p className="text-sm text-tertiary py-10 text-center">{t('blogEmpty')}</p>
+      ) : (
+        <div className="space-y-3">
+          {BLOG_POSTS.map((post, i) => (
+            <motion.article
+              key={post.slug}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.06, duration: 0.4 }}
+            >
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setOpenSlug(post.slug)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setOpenSlug(post.slug);
+                  }
+                }}
+                className="group cursor-pointer w-full text-left p-5 rounded-xl border transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                style={{
+                  backgroundColor: 'var(--color-card)',
+                  borderColor: 'var(--card-border)',
+                  boxShadow: 'var(--card-shadow)',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow)';
+                }}
+              >
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-tertiary mb-2">
+                  {post.date && <time dateTime={post.date}>{formatPostDate(post.date, lang)}</time>}
+                  <span className="inline-flex items-center gap-1">
+                    <Clock size={12} />
+                    {readingMinutes(post.body)} {t('blogMinRead')}
+                  </span>
+                  {post.lang && (
+                    <MetaPill>{post.lang === 'zh' ? t('postLangZh') : t('postLangEn')}</MetaPill>
+                  )}
+                </div>
+
+                <h3 className="font-serif text-lg font-semibold text-primary mb-2 transition-colors group-hover:text-accent">
+                  {post.title}
+                </h3>
+
+                {post.summary && (
+                  <p className="text-sm text-secondary leading-relaxed mb-3">{post.summary}</p>
+                )}
+
+                {post.tags && post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {post.tags.map((tag) => (
+                      <MetaPill key={tag}>{tag}</MetaPill>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.article>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -1179,6 +1609,11 @@ const Shell = () => {
           {activeTab === Tab.EXPERIENCES && (
             <motion.div key="experiences">
               <ExperienceTab />
+            </motion.div>
+          )}
+          {activeTab === Tab.BLOG && (
+            <motion.div key="blog">
+              <BlogTab />
             </motion.div>
           )}
           {activeTab === Tab.RESEARCH_NOTES && (

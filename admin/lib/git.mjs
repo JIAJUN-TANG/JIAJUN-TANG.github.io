@@ -31,16 +31,39 @@ export function git(args, { timeout = 120000, env = {} } = {}) {
           code: error?.code ?? 0,
           stdout: clean(stdout),
           stderr: clean(stderr),
+          // 原始输出。解析 `--porcelain` 必须用它：状态位的两格里可能含空格
+          // （` M` = 工作区改动），而 clean() 的 trim 会把首行那个空格吃掉，
+          // 于是路径的第一个字符被当成状态位切掉（App.tsx → pp.tsx）。
+          raw: String(stdout ?? ''),
         });
       },
     );
   });
 }
 
+/**
+ * 解析 `git status --porcelain -uall` 的输出。
+ * 每行格式是 `XY <path>`：X = 暂存区状态，Y = 工作区状态，都可能是空格。
+ */
+const parsePorcelain = (raw) =>
+  String(raw ?? '')
+    .split('\n')
+    .filter((line) => line.trim().length > 2)
+    .map((line) => {
+      const [x = ' ', y = ' '] = [line[0] ?? ' ', line[1] ?? ' '];
+      return {
+        status: (x + y).trim() || '?',
+        x,
+        y,
+        // 重命名会写成 `old -> new`，取新路径。
+        file: line.slice(3).replace(/^.* -> /, ''),
+      };
+    });
+
 export async function gitStatus() {
   const [branch, changed, ahead, log, remote] = await Promise.all([
     git(['rev-parse', '--abbrev-ref', 'HEAD']),
-    git(['status', '--porcelain']),
+    git(['status', '--porcelain', '-uall']),
     git(['rev-list', '--left-right', '--count', 'origin/HEAD...HEAD']),
     git(['log', '-5', '--pretty=format:%h|%s|%ad', '--date=format:%m-%d %H:%M']),
     git(['remote', 'get-url', 'origin']),
@@ -50,11 +73,7 @@ export async function gitStatus() {
   return {
     branch: branch.stdout || '(unknown)',
     remote: remote.ok ? remote.stdout : '',
-    changed: changed.stdout
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => ({ status: line.slice(0, 2).trim(), file: line.slice(3) })),
+    changed: parsePorcelain(changed.raw),
     behind: Number.isFinite(counts[0]) ? counts[0] : 0,
     ahead: Number.isFinite(counts[1]) ? counts[1] : 0,
     commits: log.stdout
@@ -67,23 +86,38 @@ export async function gitStatus() {
   };
 }
 
-/** 只提交指定文件；默认提交内容数据与抓取快照。 */
-export async function gitCommit(message, files = ['data/content.json', 'data/scholar.json']) {
-  const existing = [];
-  for (const file of files) {
-    const check = await git(['status', '--porcelain', '--', file]);
-    if (check.stdout) existing.push(file);
-  }
-  if (!existing.length) return { ok: true, skipped: true, log: '没有需要提交的改动。' };
+/** 内容数据 + 抓取快照，保存内容时会写入的文件。 */
+export const CONTENT_FILES = ['data/content.json', 'data/scholar.json'];
 
-  const add = await git(['add', '--', ...existing]);
+/**
+ * 暂存并提交。
+ *
+ * scope='all'（默认）—— 提交工作区里的全部改动，包括源码 `App.tsx` / `blog.ts` /
+ *   `blog/*.md` / `admin/*`。**站点的功能变更必须走这个范围**：只提交 `data/`
+ *   的话，push 上去的是「新内容 + 旧代码」，线上看不到新功能。
+ * scope='content'    —— 只提交 data/ 下的内容数据，适合纯粹更新一条论文这种场景。
+ *
+ * 两者都遵循 `.gitignore`（`git add -A -- .` 不会碰 node_modules / dist /
+ * data/backups / .workbuddy）。
+ */
+export async function gitCommit(message, { scope = 'all' } = {}) {
+  const target = scope === 'content' ? CONTENT_FILES : ['.'];
+
+  const pending = await git(['status', '--porcelain', '-uall', '--', ...target]);
+  if (!pending.ok) return { ok: false, log: pending.stderr || '无法读取仓库状态' };
+
+  const files = parsePorcelain(pending.raw).map((c) => c.file);
+  if (!files.length) return { ok: true, skipped: true, log: '没有需要提交的改动。' };
+
+  const add = await git(['add', '-A', '--', ...target]);
   if (!add.ok) return { ok: false, log: add.stderr || add.stdout };
 
   const commit = await git(['commit', '-m', message || 'content: update via admin console']);
   return {
     ok: commit.ok,
+    scope,
+    files,
     log: [add.stdout, commit.stdout, commit.stderr].filter(Boolean).join('\n'),
-    files: existing,
   };
 }
 

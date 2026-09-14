@@ -16,7 +16,7 @@
  *   POST /api/bibtex/import    解析并追加进论文表（按 DOI/标题去重）
  *   POST /api/scholar/sync     跑一次 Google Scholar 引用抓取
  *   GET  /api/git              仓库状态
- *   POST /api/git/commit       提交内容数据
+ *   POST /api/git/commit       提交改动（scope: all | content）
  *   POST /api/git/push         推送到远程
  *   GET  /api/diff             内容数据的 diff
  *
@@ -47,6 +47,7 @@ import { gitStatus, gitCommit, gitPush, gitDiff } from './lib/git.mjs';
 import { buildOrcidReport, applyChanges, normalizeOrcidId } from './lib/orcid.mjs';
 import { bibtexToPapers } from './lib/bibtex.mjs';
 import { runScholarSync } from './lib/scholar.mjs';
+import { listPosts, readPost, writePost, deletePost } from './lib/blog.mjs';
 
 /* ── 配置 ───────────────────────────────────────────────────── */
 
@@ -295,8 +296,9 @@ const ROUTES = {
   'GET /api/git': async () => ({ body: { ok: true, git: await gitStatus() } }),
 
   'POST /api/git/commit': async (body) => {
-    const files = Array.isArray(body.files) && body.files.length ? body.files : undefined;
-    const res = await gitCommit(body.message, files);
+    // scope='all' 提交全部改动（含源码与博客），'content' 只提交 data/ 下的内容。
+    const scope = body.scope === 'content' ? 'content' : 'all';
+    const res = await gitCommit(body.message, { scope });
     return { body: { ...res, git: await gitStatus() } };
   },
 
@@ -306,6 +308,12 @@ const ROUTES = {
   },
 
   'GET /api/diff': async () => ({ body: { ok: true, ...(await gitDiff()) } }),
+
+  /* 博客：直接读写 blog/ 下的 Markdown 文件 */
+  'GET /api/blog': async () => ({ body: { ok: true, posts: listPosts() } }),
+  'POST /api/blog/read': async (body) => ({ body: { ok: true, post: readPost(body.slug) } }),
+  'POST /api/blog/save': async (body) => ({ body: { ok: true, ...writePost(body) } }),
+  'POST /api/blog/delete': async (body) => ({ body: { ok: true, ...deletePost(body.slug) } }),
 };
 
 /* ── 静态文件 ───────────────────────────────────────────────── */
