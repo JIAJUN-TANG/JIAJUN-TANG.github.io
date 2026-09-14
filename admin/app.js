@@ -1228,16 +1228,21 @@ async function commitFlow(scope) {
     await save();
   }
 
-  const changed = state.git?.changed ?? [];
-
   if (!scope) {
+    // 弹选择框前先把状态刷新到最新，否则可能拿着过期的「有改动」去问用户。
+    await refreshGitState();
+    const n = (state.git?.changed ?? []).length;
+    if (!n) {
+      toast('没有需要提交的改动。', 'warn');
+      return false;
+    }
     scope = await chooseModal({
       title: '提交哪些改动？',
-      subtitle: `工作区共 ${changed.length} 个文件有改动`,
+      subtitle: `工作区共 ${n} 个文件有改动`,
       options: [
         {
           value: 'all',
-          label: `全部改动（${changed.length} 个文件）`,
+          label: `全部改动（${n} 个文件）`,
           desc: '源码、样式、博客、数据一起提交。站点新增功能要选这个 —— 只提数据的话，线上拿不到新功能。',
         },
         {
