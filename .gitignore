@@ -32,3 +32,6 @@ data/backups/
 # Python
 __pycache__/
 *.pyc
+
+# Vite 临时文件
+vite.config.ts.timestamp-*

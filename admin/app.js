@@ -105,9 +105,17 @@ const openKey = (collection, id) => `${collection}:${id}`;
 
 /* ── 弹窗 ───────────────────────────────────────────────────── */
 
+/**
+ * 弹窗是**可叠加**的：确认框、选择框经常从另一个弹窗里弹出来
+ * （比如「编辑文章」里删素材要二次确认）。
+ * 早先的实现在打开前会清空 #modal-root，结果一开确认框就把外面那个弹窗
+ * 连同未保存的编辑内容一起抹掉。现在每个弹窗只管自己那对 mask + modal，
+ * 关掉时只摘掉自己，DOM 顺序天然保证后开的在上面。
+ */
+const modalStack = [];
+
 function openModal({ title, subtitle, body, footer, width, onDismiss }) {
   const root = $('#modal-root');
-  root.innerHTML = '';
 
   const mask = el('div', { class: 'modal-mask' });
   const modal = el('div', { class: 'modal' }, [
@@ -125,6 +133,8 @@ function openModal({ title, subtitle, body, footer, width, onDismiss }) {
   modal.appendChild(bodyEl);
   if (footer) modal.appendChild(el('div', { class: 'modal-foot' }, footer));
 
+  const entry = { mask, modal };
+  modalStack.push(entry);
   root.append(mask, modal);
   root.classList.add('show');
 
@@ -132,8 +142,11 @@ function openModal({ title, subtitle, body, footer, width, onDismiss }) {
   const close = () => {
     if (closed) return;
     closed = true;
-    root.classList.remove('show');
-    root.innerHTML = '';
+    const at = modalStack.indexOf(entry);
+    if (at >= 0) modalStack.splice(at, 1);
+    mask.remove();
+    modal.remove();
+    if (!modalStack.length) root.classList.remove('show');
     onDismiss?.();
   };
   mask.onclick = close;
@@ -651,6 +664,13 @@ function openPostEditor(slug) {
 
     const saveBtn = el('button', { class: 'btn primary' }, [isNew ? '创建' : '保存']);
 
+    // 素材挂在「已落盘的文件名」上：没保存过的文章还没有目录可放。
+    const assets = assetPanel({
+      getSlug: () => (isNew ? null : slug),
+      slugInput,
+      bodyArea,
+    });
+
     const modal = openModal({
       title: isNew ? '写一篇' : `编辑：${post.title}`,
       subtitle: isNew ? '新文章会写成 blog/<文件名>.md' : `blog/${post.slug}.md`,
@@ -666,9 +686,10 @@ function openPostEditor(slug) {
         el('div', { class: 'field full' }, [el('label', {}, ['摘要']), summaryInput]),
         el('div', { class: 'field full' }, [el('label', {}, ['标签', el('span', { class: 'hint' }, ['逗号分隔'])]), tagsInput]),
         el('div', { class: 'field full' }, [
-          el('label', {}, ['正文', el('span', { class: 'hint' }, ['Markdown；不用再写一级标题，页面标题取自上面的「标题」'])]),
+          el('label', {}, ['正文', el('span', { class: 'hint' }, ['Markdown；不用再写一级标题，页面标题取自上面的「标题」；粘贴截图会自动上传'])]),
           bodyArea,
         ]),
+        assets,
       ]),
       footer: [
         el('button', { class: 'btn', onClick: () => modal.close() }, ['取消']),
@@ -734,6 +755,253 @@ async function removePost(post) {
   } catch (e) {
     toast(`删除失败：${e.message}`, 'bad');
   }
+}
+
+/* ── 文章素材（blog/<slug>/） ─────────────────────────────────── */
+
+const ASSET_ACCEPT = [
+  'png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'svg', 'bmp',
+  'mp4', 'webm', 'ogv', 'mov', 'm4v',
+  'mp3', 'wav', 'm4a', 'ogg', 'oga', 'flac', 'aac',
+  'pdf',
+].map((e) => `.${e}`).join(',');
+
+const ASSET_GLYPH = { image: '🖼', video: '🎬', audio: '🎵', pdf: '📄', file: '📎' };
+const ASSET_LABEL = { image: '图片', video: '视频', audio: '音频', pdf: 'PDF', file: '文件' };
+
+function formatBytes(n) {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1048576).toFixed(1)} MB`;
+}
+
+/** FileReader → 纯 base64（服务端只认载荷，不认 data URL 前缀）。 */
+const readAsBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).replace(/^data:[^;,]+;base64,/, ''));
+    reader.onerror = () => reject(new Error('读取文件失败'));
+    reader.readAsDataURL(file);
+  });
+
+/**
+ * 文章素材面板：拖拽 / 选择 / 粘贴上传，列出现有素材，一键把 Markdown 插到光标处。
+ *
+ * @param getSlug  返回**已落盘**的文件名（没保存过的文章返回 null）
+ * @param bodyArea 正文 textarea，用来插入 `![](name)`
+ */
+function assetPanel({ getSlug, slugInput, bodyArea }) {
+  const input = el('input', {
+    type: 'file',
+    multiple: 'multiple',
+    accept: ASSET_ACCEPT,
+    style: { display: 'none' },
+  });
+
+  const drop = el('div', { class: 'dropzone' }, [
+    el('div', { class: 'dz-t' }, ['把文件拖到这里，或']),
+    el('button', { class: 'btn sm primary', type: 'button', onClick: () => input.click() }, ['选择文件']),
+    el('div', { class: 'dz-d' }, [
+      `支持 ${ASSET_ACCEPT.split(',').length} 种格式（图片 / 视频 / 音频 / PDF），单个不超过 8MB`,
+    ]),
+  ]);
+
+  const grid = el('div', { class: 'asset-grid' });
+  const warn = el('div', { class: 'note warn', style: { display: 'none' } });
+
+  /** 在光标处插入一段 Markdown，前后补到「空一行」，插完光标落在片段之后。 */
+  function insertMarkdown(md) {
+    const start = bodyArea.selectionStart ?? bodyArea.value.length;
+    const end = bodyArea.selectionEnd ?? start;
+    const before = bodyArea.value.slice(0, start);
+    const after = bodyArea.value.slice(end);
+
+    // 目标：片段前后各空一行。已经空好了就不动，只有一个换行就再补一个。
+    const pad = (text, where) => {
+      if (!text) return '';
+      const edge = where === 'before' ? /(\n\n|\n)$/.exec(text) : /^(\n\n|\n)/.exec(text);
+      if (!edge) return '\n\n';
+      return edge[1] === '\n' ? '\n' : '';
+    };
+    const lead = pad(before, 'before');
+    const tail = pad(after, 'after');
+
+    bodyArea.value = `${before}${lead}${md}${tail}${after}`;
+    const caret = (before + lead + md).length;
+    bodyArea.focus();
+    bodyArea.setSelectionRange(caret, caret);
+  }
+
+  async function upload(files, { insert = false } = {}) {
+    const list = [...files].filter(Boolean);
+    if (!list.length) return;
+    const slug = getSlug();
+    if (!slug) return toast('先把文章保存一次，素材才有地方放。', 'warn');
+
+    for (const file of list) {
+      try {
+        const base64 = await readAsBase64(file);
+        const r = await api('/api/blog/asset/save', {
+          method: 'POST',
+          body: { slug, name: file.name, base64 },
+        });
+        if (insert) insertMarkdown(r.markdown);
+        toast(`已上传 ${r.name}（${formatBytes(r.bytes)}）`, 'ok');
+      } catch (e) {
+        toast(`${file.name} 上传失败：${e.message}`, 'bad');
+      }
+    }
+    await refresh();
+  }
+
+  function assetCard(slug, asset) {
+    const thumb = el('div', { class: 'asset-thumb' });
+    // 子目录要逐段编码，整串 encodeURIComponent 会把 `/` 也编掉。
+    const path = asset.name.split('/').map(encodeURIComponent).join('/');
+    const url = `/blog/${encodeURIComponent(slug)}/${path}`;
+    if (asset.kind === 'image') {
+      thumb.appendChild(el('img', { src: url, alt: asset.name, loading: 'lazy' }));
+    } else if (asset.kind === 'video') {
+      thumb.appendChild(el('video', { src: url, muted: 'muted', preload: 'metadata' }));
+    } else {
+      thumb.appendChild(el('div', { class: 'asset-glyph' }, [ASSET_GLYPH[asset.kind] ?? '📎']));
+    }
+
+    return el('div', { class: 'asset-card' }, [
+      thumb,
+      el('div', { class: 'asset-info' }, [
+        el('div', { class: 'asset-name', title: asset.name }, [asset.name]),
+        el('div', { class: 'asset-sub' }, [
+          `${ASSET_GLYPH[asset.kind] ?? '📎'} ${ASSET_LABEL[asset.kind] ?? '文件'} · ${formatBytes(asset.size)}`,
+          asset.used ? el('span', { class: 'pill on' }, ['正文已引用']) : el('span', { class: 'pill' }, ['未引用']),
+        ]),
+      ]),
+      el('div', { class: 'asset-actions' }, [
+        el(
+          'button',
+          {
+            class: 'btn sm',
+            type: 'button',
+            onClick: () => {
+              insertMarkdown(`![说明](${asset.name})`);
+              toast('已插入正文，记得把「说明」改成图片描述', 'ok');
+            },
+          },
+          ['插入正文'],
+        ),
+        el(
+          'button',
+          {
+            class: 'btn sm ghost',
+            type: 'button',
+            onClick: async () => {
+              try {
+                await navigator.clipboard.writeText(`![说明](${asset.name})`);
+                toast('Markdown 片段已复制', 'ok');
+              } catch {
+                toast(`复制失败，手动写：![说明](${asset.name})`, 'warn');
+              }
+            },
+          },
+          ['复制路径'],
+        ),
+        el(
+          'button',
+          {
+            class: 'btn sm danger',
+            type: 'button',
+            onClick: async () => {
+              const ok = await confirmModal({
+                title: `删除素材 ${asset.name}？`,
+                message: '会从 blog/<文章名>/ 里移除这个文件，并备份到 data/backups/blog/assets/。正文里的引用会变成裂图。',
+                confirmText: '删除',
+                danger: true,
+              });
+              if (!ok) return;
+              try {
+                await api('/api/blog/asset/delete', {
+                  method: 'POST',
+                  body: { slug, name: asset.name },
+                });
+                toast(`已删除 ${asset.name}`, 'ok');
+                await refresh();
+              } catch (e) {
+                toast(`删除失败：${e.message}`, 'bad');
+              }
+            },
+          },
+          ['删除'],
+        ),
+      ]),
+    ]);
+  }
+
+  async function refresh() {
+    const slug = getSlug();
+    grid.innerHTML = '';
+    warn.style.display = 'none';
+
+    if (!slug) {
+      grid.appendChild(
+        el('div', { class: 'asset-empty' }, ['文章先保存一次，素材目录 blog/<文件名>/ 才会创建。']),
+      );
+      return;
+    }
+    // 文件名改了但还没保存：上传会落到旧目录，先说清楚。
+    if (slugInput && slugInput.value.trim() && slugInput.value.trim() !== slug) {
+      warn.textContent = `文件名已改成「${slugInput.value.trim()}」，但还没保存 —— 现在上传的素材会放进旧目录 blog/${slug}/。先保存再上传。`;
+      warn.style.display = '';
+    }
+
+    let assets = [];
+    try {
+      assets = (await api('/api/blog/assets', { method: 'POST', body: { slug } })).assets ?? [];
+    } catch (e) {
+      toast(`读取素材失败：${e.message}`, 'bad');
+      return;
+    }
+
+    if (!assets.length) {
+      grid.appendChild(el('div', { class: 'asset-empty' }, ['还没有素材。']));
+      return;
+    }
+    for (const asset of assets) grid.appendChild(assetCard(slug, asset));
+  }
+
+  input.addEventListener('change', () => {
+    upload(input.files);
+    input.value = '';
+  });
+  drop.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    drop.classList.add('over');
+  });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    drop.classList.remove('over');
+    upload(e.dataTransfer?.files ?? []);
+  });
+
+  // 直接往正文里粘贴截图时自动上传并插入 —— 这是最顺手的贴图路径。
+  bodyArea.addEventListener('paste', (e) => {
+    const files = [...(e.clipboardData?.files ?? [])];
+    if (!files.length) return;
+    e.preventDefault();
+    upload(files, { insert: true });
+  });
+
+  refresh();
+
+  return el('div', { class: 'field full' }, [
+    el('label', {}, [
+      '素材',
+      el('span', { class: 'hint' }, [
+        '放在 blog/<文件名>/ 里；正文写 ![](文件名) 即可，不用管构建后的路径',
+      ]),
+    ]),
+    el('div', { class: 'asset-wrap' }, [drop, input, warn, grid]),
+  ]);
 }
 
 function addEntry(key) {

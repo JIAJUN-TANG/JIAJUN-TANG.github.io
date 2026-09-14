@@ -24,6 +24,12 @@ import { BACKUP_DIR, ROOT } from './content.mjs';
 export const BLOG_DIR = join(ROOT, 'blog');
 const BLOG_BACKUP_DIR = join(BACKUP_DIR, 'blog');
 
+/**
+ * 「你的输入不对」而不是「服务器炸了」。带上 400，中台就按 4xx 返回，
+ * 浏览器控制台不会留下一条吓人的 500。
+ */
+const userError = (message) => Object.assign(new Error(message), { status: 400 });
+
 /** 只允许小写字母、数字与连字符：既为 URL 友好，也是路径穿越的第一道闸。 */
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,80}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -31,7 +37,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 export function assertSlug(slug) {
   const s = String(slug ?? '').trim();
   if (!SLUG_RE.test(s)) {
-    throw new Error(
+    throw userError(
       '文件名只能用英文小写字母、数字和连字符（例如 how-this-site-works），不能有空格、斜杠或中文。',
     );
   }
@@ -137,7 +143,7 @@ export function listPosts() {
 export function readPost(slug) {
   const s = assertSlug(slug);
   const full = join(BLOG_DIR, `${s}.md`);
-  if (!existsSync(full)) throw new Error(`找不到文章 ${s}.md`);
+  if (!existsSync(full)) throw userError(`找不到文章 ${s}.md`);
   return fileToPost(`${s}.md`, { withBody: true });
 }
 
@@ -169,15 +175,15 @@ const trimTags = (tags) =>
  */
 export function writePost({ slug, originalSlug, title, date, summary, tags, lang, body }) {
   const nextSlug = assertSlug(slug);
-  if (!String(title ?? '').trim()) throw new Error('标题不能为空。');
+  if (!String(title ?? '').trim()) throw userError('标题不能为空。');
 
   const rawDate = String(date ?? '').trim();
   if (rawDate && !DATE_RE.test(rawDate)) {
-    throw new Error('日期要写成 2026-09-13 这样的格式。');
+    throw userError('日期要写成 2026-09-13 这样的格式。');
   }
   const rawLang = String(lang ?? '').trim().toLowerCase();
   if (rawLang && rawLang !== 'zh' && rawLang !== 'en') {
-    throw new Error('语言只能填 zh 或 en。');
+    throw userError('语言只能填 zh 或 en。');
   }
 
   mkdirSync(BLOG_DIR, { recursive: true });
@@ -209,8 +215,198 @@ export function writePost({ slug, originalSlug, title, date, summary, tags, lang
 export function deletePost(slug) {
   const s = assertSlug(slug);
   const full = join(BLOG_DIR, `${s}.md`);
-  if (!existsSync(full)) throw new Error(`找不到文章 ${s}.md`);
+  if (!existsSync(full)) throw userError(`找不到文章 ${s}.md`);
   const backup = backupPost(s);
   unlinkSync(full);
   return { slug: s, backup };
 }
+
+/* ═══════════════════════════════════════════════
+   文章素材（blog/<slug>/ 里的图片、视频、音频、PDF）
+
+   站点侧由 `blog.ts` 的 `resolveAsset` 读同一批文件，正文里只写相对路径
+   （`![封面](cover.png)`）。中台负责把文件放进去、列出来、删掉。
+   ═══════════════════════════════════════════════ */
+
+const ASSET_BACKUP_DIR = join(BACKUP_DIR, 'blog', 'assets');
+
+/** 允许放进仓库的类型。白名单而不是黑名单：blog/ 会在构建时被打进产物。 */
+export const ASSET_EXT = [
+  'png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'svg', 'bmp',
+  'mp4', 'webm', 'ogv', 'mov', 'm4v',
+  'mp3', 'wav', 'm4a', 'ogg', 'oga', 'flac', 'aac',
+  'pdf',
+];
+
+export const ASSET_MAX_BYTES = 8 * 1024 * 1024;
+
+const IMAGE_EXT = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'svg', 'bmp']);
+const VIDEO_EXT = new Set(['mp4', 'webm', 'ogv', 'mov', 'm4v']);
+const AUDIO_EXT = new Set(['mp3', 'wav', 'm4a', 'ogg', 'oga', 'flac', 'aac']);
+
+export const assetKind = (name) => {
+  const ext = String(name).split('.').pop().toLowerCase();
+  if (IMAGE_EXT.has(ext)) return 'image';
+  if (VIDEO_EXT.has(ext)) return 'video';
+  if (AUDIO_EXT.has(ext)) return 'audio';
+  if (ext === 'pdf') return 'pdf';
+  return 'file';
+};
+
+/**
+ * 把上传的文件名收拾干净：去掉目录、替换不安全字符、强制保留合法扩展名。
+ * 上传一律落在文章目录的**第一层**，子目录留给作者自己整理。
+ */
+export function safeAssetName(raw) {
+  const input = String(raw ?? '').trim();
+  // 只留最后一段 —— 顺手挡掉 `../` 与绝对路径。
+  const base = input.split(/[\\/]/).filter(Boolean).pop() ?? '';
+  const dot = base.lastIndexOf('.');
+  if (dot <= 0) throw userError('文件名要有扩展名，例如 cover.png。');
+
+  const ext = base.slice(dot + 1).toLowerCase();
+  if (!ASSET_EXT.includes(ext)) {
+    throw userError(`不支持 .${ext} 文件。可用的类型：${ASSET_EXT.join('、')}`);
+  }
+
+  const stem = base
+    .slice(0, dot)
+    .replace(/[^\w\u4e00-\u9fff.-]+/g, '-')
+    .replace(/^[-.]+/, '')
+    .replace(/-{2,}/g, '-')
+    .slice(0, 60);
+  if (!stem) throw userError('文件名不能全是符号，给它起个名字。');
+
+  return `${stem}.${ext}`;
+}
+
+/** 素材路径的每一段：中文、字母、数字、下划线、点、连字符，且不以点开头。 */
+const SEG_RE = /^[\w\u4e00-\u9fff][\w\u4e00-\u9fff.-]{0,60}$/;
+
+/**
+ * 校验一个**已存在**素材的相对路径（`sub/deep.png`），最多三层。
+ * 和 safeAssetName 一样是安全边界：删除操作直接拼路径，必须先卡死穿越。
+ */
+export function assertAssetPath(raw) {
+  const input = String(raw ?? '').trim().replace(/\\/g, '/');
+  if (!input) throw userError('缺少素材文件名。');
+  if (input.startsWith('/') || /^[a-z]:/i.test(input)) {
+    throw userError('素材路径必须是相对路径。');
+  }
+
+  const parts = input.split('/').filter((p) => p && p !== '.');
+  if (!parts.length || parts.length > 3) throw userError('素材路径不对。');
+  for (const part of parts) {
+    if (part === '..' || !SEG_RE.test(part)) throw userError(`素材路径里有非法字符：${part}`);
+  }
+
+  const name = parts[parts.length - 1];
+  const ext = name.split('.').pop().toLowerCase();
+  if (name === ext || !ASSET_EXT.includes(ext)) {
+    throw userError(`不支持 .${ext} 文件。可用的类型：${ASSET_EXT.join('、')}`);
+  }
+  return parts.join('/');
+}
+
+const assetDirOf = (slug) => join(BLOG_DIR, assertSlug(slug));
+
+/** 该文章已经放了哪些素材（含子目录，最多三层）；`used` 表示正文里是否已引用。 */
+export function listAssets(slug) {
+  const dir = assetDirOf(slug);
+  if (!existsSync(dir)) return [];
+
+  let body = '';
+  const postFile = join(BLOG_DIR, `${assertSlug(slug)}.md`);
+  if (existsSync(postFile)) body = readFileSync(postFile, 'utf8');
+
+  const out = [];
+  const walk = (rel, depth) => {
+    if (depth > 2) return;
+    for (const entry of readdirSync(join(dir, rel), { withFileTypes: true })) {
+      if (entry.name.startsWith('.')) continue;
+      const child = rel ? `${rel}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        walk(child, depth + 1);
+        continue;
+      }
+      const st = statSync(join(dir, child));
+      out.push({
+        name: child,
+        kind: assetKind(child),
+        size: st.size,
+        mtime: st.mtime.toISOString(),
+        // 正文里写 `deep.png` 或 `sub/deep.png` 都算引用。
+        used: body.includes(child) || body.includes(entry.name),
+      });
+    }
+  };
+  walk('', 0);
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** 覆盖同名素材前先留一份，避免手滑把好不容易做的图冲掉。 */
+function backupAsset(slug, name) {
+  const full = join(assetDirOf(slug), name);
+  if (!existsSync(full)) return null;
+  mkdirSync(ASSET_BACKUP_DIR, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+  // 备份是平铺的，把子目录的斜杠换成连字符。
+  const flat = name.replace(/\//g, '-');
+  const target = `${stamp}-${assertSlug(slug)}-${flat}`;
+  copyFileSync(full, join(ASSET_BACKUP_DIR, target));
+  pruneAssetBackups();
+  return target;
+}
+
+function pruneAssetBackups() {
+  try {
+    const items = readdirSync(ASSET_BACKUP_DIR)
+      .map((name) => ({ name, mtime: statSync(join(ASSET_BACKUP_DIR, name)).mtimeMs }))
+      .sort((a, b) => b.mtime - a.mtime);
+    for (const item of items.slice(30)) {
+      try {
+        unlinkSync(join(ASSET_BACKUP_DIR, item.name));
+      } catch {
+        /* 留着也不影响使用 */
+      }
+    }
+  } catch {
+    /* 备份目录还不存在 */
+  }
+}
+
+/**
+ * 落盘一个素材。`base64` 来自浏览器 FileReader，是完整 data URL 或纯 base64。
+ * 返回可直接粘进正文的 Markdown 片段。
+ */
+export function saveAsset({ slug, name, base64 }) {
+  const s = assertSlug(slug);
+  const safe = safeAssetName(name);
+
+  const payload = String(base64 ?? '').replace(/^data:[^;,]+;base64,/, '');
+  if (!payload) throw userError('没有收到文件内容。');
+
+  const buf = Buffer.from(payload, 'base64');
+  if (!buf.length) throw userError('文件内容解析失败，重试一次。');
+  if (buf.length > ASSET_MAX_BYTES) {
+    throw userError(`文件 ${(buf.length / 1048576).toFixed(1)}MB，超过 ${ASSET_MAX_BYTES / 1048576}MB 上限。先压缩一下。`);
+  }
+
+  const dir = join(BLOG_DIR, s);
+  mkdirSync(dir, { recursive: true });
+  const backup = backupAsset(s, safe);
+  writeFileSync(join(dir, safe), buf);
+
+  return { slug: s, name: safe, bytes: buf.length, backup, markdown: `![说明](${safe})` };
+}
+
+export function deleteAsset({ slug, name }) {
+  const s = assertSlug(slug);
+  const safe = assertAssetPath(name);
+  const full = join(BLOG_DIR, s, safe);
+  if (!existsSync(full)) throw userError(`找不到素材 ${safe}。`);
+  const backup = backupAsset(s, safe);
+  unlinkSync(full);
+  return { slug: s, name: safe, backup };
+}
+

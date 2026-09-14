@@ -60,6 +60,7 @@ import {
   type UIKey,
 } from './i18n';
 import { BLOG_POSTS, findPost } from './blog';
+import { MEDIA_COMPONENTS, MediaProvider } from './BlogMedia';
 import {
   extractHeadings,
   nodeText,
@@ -1097,7 +1098,7 @@ const BlogPostView = ({
       };
       return Heading;
     };
-    return { h1: make('h1'), h2: make('h2'), h3: make('h3') };
+    return { ...MEDIA_COMPONENTS, h1: make('h1'), h2: make('h2'), h3: make('h3') };
   }, [idByText]);
 
   const others = BLOG_POSTS.filter((p) => p.slug !== post.slug);
@@ -1146,11 +1147,13 @@ const BlogPostView = ({
 
           <TocMobile headings={headings} active={active} onJump={scrollToHeading} />
 
-          <div className="markdown-body blog-body text-[15px]">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-              {post.body}
-            </ReactMarkdown>
-          </div>
+          <MediaProvider slug={post.slug}>
+            <div className="markdown-body blog-body text-[15px]">
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                {post.body}
+              </ReactMarkdown>
+            </div>
+          </MediaProvider>
         </div>
       </div>
     </motion.div>
