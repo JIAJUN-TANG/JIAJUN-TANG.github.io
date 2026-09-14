@@ -195,7 +195,8 @@ a { color: var(--accent); }
 .entry-head .titling { min-width: 0; flex: 1; }
 .entry-head .t1 { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .entry-head .t2 { color: var(--ink3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
-.entry-head .mini { display: flex; gap: 6px; align-items: center; flex: none; }
+.entry-head .mini { display: flex; gap: 6px; align-items: center; flex: 0 1 auto; min-width: 0; overflow: hidden; }
+.entry-head .mini .pill { flex: none; }
 .entry-head .caret { color: var(--ink3); transition: transform 0.15s; flex: none; }
 .entry.open .caret { transform: rotate(90deg); }
 
@@ -232,6 +233,16 @@ a { color: var(--accent); }
 }
 .input:focus, .textarea:focus, .select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .textarea { resize: vertical; min-height: 74px; line-height: 1.5; }
+/* Markdown 字段用等宽字体，层级与列表一眼能看清 */
+.textarea.mono { font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-size: 12.5px; line-height: 1.7; }
+
+/* 博客正文编辑器：要一块足够高的输入区 */
+.blog-editor {
+  min-height: 420px;
+  font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.75;
+}
 .input[readonly] { background: var(--line2); color: var(--ink3); font-family: var(--mono); font-size: 12px; }
 .select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 4.5 6 8l3-3.5' fill='none' stroke='%23a8a29e' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
 
@@ -277,6 +288,23 @@ a { color: var(--accent); }
   border-top: 1px dashed var(--line);
 }
 .entry-foot .grow { flex: 1; }
+
+/* 直接挂在 .entry 下的操作条（如博客卡片）：它没有 .entry-body 包裹，
+   必须自带左右内边距，否则按钮与时间会贴到卡片边缘。 */
+.entry-foot.inset { padding: 11px 14px 12px; }
+
+/* 操作条右侧的次要信息：体积 · 修改时间 */
+.entry-foot .meta {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--ink3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.entry-foot .meta .sep { opacity: 0.5; }
 
 .empty {
   padding: 44px 20px;
@@ -365,6 +393,28 @@ a { color: var(--accent); }
 .note.warn { background: var(--warn-soft); color: var(--warn); }
 .note.bad { background: var(--danger-soft); color: var(--danger); }
 .note.ok { background: var(--accent-soft); color: var(--accent); }
+
+/* 单选弹窗（提交范围、推送前提示）——整块可点，比 radio 好按 */
+.choices { display: flex; flex-direction: column; gap: 9px; }
+.choice {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.12s, background 0.12s;
+}
+.choice:hover { border-color: var(--ink3); background: var(--line2); }
+.choice .t { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.choice .d { margin-top: 4px; font-size: 12px; line-height: 1.55; color: var(--ink2); }
+.choice.primary { border-color: var(--accent); background: var(--accent-soft); }
+.choice.primary:hover { border-color: var(--accent); filter: brightness(0.99); }
+.choice.primary .t { color: var(--accent); }
+.choice.danger .t { color: var(--danger); }
 
 pre.log {
   margin: 10px 0 0;

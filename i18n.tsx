@@ -89,6 +89,26 @@ export const UI = {
   badgeExchange: { zh: '交换', en: 'Exchange' },
   badgeSummer: { zh: '暑校', en: 'Summer School' },
 
+  /* ── Blog ───────────────────────────────────── */
+  navBlog: { zh: '博客', en: 'Blog' },
+  blogTitle: { zh: '博客', en: 'Blog' },
+  blogIntro: {
+    zh: '一些想法、记录，以及做东西的过程。',
+    en: 'Notes, thoughts, and the occasional write-up.',
+  },
+  blogEmpty: { zh: '还没有文章。', en: 'No posts yet.' },
+  blogBack: { zh: '返回列表', en: 'All posts' },
+  blogMinRead: { zh: '分钟阅读', en: 'min read' },
+  blogPostsUnit: { zh: '篇文章', en: 'posts' },
+  /** Left rail outline of the article being read. */
+  blogToc: { zh: '目录', en: 'Contents' },
+  blogTocEmpty: { zh: '这篇文章没有小标题。', en: 'No sections in this post.' },
+  blogBackToTop: { zh: '回到顶部', en: 'Back to top' },
+  blogMorePosts: { zh: '更多文章', en: 'More posts' },
+  /** Language badge on a post - always rendered in that language itself. */
+  postLangZh: { zh: '中文', en: '中文' },
+  postLangEn: { zh: 'EN', en: 'EN' },
+
   /* ── Trackers ───────────────────────────────── */
   trackersTitle: { zh: '追踪', en: 'Trackers' },
   noteLabel: { zh: '笔记', en: 'Note' },
@@ -236,4 +256,25 @@ export function repoUnit(n: number, lang: Lang): string {
 export function followerUnit(n: number, lang: Lang): string {
   if (lang === 'zh') return '位关注者';
   return n === 1 ? 'follower' : 'followers';
+}
+
+/** "2026年9月13日" / "Sep 13, 2026". Falls back to the raw string if unparsable. */
+export function formatPostDate(iso: string, lang: Lang): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : 'en-US', {
+    year: 'numeric',
+    month: lang === 'zh' ? 'long' : 'short',
+    day: 'numeric',
+  }).format(d);
+}
+
+/**
+ * Rough reading time. CJK characters count at ~400/min and Latin words at
+ * ~200/min; both are summed so a mixed-language post still estimates sanely.
+ */
+export function readingMinutes(body: string): number {
+  const cjk = (body.match(/[\u4e00-\u9fff]/g) || []).length;
+  const latin = (body.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9']+/g) || []).length;
+  return Math.max(1, Math.round(cjk / 400 + latin / 200));
 }

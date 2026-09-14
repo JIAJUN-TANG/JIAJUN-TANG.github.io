@@ -27,10 +27,14 @@ function el(tag, props = {}, children = []) {
 
 /* ── 状态 ───────────────────────────────────────────────────── */
 
+/** 博客不是 content.json 里的分区，而是 blog/ 下的 Markdown 文件。 */
+const BLOG_KEY = '__blog';
+
 const state = {
   schema: null,
   content: null,
   counts: {},
+  posts: [],
   backups: [],
   config: {},
   git: {},
@@ -163,6 +167,42 @@ function confirmModal({ title, message, confirmText = '确认', danger = false, 
   });
 }
 
+/**
+ * 单选弹窗：resolve 选中项的 value，点取消 / 关掉则 resolve null。
+ * 第一个选项默认是主操作。用于「提交哪些改动」「还有文件没提交怎么办」这类岔路口。
+ */
+function chooseModal({ title, subtitle, options, cancelText = '取消' }) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (v) => {
+      if (settled) return;
+      settled = true;
+      m.close();
+      resolve(v);
+    };
+    const m = openModal({
+      title,
+      subtitle,
+      body: el(
+        'div',
+        { class: 'choices' },
+        options.map((o, i) =>
+          el(
+            'button',
+            {
+              class: `choice${i === 0 ? ' primary' : ''}${o.danger ? ' danger' : ''}`,
+              onClick: () => finish(o.value),
+            },
+            [el('div', { class: 't' }, [o.label]), o.desc ? el('div', { class: 'd' }, [o.desc]) : null],
+          ),
+        ),
+      ),
+      footer: [el('div', { class: 'grow' }), el('button', { class: 'btn', onClick: () => finish(null) }, [cancelText])],
+      onDismiss: () => finish(null),
+    });
+  });
+}
+
 /* ── 顶栏 / 侧栏 ────────────────────────────────────────────── */
 
 function renderGit() {
@@ -186,34 +226,38 @@ function setDirty(dirty) {
 function renderNav() {
   const nav = $('#nav');
   nav.innerHTML = '';
+
+  const item = (key, icon, label, count) =>
+    el('button', {
+      class: `nav-item ${state.active === key ? 'active' : ''}`,
+      onClick: () => {
+        state.active = key;
+        state.filter = '';
+        renderNav();
+        renderMain();
+      },
+    }, [
+      el('span', { class: 'ico' }, [icon]),
+      el('span', {}, [label]),
+      el('span', { class: 'count' }, [String(count)]),
+    ]);
+
   for (const key of state.schema.order) {
     const def = state.schema.collections[key];
-    const count = state.content[key]?.length ?? 0;
-    nav.appendChild(
-      el('button', {
-        class: `nav-item ${state.active === key ? 'active' : ''}`,
-        onClick: () => {
-          state.active = key;
-          state.filter = '';
-          renderNav();
-          renderMain();
-        },
-      }, [
-        el('span', { class: 'ico' }, [def.icon]),
-        el('span', {}, [def.label]),
-        el('span', { class: 'count' }, [String(count)]),
-      ]),
-    );
+    nav.appendChild(item(key, def.icon, def.label, state.content[key]?.length ?? 0));
   }
+
+  // 博客是 blog/ 下的 Markdown 文件，不在 content.json 里，单独挂在最后。
+  nav.appendChild(item(BLOG_KEY, '📝', '博客', state.posts.length));
 }
 
 /* ── 字段编辑器 ─────────────────────────────────────────────── */
 
-function l10nEditor(obj, onChange, { multiline = false } = {}) {
+function l10nEditor(obj, onChange, { multiline = false, rows = 4, mono = false } = {}) {
   const grid = el('div', { class: 'l10n' });
   for (const [code, label] of [['zh', '中文'], ['en', 'EN']]) {
     const node = multiline
-      ? el('textarea', { class: 'textarea', rows: 4 })
+      ? el('textarea', { class: `textarea${mono ? ' mono' : ''}`, rows })
       : el('input', { class: 'input' });
     node.value = obj[code] ?? '';
     node.oninput = () => {
@@ -287,7 +331,10 @@ function fieldNode(collectionKey, entry, field, onChange) {
     case 'textarea': {
       const node =
         field.kind === 'textarea'
-          ? el('textarea', { class: 'textarea', rows: 4 })
+          ? el('textarea', {
+              class: `textarea${field.mono ? ' mono' : ''}`,
+              rows: field.rows ?? 4,
+            })
           : el('input', { class: 'input' });
       node.value = entry[field.key] ?? '';
       node.oninput = () => {
@@ -315,7 +362,13 @@ function fieldNode(collectionKey, entry, field, onChange) {
     }
     case 'l10ntext': {
       if (!entry[field.key] || typeof entry[field.key] !== 'object') entry[field.key] = { zh: '', en: '' };
-      wrap.appendChild(l10nEditor(entry[field.key], onChange, { multiline: true }));
+      wrap.appendChild(
+        l10nEditor(entry[field.key], onChange, {
+          multiline: true,
+          rows: field.rows ?? 4,
+          mono: !!field.mono,
+        }),
+      );
       break;
     }
     case 'list': {
@@ -433,6 +486,7 @@ async function removeEntry(collectionKey, index, entry) {
 
 function renderMain() {
   const key = state.active;
+  if (key === BLOG_KEY) return renderBlog();
   const def = state.schema.collections[key];
   const list = state.content[key] ?? [];
   const main = $('#main');
@@ -480,6 +534,205 @@ function renderMain() {
     const wrap = el('div', { class: 'list' });
     for (const { entry, index } of items) wrap.appendChild(renderEntry(key, entry, index, list));
     holderEl.appendChild(wrap);
+  }
+}
+
+/* ── 博客 ───────────────────────────────────────────────────── */
+
+/** 把文件的 ISO 时间戳格式化成「2026-09-13 23:54」；取不到就返回空串。 */
+function formatStamp(iso) {
+  const d = new Date(iso);
+  if (!iso || Number.isNaN(d.getTime())) return '';
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** 只拉取文章列表，不动界面。失败时保留已有数据（不清零），并留下日志。 */
+async function loadPosts() {
+  try {
+    state.posts = (await api('/api/blog')).posts ?? [];
+  } catch (e) {
+    console.warn('[admin] 读取 blog/ 失败：', e.message);
+  }
+}
+
+/** 拉列表并重绘左侧导航（侧栏计数跟着变）。 */
+async function refreshPosts() {
+  await loadPosts();
+  renderNav();
+}
+
+function renderBlog() {
+  const main = $('#main');
+  main.innerHTML = '';
+
+  main.appendChild(
+    el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h1', {}, ['📝 博客']),
+        el('p', {}, ['每篇文章是 blog/ 目录下的一个 Markdown 文件，保存后站点构建时会自动收录。']),
+      ]),
+      el('div', { class: 'spacer' }),
+      el('button', { class: 'btn primary', onClick: () => openPostEditor(null) }, ['＋ 写一篇']),
+    ]),
+  );
+
+  if (!state.posts.length) {
+    main.appendChild(el('div', { class: 'empty' }, ['还没有文章。点右上角「＋ 写一篇」开始。']));
+    return;
+  }
+
+  const list = el('div', { class: 'list' });
+
+  for (const post of state.posts) {
+    list.appendChild(
+      el('div', { class: 'entry' }, [
+        el('div', { class: 'entry-head' }, [
+          el('div', { class: 'titling' }, [
+            el('div', { class: 't1' }, [post.title]),
+            el('div', { class: 't2' }, [post.summary || '（没有摘要）']),
+          ]),
+          el('div', { class: 'mini' }, [
+            el('span', { class: 'pill' }, [`${post.slug}.md`]),
+            post.date ? el('span', { class: 'pill' }, [post.date]) : null,
+            post.lang ? el('span', { class: 'pill on' }, [post.lang === 'zh' ? '中文' : 'EN']) : null,
+            ...(post.tags ?? []).map((tag) => el('span', { class: 'pill' }, [tag])),
+          ]),
+        ]),
+        el('div', { class: 'entry-foot inset' }, [
+          el('button', { class: 'btn sm primary', onClick: () => openPostEditor(post.slug) }, ['编辑']),
+          el('button', { class: 'btn sm danger', onClick: () => removePost(post) }, ['删除']),
+          el('div', { class: 'grow' }),
+          el('span', { class: 'meta' }, [
+            `${(post.bytes / 1024).toFixed(1)} KB`,
+            el('span', { class: 'sep', 'aria-hidden': 'true' }, ['·']),
+            `改于 ${formatStamp(post.mtime)}`,
+          ]),
+        ]),
+      ]),
+    );
+  }
+
+  main.appendChild(list);
+}
+
+/** 编辑既有文章（传 slug）或新建一篇（传 null）。 */
+function openPostEditor(slug) {
+  const isNew = !slug;
+  let post = {
+    slug: '',
+    title: '',
+    date: new Date().toISOString().slice(0, 10),
+    summary: '',
+    tags: [],
+    lang: 'zh',
+    body: '',
+  };
+
+  const build = () => {
+    const slugInput = el('input', { class: 'input', placeholder: 'how-this-site-works' });
+    slugInput.value = post.slug;
+    const titleInput = el('input', { class: 'input', placeholder: '文章标题' });
+    titleInput.value = post.title;
+    const dateInput = el('input', { class: 'input', placeholder: '2026-09-13' });
+    dateInput.value = post.date ?? '';
+    const summaryInput = el('input', { class: 'input', placeholder: '一句话摘要，显示在列表里' });
+    summaryInput.value = post.summary ?? '';
+    const tagsInput = el('input', { class: 'input', placeholder: '建站, 前端, 工具' });
+    tagsInput.value = (post.tags ?? []).join(', ');
+    const langSelect = el('select', { class: 'select' }, [
+      el('option', { value: '' }, ['不标注']),
+      el('option', { value: 'zh' }, ['中文']),
+      el('option', { value: 'en' }, ['English']),
+    ]);
+    langSelect.value = post.lang ?? '';
+    const bodyArea = el('textarea', { class: 'textarea blog-editor', placeholder: '正文，Markdown 格式…' });
+    bodyArea.value = post.body ?? '';
+
+    const saveBtn = el('button', { class: 'btn primary' }, [isNew ? '创建' : '保存']);
+
+    const modal = openModal({
+      title: isNew ? '写一篇' : `编辑：${post.title}`,
+      subtitle: isNew ? '新文章会写成 blog/<文件名>.md' : `blog/${post.slug}.md`,
+      width: '920px',
+      body: el('div', { class: 'grid' }, [
+        el('div', { class: 'field' }, [
+          el('label', {}, ['文件名', el('span', { class: 'hint' }, ['英文小写与连字符，改它会重命名文件'])]),
+          slugInput,
+        ]),
+        el('div', { class: 'field' }, [el('label', {}, ['日期']), dateInput]),
+        el('div', { class: 'field' }, [el('label', {}, ['标题']), titleInput]),
+        el('div', { class: 'field' }, [el('label', {}, ['语言']), langSelect]),
+        el('div', { class: 'field full' }, [el('label', {}, ['摘要']), summaryInput]),
+        el('div', { class: 'field full' }, [el('label', {}, ['标签', el('span', { class: 'hint' }, ['逗号分隔'])]), tagsInput]),
+        el('div', { class: 'field full' }, [
+          el('label', {}, ['正文', el('span', { class: 'hint' }, ['Markdown；不用再写一级标题，页面标题取自上面的「标题」'])]),
+          bodyArea,
+        ]),
+      ]),
+      footer: [
+        el('button', { class: 'btn', onClick: () => modal.close() }, ['取消']),
+        el('div', { class: 'grow' }),
+        saveBtn,
+      ],
+    });
+
+    saveBtn.onclick = async () => {
+      saveBtn.disabled = 'disabled';
+      try {
+        const r = await api('/api/blog/save', {
+          method: 'POST',
+          body: {
+            slug: slugInput.value.trim(),
+            originalSlug: isNew ? null : slug,
+            title: titleInput.value,
+            date: dateInput.value.trim(),
+            summary: summaryInput.value,
+            tags: tagsInput.value.split(',').map((s) => s.trim()).filter(Boolean),
+            lang: langSelect.value,
+            body: bodyArea.value,
+          },
+        });
+        toast(`已保存 blog/${r.slug}.md`, 'ok');
+        modal.close();
+        await refreshPosts();
+        renderMain();
+      } catch (e) {
+        toast(`保存失败：${e.message}`, 'bad');
+      } finally {
+        saveBtn.disabled = null;
+      }
+    };
+  };
+
+  if (isNew) {
+    build();
+    return;
+  }
+
+  api('/api/blog/read', { method: 'POST', body: { slug } })
+    .then((r) => {
+      post = r.post;
+      build();
+    })
+    .catch((e) => toast(`读取失败：${e.message}`, 'bad'));
+}
+
+async function removePost(post) {
+  const ok = await confirmModal({
+    title: `删除《${post.title}》？`,
+    message: `会删除 blog/${post.slug}.md。删之前会自动备份到 data/backups/blog/，但站点上这篇文章就消失了。`,
+    confirmText: '删除',
+    danger: true,
+  });
+  if (!ok) return;
+  try {
+    await api('/api/blog/delete', { method: 'POST', body: { slug: post.slug } });
+    toast(`已删除 ${post.slug}.md`, 'ok');
+    await refreshPosts();
+    renderMain();
+  } catch (e) {
+    toast(`删除失败：${e.message}`, 'bad');
   }
 }
 
@@ -538,6 +791,7 @@ async function reload() {
   state.backups = s.backups;
   state.git = s.git;
   state.config = s.config;
+  await loadPosts();
   setDirty(false);
   renderNav();
   renderMain();
@@ -957,48 +1211,120 @@ async function refreshGitState() {
   }
 }
 
-async function commitFlow() {
+const today = () => new Date().toISOString().slice(0, 10);
+
+/**
+ * 提交改动。scope 传 'all' / 'content' 时直接提交，不传则先问用户。
+ * 返回 true 表示确实提交成功了（调用方据此决定要不要接着推送）。
+ */
+async function commitFlow(scope) {
   if (state.dirty) {
     const ok = await confirmModal({
       title: '还有未保存的改动',
       message: '先把内容保存到 data/content.json，再一起提交？',
       confirmText: '先保存再提交',
     });
-    if (!ok) return;
+    if (!ok) return false;
     await save();
   }
-  const fallback = `content: 更新站点数据 ${new Date().toISOString().slice(0, 10)}`;
+
+  const changed = state.git?.changed ?? [];
+
+  if (!scope) {
+    scope = await chooseModal({
+      title: '提交哪些改动？',
+      subtitle: `工作区共 ${changed.length} 个文件有改动`,
+      options: [
+        {
+          value: 'all',
+          label: `全部改动（${changed.length} 个文件）`,
+          desc: '源码、样式、博客、数据一起提交。站点新增功能要选这个 —— 只提数据的话，线上拿不到新功能。',
+        },
+        {
+          value: 'content',
+          label: '仅内容数据',
+          desc: '只提交 data/content.json 与抓取快照，适合单纯更新了一条论文。',
+        },
+      ],
+    });
+    if (scope === null) return false;
+  }
+
+  const fallback =
+    scope === 'content' ? `content: 更新站点数据 ${today()}` : `更新站点内容与功能 ${today()}`;
+
   const message = await promptModal({
     title: '提交改动',
-    label: '提交信息',
+    label: scope === 'content' ? '提交信息（仅内容数据）' : '提交信息（全部改动）',
     value: fallback,
     confirmText: '提交',
   });
-  if (message === null) return;
+  if (message === null) return false;
+
   try {
-    const r = await api('/api/git/commit', { method: 'POST', body: { message: message || fallback } });
-    if (!r.ok) return toast(r.log || '提交失败', 'bad');
-    toast(r.skipped ? r.log : '已提交', r.skipped ? 'warn' : 'ok');
+    const r = await api('/api/git/commit', { method: 'POST', body: { message: message || fallback, scope } });
     state.git = r.git;
     renderGit();
+    if (!r.ok) {
+      toast(r.log || '提交失败', 'bad');
+      return false;
+    }
+    if (r.skipped) {
+      toast(r.log, 'warn');
+      return false;
+    }
+    toast(`已提交 ${r.files?.length ?? ''} 个文件`, 'ok');
+    return true;
   } catch (e) {
     toast(`提交失败：${e.message}`, 'bad');
+    return false;
   }
 }
 
 async function pushFlow() {
-  const ok = await confirmModal({
-    title: '推送到 GitHub？',
-    message: '会把当前分支推送到 origin。GitHub Pages 构建完成后站点自动更新。',
-    confirmText: '推送',
-  });
-  if (!ok) return;
+  const changed = state.git?.changed ?? [];
+
+  // 关键防线：推送只上传「已提交」的内容。工作区还有改动时，线上不会包含它们
+  // ——「功能明明做完了线上却没有」这个坑就是这么踩的。
+  if (changed.length) {
+    const choice = await chooseModal({
+      title: `还有 ${changed.length} 个文件没提交`,
+      subtitle: '推送只会上传已提交的内容',
+      options: [
+        {
+          value: 'commit',
+          label: '一起提交并推送',
+          desc: `${changed.map((c) => c.file).slice(0, 6).join('、')}${changed.length > 6 ? ' 等' : ''} —— 这些改动会随本次推送上线。`,
+        },
+        {
+          value: 'raw',
+          label: '只推送已提交的部分',
+          desc: '保持现状推送。工作区里这些改动不会出现在线上。',
+          danger: true,
+        },
+      ],
+    });
+    if (choice === null) return;
+
+    if (choice === 'commit') {
+      const done = await commitFlow('all');
+      if (!done) return;
+    }
+  } else {
+    const ok = await confirmModal({
+      title: '推送到 GitHub？',
+      message: '会把当前分支推送到 origin。工作区没有未提交的改动，GitHub Pages 构建完成后站点自动更新。',
+      confirmText: '推送',
+    });
+    if (!ok) return;
+  }
+
   try {
     const r = await api('/api/git/push', { method: 'POST', body: {} });
-    if (r.ok) toast('已推送', 'ok');
-    else toast(r.log || '推送失败（若是本机代理问题，可在终端手动 git push）', 'bad');
     state.git = r.git;
     renderGit();
+    if (r.ok) toast('已推送，等 GitHub Pages 构建完（约 1 分钟）刷新站点即可', 'ok');
+    else toast(r.log || '推送失败（若是本机代理问题，可在终端手动 git push）', 'bad');
   } catch (e) {
     toast(`推送失败：${e.message}`, 'bad');
   }
@@ -1008,7 +1334,7 @@ async function openGitTool() {
   const out = el('div');
   const m = openModal({
     title: '仓库状态',
-    subtitle: '内容改完记得提交并推送',
+    subtitle: '改完内容记得提交 → 推送',
     body: out,
     footer: [
       el('button', { class: 'btn', onClick: () => commitFlow().then(paint) }, ['提交改动']),
@@ -1020,24 +1346,40 @@ async function openGitTool() {
   async function paint() {
     await refreshGitState();
     const g = state.git ?? {};
+    const changed = g.changed ?? [];
     out.innerHTML = '';
     out.appendChild(
       el('div', { class: 'section' }, [
         el('h3', {}, ['工作区', el('span', { class: 'badge' }, [g.branch || '—'])]),
         el('div', { class: 'note' }, [`远程 ${g.remote || '（未配置）'} · 领先 ${g.ahead ?? 0} · 落后 ${g.behind ?? 0}`]),
-        (g.changed ?? []).length
+        changed.length
+          ? el('div', { class: 'note warn', style: { marginTop: '10px' } }, [
+              `${changed.length} 个文件有改动，还没提交。推送不会带上它们 —— 线上不会生效。`,
+            ])
+          : el('div', { class: 'note ok', style: { marginTop: '10px' } }, ['工作区干净，没有未提交的改动。']),
+        changed.length
           ? el(
               'div',
-              { class: 'filelist', style: { marginTop: '10px' } },
-              g.changed.map((c) => el('div', {}, [el('span', { class: `st ${String(c.status).toLowerCase()}` }, [c.status]), c.file])),
+              { class: 'filelist', style: { marginTop: '8px' } },
+              changed.map((c) => el('div', {}, [el('span', { class: `st ${String(c.status).toLowerCase()}` }, [c.status]), c.file])),
             )
-          : el('div', { class: 'note ok', style: { marginTop: '10px' } }, ['工作区干净，没有未提交的改动。']),
+          : null,
       ]),
     );
     out.appendChild(
       el('div', { class: 'section' }, [
         el('h3', {}, ['最近提交']),
         el('div', { class: 'filelist' }, (g.commits ?? []).map((c) => el('div', {}, [`${c.hash}  ${c.date}  ${c.subject}`]))),
+      ]),
+    );
+    out.appendChild(
+      el('div', { class: 'section' }, [
+        el('h3', {}, ['提交范围怎么选']),
+        el('div', { class: 'note' }, [
+          '站点源码（App.tsx、blog.ts、blog/*.md、admin/*…）和内容数据在同一个仓库里。' +
+            '新增功能属于源码改动，提交时要选「全部改动」；只选「仅内容数据」的话，' +
+            '推上去的是「新内容 + 旧代码」，线上看不到新功能。',
+        ]),
       ]),
     );
   }
@@ -1065,6 +1407,7 @@ async function boot() {
     state.config = s.config;
     state.git = s.git;
     state.active = s.schema.order[0];
+    await loadPosts();
     renderNav();
     renderMain();
     renderGit();
@@ -1083,8 +1426,7 @@ $('#btn-discard').onclick = async () => {
 };
 $('#git-chip').onclick = () => openGitTool();
 $('#btn-commit').onclick = () => commitFlow();
-$('#btn-push').onclick = () => pushFlow();
-$('#btn-backup').onclick = async () => {
+$('#btn-push').onclick = () => pushFlow();$('#btn-backup').onclick = async () => {
   try {
     const r = await api('/api/backup', { method: 'POST', body: {} });
     toast(`已生成快照 ${r.backup}`, 'ok');

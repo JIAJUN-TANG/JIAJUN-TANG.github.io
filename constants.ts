@@ -75,9 +75,11 @@ export const SCHOLAR_STATS = {
 /* ═══════════════════════════════════════════════
    内容数据
 
-   下面的条目全部来自 data/content.json，该文件由飞书多维表格同步生成
-   （见 .github/workflows/sync-content.yml）。要改内容请到多维表格里改，
-   不要直接编辑 JSON —— 下次同步会覆盖。
+   下面的条目全部来自 data/content.json，用本机的中台改：
+   `npm run admin` → http://127.0.0.1:4399/
+
+   分区与字段定义在 admin/schema.mjs，那里是唯一的真相来源；
+   手改 JSON 也可以，但要保持结构（id 唯一、双语字段写 {zh, en}）。
 
    个人简介、社交链接与首页卡片属于低频内容，仍然写在代码里。
    ═══════════════════════════════════════════════ */
@@ -87,6 +89,9 @@ export const INITIAL_CONFERENCES: ConferencePaper[] = content.conferences as Con
 export const INITIAL_PROJECTS: ResearchProject[] = content.projects as ResearchProject[];
 export const INITIAL_ACADEMIC: AcademicExperience[] = content.academic as AcademicExperience[];
 export const INITIAL_NEWS: NewsItem[] = content.news as NewsItem[];
+
+/** 「追踪」页的卡片（Markdown 自由文本），同样由中台管理。 */
+export const INITIAL_CARDS: CustomCardData[] = (content.cards ?? []) as CustomCardData[];
 
 /** 荣誉奖励、学术著作、系统开发共用 OtherExperience，按 type 区分。 */
 export const INITIAL_OTHER_EXPERIENCES: OtherExperience[] = [
@@ -137,37 +142,3 @@ export const PROFILE: Profile = {
   education: [],
   news: INITIAL_NEWS,
 };
-
-/* ═══════════════════════════════════════════════
-   首页卡片（Markdown 自由文本，不放进多维表格）
-   ═══════════════════════════════════════════════ */
-
-export const INITIAL_CARDS: CustomCardData[] = [
-  {
-    id: 'c1',
-    type: 'markdown',
-    title: { zh: '研究理念', en: 'Philosophy' },
-    content: {
-      zh: '## 研究理念\n\n我相信**思考的工具**。技术应当拓展我们的心智，而不是取代它。\n\n* “计算机是我们创造出的最非凡的工具。”——史蒂夫·乔布斯',
-      en: '## Research Philosophy\n\nI believe in **tools for thought**. Technology should expand our mental capacity. \n\n* "The computer is the most remarkable tool that we have ever come up with." - Steve Jobs',
-    },
-  },
-  {
-    id: 'c3',
-    type: 'markdown',
-    title: { zh: '近期安排', en: 'Schedule' },
-    content: {
-      zh: '### 暂无',
-      en: '### None',
-    },
-  },
-  {
-    id: 'c2',
-    type: 'markdown',
-    title: { zh: '公开成果', en: 'Public Contributions' },
-    content: {
-      zh: '**平台开发**\n\n- [南京大学数智文献平台](https://digitalilab.cn)\n\n- DocuManager\n\n**开放数据集**\n\n- [中美四位发言人推文数据集](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)',
-      en: '**Platform Development**\n\n- [南京大学数智文献平台](https://digitalilab.cn)\n\n- DocuManager\n\n**Available Dataset**\n\n- [Tweets Dataset of 4 Chinese and US spokespersons](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)',
-    },
-  },
-];

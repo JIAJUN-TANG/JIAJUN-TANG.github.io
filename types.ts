@@ -2,7 +2,8 @@ export enum Tab {
   HOME = 'home',
   PUBLICATIONS = 'publications',
   EXPERIENCES = 'experiences',
-  RESEARCH_NOTES = 'research_notes'
+  RESEARCH_NOTES = 'research_notes',
+  BLOG = 'blog'
 }
 
 /** 'zh' renders the Chinese site, 'en' the English one. */
@@ -115,6 +116,25 @@ export interface NewsItem {
   date: L10n;
   category: 'Publication' | 'Talk' | 'Award' | 'News';
   link?: string;
+}
+
+/**
+ * A blog post. One Markdown file per post under `blog/`, each opening with a
+ * small front-matter header. Posts are single-language (whichever language you
+ * write them in); the site labels the language but never hides a post.
+ */
+export interface BlogPost {
+  /** Filename without the `.md` extension, e.g. "how-this-site-works". */
+  slug: string;
+  title: string;
+  /** ISO date, `YYYY-MM-DD`. Drives sorting and display. */
+  date: string;
+  summary?: string;
+  tags?: string[];
+  /** Language the post is written in. Defaults to the site language. */
+  lang?: Lang;
+  /** Markdown body, with the front-matter block already stripped. */
+  body: string;
 }
 
 export interface Profile {

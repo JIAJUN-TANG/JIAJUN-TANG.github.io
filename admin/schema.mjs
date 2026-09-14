@@ -25,6 +25,7 @@ export const ID_PREFIX = {
   books: 'o',
   software: 's',
   news: 'n',
+  cards: 'c',
 };
 
 /** 写进 content.json 的顺序，也是中台左侧栏的顺序。 */
@@ -37,6 +38,7 @@ export const ORDER = [
   'books',
   'software',
   'news',
+  'cards',
 ];
 
 const LANG_OPTIONS = [
@@ -262,6 +264,32 @@ export const COLLECTIONS = {
         ],
       },
       { key: 'link', label: '链接', kind: 'text' },
+    ],
+  },
+
+  /** 「追踪」页的卡片：中英各一份 Markdown，自由排版。 */
+  cards: {
+    key: 'cards',
+    label: '追踪卡片',
+    icon: '🧭',
+    blurb:
+      '「追踪」页的卡片，内容就是一段 Markdown（标题、加粗、列表、链接都能写），中英各一份。',
+    titleField: 'title',
+    subField: 'content',
+    typeFixed: 'markdown',
+    fields: [
+      { key: 'id', label: 'ID', kind: 'id' },
+      { key: 'title', label: '卡片标题', kind: 'l10n', required: true },
+      {
+        key: 'content',
+        label: '内容',
+        kind: 'l10ntext',
+        rows: 14,
+        mono: true,
+        full: true,
+        required: true,
+        hint: 'Markdown：# 标题、**加粗**、- 列表、[文字](链接)',
+      },
     ],
   },
 };

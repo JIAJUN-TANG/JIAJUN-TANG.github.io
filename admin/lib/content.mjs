@@ -104,7 +104,10 @@ export function normalizeSection(collectionKey, rawEntries) {
       switch (field.kind) {
         case 'id':
           break;
-        case 'l10n': {
+        case 'l10n':
+        // 双语多行（Markdown 正文等）与单行共用同一套规整逻辑，
+        // 少了这个分支会被 default 静默丢掉 —— 见 abstractLang 那次事故。
+        case 'l10ntext': {
           const l = coerceL10n(v);
           if (l) entry[field.key] = l;
           else if (field.required) warnings.push(`${def.label} 第 ${i + 1} 条缺少「${field.label}」`);
