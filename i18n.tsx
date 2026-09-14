@@ -108,6 +108,16 @@ export const UI = {
   /** Language badge on a post - always rendered in that language itself. */
   postLangZh: { zh: '中文', en: '中文' },
   postLangEn: { zh: 'EN', en: 'EN' },
+  /** Media inside a post (images, players, lightbox). */
+  mediaZoom: { zh: '点击放大', en: 'Click to enlarge' },
+  mediaDownload: { zh: '下载', en: 'Download' },
+  mediaOpen: { zh: '新窗口打开', en: 'Open in a new tab' },
+  mediaPrev: { zh: '上一张', en: 'Previous' },
+  mediaNext: { zh: '下一张', en: 'Next' },
+  mediaClose: { zh: '关闭', en: 'Close' },
+  mediaVideo: { zh: '视频', en: 'Video' },
+  mediaAudio: { zh: '音频', en: 'Audio' },
+  mediaDoc: { zh: '文档', en: 'Document' },
 
   /* ── Trackers ───────────────────────────────── */
   trackersTitle: { zh: '追踪', en: 'Trackers' },

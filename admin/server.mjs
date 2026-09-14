@@ -19,6 +19,13 @@
  *   POST /api/git/commit       提交改动（scope: all | content）
  *   POST /api/git/push         推送到远程
  *   GET  /api/diff             内容数据的 diff
+ *   GET  /api/blog             文章列表
+ *   POST /api/blog/read        读一篇（含正文）
+ *   POST /api/blog/save        新建 / 保存 / 改名
+ *   POST /api/blog/delete      删除一篇（先备份）
+ *   POST /api/blog/assets      列出文章素材（blog/<slug>/）
+ *   POST /api/blog/asset/save  上传素材（base64，走单独的体积上限）
+ *   POST /api/blog/asset/delete 删除素材（先备份）
  *
  * 命令行参数：--port 4399 / --no-open
  */
@@ -47,7 +54,7 @@ import { gitStatus, gitCommit, gitPush, gitDiff } from './lib/git.mjs';
 import { buildOrcidReport, applyChanges, normalizeOrcidId } from './lib/orcid.mjs';
 import { bibtexToPapers } from './lib/bibtex.mjs';
 import { runScholarSync } from './lib/scholar.mjs';
-import { listPosts, readPost, writePost, deletePost } from './lib/blog.mjs';
+import { listPosts, readPost, writePost, deletePost, listAssets, saveAsset, deleteAsset } from './lib/blog.mjs';
 
 /* ── 配置 ───────────────────────────────────────────────────── */
 
@@ -66,8 +73,21 @@ const MIME = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
   '.webp': 'image/webp',
+  '.avif': 'image/avif',
+  '.bmp': 'image/bmp',
   '.ico': 'image/x-icon',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.mov': 'video/quicktime',
+  '.m4v': 'video/x-m4v',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.m4a': 'audio/mp4',
+  '.ogg': 'audio/ogg',
+  '.flac': 'audio/flac',
+  '.pdf': 'application/pdf',
   '.woff2': 'font/woff2',
 };
 
@@ -107,8 +127,8 @@ function readBody(req, limit = 12 * 1024 * 1024) {
   });
 }
 
-async function readJsonBody(req) {
-  const text = await readBody(req);
+async function readJsonBody(req, limit) {
+  const text = await readBody(req, limit);
   if (!text.trim()) return {};
   try {
     return JSON.parse(text);
@@ -314,12 +334,26 @@ const ROUTES = {
   'POST /api/blog/read': async (body) => ({ body: { ok: true, post: readPost(body.slug) } }),
   'POST /api/blog/save': async (body) => ({ body: { ok: true, ...writePost(body) } }),
   'POST /api/blog/delete': async (body) => ({ body: { ok: true, ...deletePost(body.slug) } }),
+
+  /* 文章素材：blog/<slug>/ 下的图片、视频、音频、PDF */
+  'POST /api/blog/assets': async (body) => ({ body: { ok: true, assets: listAssets(body.slug) } }),
+  'POST /api/blog/asset/save': async (body) => ({ body: { ok: true, ...saveAsset(body) } }),
+  'POST /api/blog/asset/delete': async (body) => ({ body: { ok: true, ...deleteAsset(body) } }),
+};
+
+/**
+ * 上传走 base64，体积比原文件大 1/3，所以这几条路由单独放宽请求体上限；
+ * 其余接口保持 12MB，避免一个坏请求就把内存撑起来。
+ */
+const ROUTE_LIMITS = {
+  'POST /api/blog/asset/save': 20 * 1024 * 1024,
 };
 
 /* ── 静态文件 ───────────────────────────────────────────────── */
 
 const ADMIN_DIR = join(ROOT, 'admin');
-const ALLOW_EXTERNAL = ['/image', '/dist', '/favicon.ico'];
+// `/blog` 也放行，中台才能给文章素材显示缩略图与预览（只监听回环地址）。
+const ALLOW_EXTERNAL = ['/image', '/dist', '/blog', '/favicon.ico'];
 
 function resolveStatic(pathname) {
   const clean = decodeURIComponent(pathname.split('?')[0]);
@@ -356,11 +390,14 @@ async function main() {
       const handler = ROUTES[key];
       if (!handler) return sendJson(res, 404, { ok: false, error: `未知接口 ${key}` });
       try {
-        const body = req.method === 'GET' ? {} : await readJsonBody(req);
+        const body =
+          req.method === 'GET' ? {} : await readJsonBody(req, ROUTE_LIMITS[key]);
         const out = await handler(body);
         return sendJson(res, 200, out.body);
       } catch (e) {
-        return sendJson(res, 500, { ok: false, error: e.message });
+        // 业务校验失败（文件名不合法、文件太大…）带 status=400；
+        // 其余才是真正的服务端故障，保持 500。
+        return sendJson(res, e.status ?? 500, { ok: false, error: e.message });
       }
     }
 

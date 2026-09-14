@@ -104,3 +104,64 @@ export const BLOG_POSTS: BlogPost[] = Object.entries(RAW)
 
 export const findPost = (slug: string): BlogPost | undefined =>
   BLOG_POSTS.find((post) => post.slug === slug);
+
+/* ═══════════════════════════════════════════════
+   文章素材（图片 / 视频 / 音频 / PDF）
+
+   约定：一篇文章的素材放在与它同名的文件夹里 —— `blog/<slug>/`。
+   正文里写相对路径就行，不用管构建后的哈希文件名：
+
+     ![封面](cover.png)
+     ![演示](../../blog/how-this-site-works/demo.mp4)
+
+   这些文件在**构建期**由 Vite 收进产物（`?url` 导出真实地址），
+   运行时零请求、也没有路径拼接的坑。放在这里而不是 `public/`，
+   是为了让「文章 + 它的素材」永远待在一起，删文章时不会留下孤儿文件。
+   ═══════════════════════════════════════════════ */
+
+const ASSET_URLS = import.meta.glob(['./blog/**/*', '!**/*.md'], {
+  query: '?url',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+
+/** `http:` / `https:` / `mailto:` / `//cdn…` / `data:` 一律原样放行。 */
+const EXTERNAL_RE = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
+
+const tryDecode = (value: string): string => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
+/**
+ * 把正文里的相对路径解析成构建产物的真实 URL。
+ * 解析不到时**原样返回**，这样外链和 `public/` 里的绝对路径都不受影响。
+ */
+export function resolveAsset(slug: string, src?: string): string {
+  const raw = String(src ?? '').trim();
+  if (!raw || raw.startsWith('#') || EXTERNAL_RE.test(raw)) return raw;
+
+  const rel = raw.replace(/^\.?\//, '');
+  const keys = [
+    `./blog/${slug}/${rel}`,
+    `./blog/${slug}/${tryDecode(rel)}`,
+    `./blog/${rel}`,
+    `./blog/${tryDecode(rel)}`,
+  ];
+  for (const key of keys) if (ASSET_URLS[key]) return ASSET_URLS[key];
+  return raw;
+}
+
+/** 一篇文章已经放进去的素材文件名（中台的素材面板用）。 */
+export const ASSETS_BY_SLUG: Record<string, string[]> = Object.keys(ASSET_URLS).reduce(
+  (acc, key) => {
+    const match = /^\.\/blog\/([^/]+)\/(.+)$/.exec(key);
+    if (!match) return acc;
+    (acc[match[1]] ??= []).push(match[2]);
+    return acc;
+  },
+  {} as Record<string, string[]>,
+);
