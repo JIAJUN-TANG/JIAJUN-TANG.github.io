@@ -764,7 +764,7 @@
       },
       "content": {
         "zh": "**平台开发**\n\n- [南京大学数智文献平台](https://digitalilab.cn)\n\n- DocuManager\n\n**开放数据集**\n\n- [中美四位发言人推文数据集](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)",
-        "en": "**Platform Development**\n\n- [南京大学数智文献平台](https://digitalilab.cn)\n\n- DocuManager\n\n**Available Dataset**\n\n- [Tweets Dataset of 4 Chinese and US spokespersons](https://www.scidb.cn/en/detail?dataSetId=b21b348b814b4419b8dd30b9c7b89809&version=V1)"
+        "en": "**Platform Development**\n\n- [南京大学数智文献平台](https://digitalilab.cn)\n\n- DocuManager\n\n**Available Dataset**\n- [Dataset of Tweets by Chinese and US Mainstream Media before 2023](https://doi.org/10.57760/sciencedb.09845)\n\n- [Tweets Dataset of 4 Chinese and US spokespersons](https://doi.org/10.57760/sciencedb.10938)"
       },
       "type": "markdown"
     }
