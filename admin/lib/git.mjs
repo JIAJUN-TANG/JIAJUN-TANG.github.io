@@ -19,11 +19,11 @@ const clean = (s) =>
     .join('\n')
     .trim();
 
-export function git(args, { timeout = 120000, env = {} } = {}) {
+export function git(args, { timeout = 120000, env = {}, cwd = ROOT } = {}) {
   return new Promise((resolve) => {
     execFile(
       'git',
-      ['-C', ROOT, ...args],
+      ['-C', cwd, ...args],
       { timeout, maxBuffer: 8 * 1024 * 1024, env: { ...process.env, GIT_TERMINAL_PROMPT: '0', ...env } },
       (error, stdout, stderr) => {
         resolve({
@@ -60,18 +60,26 @@ const parsePorcelain = (raw) =>
       };
     });
 
-export async function gitStatus() {
-  const [branch, changed, ahead, log, remote] = await Promise.all([
-    git(['rev-parse', '--abbrev-ref', 'HEAD']),
-    git(['status', '--porcelain', '-uall']),
-    git(['rev-list', '--left-right', '--count', 'origin/HEAD...HEAD']),
-    git(['log', '-5', '--pretty=format:%h|%s|%ad', '--date=format:%m-%d %H:%M']),
-    git(['remote', 'get-url', 'origin']),
+export async function gitStatus({ cwd = ROOT } = {}) {
+  const opts = { cwd };
+  const [branch, changed, upstream, log, remote] = await Promise.all([
+    git(['rev-parse', '--abbrev-ref', 'HEAD'], opts),
+    git(['status', '--porcelain', '-uall'], opts),
+    // 分支自己的 upstream，比写死 origin/HEAD 准（HEAD 是符号引用，可能指向别的分支）。
+    git(['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'], opts),
+    git(['log', '-5', '--pretty=format:%h|%s|%ad', '--date=format:%m-%d %H:%M'], opts),
+    git(['remote', 'get-url', 'origin'], opts),
   ]);
 
-  const counts = ahead.stdout.split(/\s+/).map(Number);
+  // 没有 upstream（新分支 / 裸仓库当远程）时退回 origin/HEAD；再不行就退化成全 0。
+  const base = upstream.ok && upstream.stdout ? upstream.stdout : 'origin/HEAD';
+  const counts = (await git(['rev-list', '--left-right', '--count', `${base}...HEAD`], opts))
+    .stdout.split(/\s+/)
+    .map(Number);
+
   return {
     branch: branch.stdout || '(unknown)',
+    upstream: upstream.ok ? upstream.stdout : '',
     remote: remote.ok ? remote.stdout : '',
     changed: parsePorcelain(changed.raw),
     behind: Number.isFinite(counts[0]) ? counts[0] : 0,
@@ -83,6 +91,42 @@ export async function gitStatus() {
         const [hash, subject, date] = line.split('|');
         return { hash, subject, date };
       }),
+  };
+}
+
+/**
+ * 拉取远程引用（只更新 refs，**不动工作区**）。
+ *
+ * ⚠️ 这一步是必须的，别省：`gitStatus()` 里的 behind 用的是**本地缓存的**
+ * 远程引用。不先 fetch 的话，远程真的前进了，中台依然显示「落后 0」，
+ * 用户看着「已是最新」一点推送，就撞上 git 那句晦涩的
+ * `rejected ... (fetch first)` —— 这正是踩过的坑。
+ *
+ * 网络失败不致命（离线时就当没这回事），所以只把结果报出去，不抛异常。
+ */
+export async function gitFetch({ cwd = ROOT } = {}) {
+  const res = await git(['fetch', 'origin'], { timeout: 60000, cwd });
+  return { ok: res.ok, log: res.stderr || res.stdout || '' };
+}
+
+/**
+ * `git pull --rebase`：把远程新提交垫在本地提交下面。
+ *
+ * 冲突时**必须 `--abort`**，别把仓库丢在 rebase 中间态 —— 那种状态下
+ * 用户下次打开中台会看到一堆莫名其妙的「未完成的操作」，且没法正常提交。
+ */
+export async function gitPullRebase({ cwd = ROOT } = {}) {
+  const branch = (await git(['rev-parse', '--abbrev-ref', 'HEAD'], { cwd })).stdout || 'main';
+  const res = await git(['pull', '--rebase', 'origin', branch], { timeout: 180000, cwd });
+
+  if (res.ok) return { ok: true, branch, log: res.stdout };
+
+  await git(['rebase', '--abort'], { cwd });
+  return {
+    ok: false,
+    branch,
+    conflict: true,
+    log: res.stderr || res.stdout,
   };
 }
 
@@ -121,9 +165,56 @@ export async function gitCommit(message, { scope = 'all' } = {}) {
   };
 }
 
-export async function gitPush() {
-  const res = await git(['push', 'origin', 'HEAD'], { timeout: 180000 });
-  return { ok: res.ok, log: [res.stdout, res.stderr].filter(Boolean).join('\n') };
+/**
+ * 推送到 origin。
+ *
+ * 和裸 `git push` 的区别：**先 fetch 看清远程状态**。
+ * 远程有本地没有的提交时（每天的引用数 workflow 就是一个固定来源），
+ * 直接 push 会被非快进拒绝。这里不把 git 的原始报错丢给用户，而是返回
+ * `{ diverged: true, behind }`，由界面决定是「先合并再推」还是放弃。
+ *
+ * @param merge  true = 落后时自动 `pull --rebase` 后继续推送（界面确认过再用）
+ */
+export async function gitPush({ cwd = ROOT, merge = false } = {}) {
+  // fetch 失败（离线 / 代理不通）不致命 —— 也许本来就能推上去，继续试。
+  const fetched = await gitFetch({ cwd });
+
+  if (fetched.ok) {
+    const status = await gitStatus({ cwd });
+
+    if (status.behind > 0) {
+      if (!merge) {
+        return {
+          ok: false,
+          diverged: true,
+          behind: status.behind,
+          ahead: status.ahead,
+          log:
+            `远程有 ${status.behind} 个新提交还没并进来（常见来源：每天的引用数自动更新、` +
+            `或在别处推送过）。直接推送会被拒绝。`,
+        };
+      }
+
+      const pulled = await gitPullRebase({ cwd });
+      if (!pulled.ok) {
+        return {
+          ok: false,
+          conflict: true,
+          log:
+            '合并远程新提交时发生冲突，已回滚到合并前（仓库是干净的，可以放心）。\n' +
+            '需要手动解决后再推送：\n' +
+            pulled.log,
+        };
+      }
+    }
+  }
+
+  const res = await git(['push', 'origin', 'HEAD'], { timeout: 180000, cwd });
+  return {
+    ok: res.ok,
+    fetched: fetched.ok,
+    log: [res.stdout, res.stderr].filter(Boolean).join('\n'),
+  };
 }
 
 export const gitDiff = async () => {
