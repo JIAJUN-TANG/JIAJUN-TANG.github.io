@@ -1,13 +1,32 @@
 {
-  "updated": null,
+  "updated": "2026-09-14T08:45:06Z",
   "scholar_id": "cXJ2lKAAAAAJ",
   "profile": {
-    "name": "",
-    "affiliation": "",
-    "total_citations": 0,
-    "h_index": 0,
+    "name": "Jiajun Tang",
+    "affiliation": "Nanjing University",
+    "total_citations": 6,
+    "h_index": 1,
     "i10_index": 0,
     "citations_per_year": {}
   },
-  "publications": []
+  "publications": [
+    {
+      "pub_id": "cXJ2lKAAAAAJ:d1gkVwhDpl0C",
+      "title": "Persuasion Strategies of the Major Powers on Social Media: An Analysis of the Metadiscourse from the Chinese and American Spokespersons' Tweets",
+      "authors": "",
+      "venue": "",
+      "year": 2024,
+      "citations": 6,
+      "url": "https://scholar.google.com/scholar?oi=bibs&hl=en&cites=2469357386633569928"
+    },
+    {
+      "pub_id": "cXJ2lKAAAAAJ:9yKSN-GCB0IC",
+      "title": "How narrative content supports reading immersion: an empirical analysis of digital reading traces of detective fiction",
+      "authors": "",
+      "venue": "",
+      "year": 2026,
+      "citations": 0,
+      "url": ""
+    }
+  ]
 }
