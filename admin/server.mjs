@@ -15,9 +15,10 @@
  *   POST /api/bibtex/parse     解析 .bib 文本（预览，不落盘）
  *   POST /api/bibtex/import    解析并追加进论文表（按 DOI/标题去重）
  *   POST /api/scholar/sync     跑一次 Google Scholar 引用抓取
- *   GET  /api/git              仓库状态
+ *   GET  /api/git              仓库状态（不联网，快）
+ *   POST /api/git/refresh      先 fetch 再看状态（打开面板时用，behind 才是真的）
  *   POST /api/git/commit       提交改动（scope: all | content）
- *   POST /api/git/push         推送到远程
+ *   POST /api/git/push         推送到远程（merge: true = 落后时先 rebase 再推）
  *   GET  /api/diff             内容数据的 diff
  *   GET  /api/blog             文章列表
  *   POST /api/blog/read        读一篇（含正文）
@@ -50,7 +51,7 @@ import {
   listBackups,
   sectionCounts,
 } from './lib/content.mjs';
-import { gitStatus, gitCommit, gitPush, gitDiff } from './lib/git.mjs';
+import { gitStatus, gitCommit, gitPush, gitDiff, gitFetch } from './lib/git.mjs';
 import { buildOrcidReport, applyChanges, normalizeOrcidId } from './lib/orcid.mjs';
 import { bibtexToPapers } from './lib/bibtex.mjs';
 import { runScholarSync } from './lib/scholar.mjs';
@@ -315,6 +316,22 @@ const ROUTES = {
 
   'GET /api/git': async () => ({ body: { ok: true, git: await gitStatus() } }),
 
+  /**
+   * 拉取远程引用后再读状态。`GET /api/git` 是不联网的（快），但它算出来的
+   * behind 用的是本地缓存的远程引用 —— 打开面板时先走这条，看到的才是真的。
+   */
+  'POST /api/git/refresh': async () => {
+    const fetched = await gitFetch();
+    return {
+      body: {
+        ok: true,
+        fetched: fetched.ok,
+        fetchLog: fetched.ok ? '' : fetched.log,
+        git: await gitStatus(),
+      },
+    };
+  },
+
   'POST /api/git/commit': async (body) => {
     // scope='all' 提交全部改动（含源码与博客），'content' 只提交 data/ 下的内容。
     const scope = body.scope === 'content' ? 'content' : 'all';
@@ -322,8 +339,9 @@ const ROUTES = {
     return { body: { ...res, git: await gitStatus() } };
   },
 
-  'POST /api/git/push': async () => {
-    const res = await gitPush();
+  'POST /api/git/push': async (body) => {
+    // merge=true 表示用户已确认「先把远程新提交合并进来再推」。
+    const res = await gitPush({ merge: body?.merge === true });
     return { body: { ...res, git: await gitStatus() } };
   },
 

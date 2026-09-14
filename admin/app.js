@@ -1469,10 +1469,15 @@ function promptModal({ title, label, value, confirmText = '确认' }) {
   });
 }
 
-async function refreshGitState() {
+async function refreshGitState({ fetchRemote = false } = {}) {
   try {
-    const r = await api('/api/git');
+    // `GET /api/git` 不联网，算出的 behind 基于**本地缓存**的远程引用 —— 远程真的
+    // 前进了它也会显示 0。打开面板时用 refresh 先 fetch，看到的才是真实差距。
+    const r = fetchRemote
+      ? await api('/api/git/refresh', { method: 'POST', body: {} })
+      : await api('/api/git');
     state.git = r.git;
+    state.gitFetchFailed = fetchRemote && r.fetched === false;
     renderGit();
   } catch {
     /* 状态刷新失败不打扰用户 */
@@ -1592,11 +1597,42 @@ async function pushFlow() {
     if (!ok) return;
   }
 
+  const doPush = (merge) => api('/api/git/push', { method: 'POST', body: { merge } });
+
   try {
-    const r = await api('/api/git/push', { method: 'POST', body: {} });
+    let r = await doPush(false);
+
+    // 远程有本地没有的提交时，git 会以「非快进」拒绝并甩出一段看不懂的英文。
+    // 这里翻译成人话并让用户选：合并（rebase，远程改动会保留）还是先不推。
+    if (!r.ok && r.diverged) {
+      state.git = r.git;
+      renderGit();
+      const choice = await chooseModal({
+        title: `远程有 ${r.behind} 个新提交`,
+        subtitle: '要先合并再推送吗？',
+        options: [
+          {
+            value: 'merge',
+            label: '先合并再推送',
+            desc: '把远程这些提交垫在你这次提交的下面（rebase），再一起推送。' +
+              '远程的改动会保留、不会被覆盖。',
+          },
+          {
+            value: 'cancel',
+            label: '先不推送',
+            desc: '保持现状。也可以自己去终端处理。',
+            danger: true,
+          },
+        ],
+      });
+      if (choice !== 'merge') return;
+      r = await doPush(true);
+    }
+
     state.git = r.git;
     renderGit();
     if (r.ok) toast('已推送，等 GitHub Pages 构建完（约 1 分钟）刷新站点即可', 'ok');
+    else if (r.conflict) toast('合并时发生冲突，已回滚到合并前，仓库是干净的 —— 需要手动解决。', 'bad');
     else toast(r.log || '推送失败（若是本机代理问题，可在终端手动 git push）', 'bad');
   } catch (e) {
     toast(`推送失败：${e.message}`, 'bad');
@@ -1616,8 +1652,8 @@ async function openGitTool() {
     ],
   });
 
-  async function paint() {
-    await refreshGitState();
+  async function paint({ fetchRemote = false } = {}) {
+    await refreshGitState({ fetchRemote });
     const g = state.git ?? {};
     const changed = g.changed ?? [];
     out.innerHTML = '';
@@ -1625,6 +1661,17 @@ async function openGitTool() {
       el('div', { class: 'section' }, [
         el('h3', {}, ['工作区', el('span', { class: 'badge' }, [g.branch || '—'])]),
         el('div', { class: 'note' }, [`远程 ${g.remote || '（未配置）'} · 领先 ${g.ahead ?? 0} · 落后 ${g.behind ?? 0}`]),
+        (g.behind ?? 0) > 0
+          ? el('div', { class: 'note warn', style: { marginTop: '10px' } }, [
+              `远程有 ${g.behind} 个新提交还没并进来（常见来源：每天的引用数自动更新）。` +
+                '直接推送会被拒绝，点「推送到 GitHub」时会问你要不要先合并。',
+            ])
+          : null,
+        state.gitFetchFailed
+          ? el('div', { class: 'note warn', style: { marginTop: '10px' } }, [
+              '这次没能连上 GitHub，「领先 / 落后」是本地缓存的数据，可能不准。',
+            ])
+          : null,
         changed.length
           ? el('div', { class: 'note warn', style: { marginTop: '10px' } }, [
               `${changed.length} 个文件有改动，还没提交。推送不会带上它们 —— 线上不会生效。`,
@@ -1657,7 +1704,8 @@ async function openGitTool() {
     );
   }
 
-  await paint();
+  // 打开面板时联网刷新一次，这样「落后 N」才是真的（本地引用可能是过期的）。
+  await paint({ fetchRemote: true });
   void m;
 }
 
