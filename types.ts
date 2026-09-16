@@ -25,7 +25,12 @@ export type CrestKey = 'nju' | 'csu' | 'nccu' | 'nus';
 export interface Paper {
   id: string;
   title: L10n;
-  authors: string[];
+  /**
+   * 作者列表。中台 schema 里作者是**可选**字段，历史内容也可能被手工改过，
+   * 所以真实数据里可能整条缺失 —— 读取前一律 `paper.authors ?? []`。
+   * 做成可选正是为了让 TS 拦住忘记兜底的写法。
+   */
+  authors?: string[];
   venue: L10n;
   year: number;
   url?: string;
