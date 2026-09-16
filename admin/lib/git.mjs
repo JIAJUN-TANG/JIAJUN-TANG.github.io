@@ -6,8 +6,10 @@
  */
 
 import { execFile } from 'node:child_process';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { ROOT } from './content.mjs';
+import { ROOT, CONFIG_FILE, readJson } from './content.mjs';
 
 /** .gitattributes 里的历史遗留写法会让每条命令都刷 7 行警告，这里过滤掉。 */
 const NOISE = /is not a valid attribute name/;
@@ -42,6 +44,28 @@ export function git(args, { timeout = 120000, env = {}, cwd = ROOT } = {}) {
 }
 
 /**
+ * 联网的 git 命令：先直连，直连不通再走 `admin/config.json` 里配置的代理，
+ * 代理也再给一次机会（本机那个代理本身就不稳，实测三次里能成一次）。
+ *
+ * 为什么需要这个：这台机器上 GitHub 直连时通时不通，而中台以前只会直连 ——
+ * 于是一次 fetch 都成功不了，「远程有新提交」的提示永远弹不出来。
+ * `gitProxy` 留空则只直连，行为跟以前完全一样。改完保存 config.json 即生效。
+ */
+async function gitNetwork(args, { timeout = 60000, cwd = ROOT } = {}) {
+  const proxy = String(readJson(CONFIG_FILE, {})?.gitProxy ?? '').trim();
+  const tries = proxy
+    ? [[], ['-c', `http.proxy=${proxy}`], ['-c', `http.proxy=${proxy}`]]
+    : [[]];
+
+  let last = { ok: false, stdout: '', stderr: '' };
+  for (const extra of tries) {
+    last = await git([...extra, ...args], { timeout, cwd });
+    if (last.ok) return last;
+  }
+  return last;
+}
+
+/**
  * 解析 `git status --porcelain -uall` 的输出。
  * 每行格式是 `XY <path>`：X = 暂存区状态，Y = 工作区状态，都可能是空格。
  */
@@ -60,30 +84,141 @@ const parsePorcelain = (raw) =>
       };
     });
 
-export async function gitStatus({ cwd = ROOT } = {}) {
+/* ── 远程分支当前指向哪 ──────────────────────────────────────
+ *
+ * 为什么不直接用 `@{upstream}` / `refs/remotes/origin/*`：
+ * 本仓库所在的卷上，git 无法在 `.git/refs/` 下新建子目录（静默失败，退出码还是 0），
+ * 于是 `refs/remotes/origin/main` 根本存不住，`@{upstream}` 永远解析不出来，
+ * ahead/behind 会一路显示 0 —— 中台因此从不提示「远程有新提交」，
+ * 用户一点推送就撞上 `rejected (fetch first)`。
+ *
+ * 所以改成自己记录远程分支的 sha，按可靠性依次尝试三个来源：
+ *   1. 调用方刚 fetch 到的 sha（最准，refresh / push 路径用这个）
+ *   2. 上次成功 fetch 时写下的缓存（`.git/admin-remote-head.json`）
+ *   3. `.git/FETCH_HEAD` —— 注意 fetch **失败**时 git 会把它清空
+ * 三个都拿不到就返回 null：此时 behind/ahead 报 0，但 `compared=false`，
+ * 界面必须显示「远程状态未知」，不能假装「已是最新」。
+ */
+
+const CACHE_FILE = (cwd) => join(cwd, '.git', 'admin-remote-head.json');
+
+function readRemoteCache(cwd, branch) {
+  try {
+    const data = JSON.parse(readFileSync(CACHE_FILE(cwd), 'utf8'));
+    if (data?.sha && (!branch || data.branch === branch)) return data;
+  } catch {
+    /* 缓存不存在或坏了，交给下一个来源 */
+  }
+  return null;
+}
+
+function writeRemoteCache(cwd, branch, sha) {
+  try {
+    writeFileSync(
+      CACHE_FILE(cwd),
+      JSON.stringify({ branch, sha, fetchedAt: new Date().toISOString() }, null, 2),
+    );
+  } catch {
+    /* 缓存写不进去不影响主流程，只是下次要多联网一次 */
+  }
+}
+
+/** 从 `.git/FETCH_HEAD` 里挑出目标分支的 sha（不联网）。 */
+function readFetchHead(cwd, branch) {
+  const file = join(cwd, '.git', 'FETCH_HEAD');
+  if (!existsSync(file)) return null;
+
+  let lines;
+  try {
+    lines = readFileSync(file, 'utf8').split('\n').filter((l) => l.trim());
+  } catch {
+    return null;
+  }
+
+  const shaOf = (line) => (/^([0-9a-f]{40})\b/i.exec(line)?.[1] ?? null);
+
+  // 行格式： <sha>\t\tbranch 'main' of https://…
+  for (const line of lines) {
+    const sha = shaOf(line);
+    if (sha && branch && new RegExp(`branch '${branch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'`).test(line)) {
+      return { sha, fetchedAt: null };
+    }
+  }
+  // 只 fetch 了单个 ref 时没写 branch 名，取第一条即可。
+  const first = lines.map(shaOf).find(Boolean);
+  return first ? { sha: first, fetchedAt: null } : null;
+}
+
+/**
+ * 解析「远程这个分支现在指向哪个 commit」。
+ * @param override 刚 fetch 完可以直接把 sha 传进来，跳过缓存
+ */
+function resolveRemote({ cwd = ROOT, branch, override = null } = {}) {
+  if (typeof override === 'string' && /^[0-9a-f]{40}$/i.test(override)) {
+    return { sha: override, fetchedAt: new Date().toISOString() };
+  }
+  return readRemoteCache(cwd, branch) ?? readFetchHead(cwd, branch);
+}
+
+/** 当前分支名（分离 HEAD 时返回空串）。 */
+export async function currentBranch({ cwd = ROOT } = {}) {
+  const res = await git(['rev-parse', '--abbrev-ref', 'HEAD'], { cwd });
+  const name = res.stdout;
+  return res.ok && name && name !== 'HEAD' ? name : '';
+}
+
+/** 分支在配置里声明的远程 + 远程分支 ref（`branch.<name>.remote` / `.merge`）。 */
+async function upstreamConfig(branch, { cwd = ROOT } = {}) {
+  if (!branch) return null;
+  const [remote, merge] = await Promise.all([
+    git(['config', '--get', `branch.${branch}.remote`], { cwd }),
+    git(['config', '--get', `branch.${branch}.merge`], { cwd }),
+  ]);
+  // `git config --get` 在键不存在时退出码是 1，所以要看 ok 而不是 stdout 是否为空。
+  if (!remote.ok || !merge.ok || !remote.stdout || !merge.stdout) return null;
+  return { remote: remote.stdout, ref: merge.stdout };
+}
+
+export async function gitStatus({ cwd = ROOT, remoteSha = null } = {}) {
   const opts = { cwd };
-  const [branch, changed, upstream, log, remote] = await Promise.all([
-    git(['rev-parse', '--abbrev-ref', 'HEAD'], opts),
+  const branch = await currentBranch({ cwd });
+  const up = await upstreamConfig(branch, { cwd });
+
+  const [changed, log, remote] = await Promise.all([
     git(['status', '--porcelain', '-uall'], opts),
-    // 分支自己的 upstream，比写死 origin/HEAD 准（HEAD 是符号引用，可能指向别的分支）。
-    git(['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'], opts),
     git(['log', '-5', '--pretty=format:%h|%s|%ad', '--date=format:%m-%d %H:%M'], opts),
     git(['remote', 'get-url', 'origin'], opts),
   ]);
 
-  // 没有 upstream（新分支 / 裸仓库当远程）时退回 origin/HEAD；再不行就退化成全 0。
-  const base = upstream.ok && upstream.stdout ? upstream.stdout : 'origin/HEAD';
-  const counts = (await git(['rev-list', '--left-right', '--count', `${base}...HEAD`], opts))
-    .stdout.split(/\s+/)
-    .map(Number);
+  const base = resolveRemote({ cwd, branch, override: remoteSha });
+
+  // `rev-list --left-right --count A...B` 左边是 A 独有的（= 我们落后的），右边是 B 独有的。
+  let behind = 0;
+  let ahead = 0;
+  let compared = false;
+  if (base?.sha) {
+    const counts = await git(['rev-list', '--left-right', '--count', `${base.sha}...HEAD`], opts);
+    const [b, a] = counts.stdout.split(/\s+/).map(Number);
+    if (counts.ok && Number.isFinite(b) && Number.isFinite(a)) {
+      behind = b;
+      ahead = a;
+      compared = true;
+    }
+  }
 
   return {
-    branch: branch.stdout || '(unknown)',
-    upstream: upstream.ok ? upstream.stdout : '',
+    branch: branch || '(unknown)',
+    // 展示用：`origin/main`。拿不到远程状态时留空，别编一个出来。
+    upstream: compared && up ? `${up.remote}/${up.ref.replace(/^refs\/heads\//, '')}` : '',
     remote: remote.ok ? remote.stdout : '',
     changed: parsePorcelain(changed.raw),
-    behind: Number.isFinite(counts[0]) ? counts[0] : 0,
-    ahead: Number.isFinite(counts[1]) ? counts[1] : 0,
+    behind,
+    ahead,
+    /** false = 拿不到远程 sha，behind/ahead 不可信，界面要如实说明。 */
+    compared,
+    remoteSha: base?.sha ?? '',
+    /** 远程 sha 是什么时候拿到的；null 表示来自 FETCH_HEAD，时间未知。 */
+    remoteCheckedAt: base?.fetchedAt ?? null,
     commits: log.stdout
       .split('\n')
       .filter(Boolean)
@@ -95,18 +230,23 @@ export async function gitStatus({ cwd = ROOT } = {}) {
 }
 
 /**
- * 拉取远程引用（只更新 refs，**不动工作区**）。
+ * 拉取远程引用（只更新 refs 与 FETCH_HEAD，**不动工作区**）。
  *
- * ⚠️ 这一步是必须的，别省：`gitStatus()` 里的 behind 用的是**本地缓存的**
- * 远程引用。不先 fetch 的话，远程真的前进了，中台依然显示「落后 0」，
- * 用户看着「已是最新」一点推送，就撞上 git 那句晦涩的
- * `rejected ... (fetch first)` —— 这正是踩过的坑。
+ * ⚠️ 这一步是必须的，别省：不在联网状态下刷新一次，中台手里的「远程指向哪」
+ * 就是上次的旧值，远程真前进了也看不出来，用户看着「已是最新」一点推送，
+ * 就撞上 git 那句晦涩的 `rejected ... (fetch first)` —— 这正是踩过的坑。
  *
  * 网络失败不致命（离线时就当没这回事），所以只把结果报出去，不抛异常。
+ * 失败时 git 会清空 FETCH_HEAD，所以成功的结果额外写进 admin-remote-head.json 缓存。
  */
 export async function gitFetch({ cwd = ROOT } = {}) {
-  const res = await git(['fetch', 'origin'], { timeout: 60000, cwd });
-  return { ok: res.ok, log: res.stderr || res.stdout || '' };
+  const branch = await currentBranch({ cwd });
+  const res = await gitNetwork(['fetch', 'origin'], { timeout: 90000, cwd });
+  if (!res.ok) return { ok: false, log: res.stderr || res.stdout || '', sha: null };
+
+  const found = readFetchHead(cwd, branch);
+  if (found?.sha) writeRemoteCache(cwd, branch, found.sha);
+  return { ok: true, log: '', sha: found?.sha ?? null };
 }
 
 /**
@@ -116,8 +256,8 @@ export async function gitFetch({ cwd = ROOT } = {}) {
  * 用户下次打开中台会看到一堆莫名其妙的「未完成的操作」，且没法正常提交。
  */
 export async function gitPullRebase({ cwd = ROOT } = {}) {
-  const branch = (await git(['rev-parse', '--abbrev-ref', 'HEAD'], { cwd })).stdout || 'main';
-  const res = await git(['pull', '--rebase', 'origin', branch], { timeout: 180000, cwd });
+  const branch = (await currentBranch({ cwd })) || 'main';
+  const res = await gitNetwork(['pull', '--rebase', 'origin', branch], { timeout: 180000, cwd });
 
   if (res.ok) return { ok: true, branch, log: res.stdout };
 
@@ -180,7 +320,8 @@ export async function gitPush({ cwd = ROOT, merge = false } = {}) {
   const fetched = await gitFetch({ cwd });
 
   if (fetched.ok) {
-    const status = await gitStatus({ cwd });
+    // 用刚 fetch 到的 sha 比对，别让 gitStatus 退回可能过期的缓存。
+    const status = await gitStatus({ cwd, remoteSha: fetched.sha });
 
     if (status.behind > 0) {
       if (!merge) {
@@ -209,7 +350,7 @@ export async function gitPush({ cwd = ROOT, merge = false } = {}) {
     }
   }
 
-  const res = await git(['push', 'origin', 'HEAD'], { timeout: 180000, cwd });
+  const res = await gitNetwork(['push', 'origin', 'HEAD'], { timeout: 180000, cwd });
   return {
     ok: res.ok,
     fetched: fetched.ok,

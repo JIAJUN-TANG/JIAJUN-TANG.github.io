@@ -23,6 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 
+# macOS 元数据垃圾：._* 是 AppleDouble 资源分叉，跟真实文件配对出现
+# （image/avatar.jpeg 旁边就会多一个 image/._avatar.jpeg）。
+# 它没有任何内容价值，却会被 git 当成普通文件跟踪，所以显式忽略。
+._*
+.AppleDouble
+.Spotlight-V100
+.Trashes
+.fseventsd
+
 # WorkBuddy local state
 .workbuddy/
 

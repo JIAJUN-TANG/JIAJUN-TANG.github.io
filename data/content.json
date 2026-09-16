@@ -2,6 +2,24 @@
   "$comment": "由本地管理中台（npm run admin）维护。手动改也可以，但记得保持同样的结构：id 唯一、双语字段写 {zh,en}。",
   "papers": [
     {
+      "id": "p9",
+      "title": {
+        "zh": "国产游戏跨文化传播策略研究——基于Steam在线评论的文本挖掘和组态分析",
+        "en": "A Study on the Cross-Cultural and Strategies of Chinese Games from the Perspective of Configuration: An Analysis Based on Steam Online Reviews"
+      },
+      "venue": {
+        "zh": "中国数字出版",
+        "en": "China Digital Publishing"
+      },
+      "year": 2026,
+      "type": "cn",
+      "publicationType": "authored",
+      "citationCount": 0,
+      "url": "https://kns.cnki.net/kcms2/article/abstract?v=wFrtWXqGzUjvL293J0RT9V6FIg2o-YjV4Xjru-tO1BSGmZHqR46U5ENk21DjZrXKM_HCaFtsOFFm-jf1dfw0PNRFjF6VcBsq9eBv27VGomzhhw9R2wKRny2DzS9vcq4IrwAtDdwBTdFvAd9wwMQQXbN7E9A891hsETI0uLPiNq8E1Pxa4wKs208Gj0C9cfYd_5XUXeKxstVdbCSKz8xRlg==&uniplatform=NZKPT&language=CHS",
+      "abstractLang": "zh",
+      "abstract": "在国产游戏加速“走出去”的背景下，玩家在线评论对文化传播效果和玩家体验的反映作用愈发重要。文章以Steam平台19款国产游戏在线评论为研究对象，采用主题建模和方面级情感分析，识别玩家关注的8个游戏要素，并进一步使用组态分析探究游戏要素对游戏销量和游玩时长的影响。研究发现，国内外玩家对要素的关注度和好评度整体分布无显著差异，但具体要素差异明显：游戏的玩法内容机制、性能技术优化和角色剧情演绎是玩家关注重点；中国文化叙事是低关注高好评的要素；社交互动保障等表现较差，降低了市场评价。此外，研究为国产游戏“出海”凝练了基于要素组态效应的跨文化传播优化路径，助力数字文化产品的精准传播。"
+    },
+    {
       "id": "p1",
       "title": {
         "zh": "数字时代出版编辑人才胜任力模型优化研究",
