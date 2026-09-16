@@ -494,16 +494,13 @@ const PublicationsTab = () => {
   const [authoredExpanded, setAuthoredExpanded] = useState(true);
   const [contributedExpanded, setContributedExpanded] = useState(true);
 
+  /** 唐嘉骏是不是第一作者 —— 论文排序时把署名文章排在前面。 */
   const isFirstAuthor = (paper: Paper): boolean => {
-    if (paper.authors.length === 0) return false;
-    const firstAuthor = paper.authors[0];
-    const isTangFirst = firstAuthor.includes('唐嘉骏') || firstAuthor.includes('Jiajun Tang');
-    if (isTangFirst) return true;
-    const secondAuthor = paper.authors[1];
-    if (secondAuthor && secondAuthor.includes('*')) {
-      return isTangFirst;
-    }
-    return false;
+    // `authors` 可能整条缺失 —— 中台的 schema 只强制 title，作者是可选的，
+    // 而内容也可能被手工编辑过。直接读 .length 会让整个论文页白屏，
+    // 所以先归一成数组（见 2026-09-16 那次 p9 缺 authors 的报错）。
+    const firstAuthor = (paper.authors ?? [])[0] ?? '';
+    return firstAuthor.includes('唐嘉骏') || firstAuthor.includes('Jiajun Tang');
   };
 
   const getIF = (paper: Paper): number => {
@@ -573,9 +570,9 @@ const PublicationsTab = () => {
         {tr(paper.title)}
       </h3>
 
-      {/* Authors */}
+      {/* Authors —— 同上，缺 authors 时渲染空行而不是抛错 */}
       <p className="text-secondary text-sm mb-3 leading-relaxed">
-        {paper.authors.map((author, i) => {
+        {(paper.authors ?? []).map((author, i) => {
           const isCorresponding = author.includes('*');
           const cleanName = author.replace('*', '').trim();
           const isUser = cleanName.includes('唐嘉骏') || cleanName.includes('Jiajun Tang');
