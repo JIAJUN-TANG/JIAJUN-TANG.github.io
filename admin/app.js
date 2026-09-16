@@ -225,9 +225,17 @@ function renderGit() {
   if (g.behind) parts.push(`↓${g.behind}`);
   const n = (g.changed || []).length;
   if (n) parts.push(`${n} 项改动`);
+  // compared=false：拿不到远程 sha，behind/ahead 一律是 0，不可当成「已是最新」。
+  if (g.compared === false) parts.push('远程状态未知');
   $('#git-text').textContent = parts.join(' · ');
   $('#git-chip').className = `chip ${state.dirty ? 'dirty' : n ? '' : 'ok'}`;
-  $('#git-chip').title = state.dirty ? '有未保存的改动' : n ? '有未提交的改动' : '工作区干净';
+  $('#git-chip').title = state.dirty
+    ? '有未保存的改动'
+    : n
+      ? '有未提交的改动'
+      : g.compared === false
+        ? '工作区干净（但没能确认远程状态）'
+        : '工作区干净';
 }
 
 function setDirty(dirty) {
@@ -1656,11 +1664,29 @@ async function openGitTool() {
     await refreshGitState({ fetchRemote });
     const g = state.git ?? {};
     const changed = g.changed ?? [];
+    // 远程 sha 是什么时候拿到的（本地时区）。用来告诉用户这个「领先 / 落后」有多新鲜。
+    const checkedAt = (() => {
+      const d = new Date(g.remoteCheckedAt ?? '');
+      if (Number.isNaN(d.getTime())) return '';
+      const p = (n) => String(n).padStart(2, '0');
+      return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    })();
     out.innerHTML = '';
     out.appendChild(
       el('div', { class: 'section' }, [
         el('h3', {}, ['工作区', el('span', { class: 'badge' }, [g.branch || '—'])]),
-        el('div', { class: 'note' }, [`远程 ${g.remote || '（未配置）'} · 领先 ${g.ahead ?? 0} · 落后 ${g.behind ?? 0}`]),
+        el('div', { class: 'note' }, [
+          `远程 ${g.remote || '（未配置）'} · ` +
+            (g.compared === false
+              ? '领先 / 落后 未知'
+              : `领先 ${g.ahead ?? 0} · 落后 ${g.behind ?? 0}${checkedAt ? `（${checkedAt} 核对）` : ''}`),
+        ]),
+        g.compared === false
+          ? el('div', { class: 'note warn', style: { marginTop: '10px' } }, [
+              '还没能确认远程分支的状态 —— 要么连不上 GitHub，要么本地还没有一次成功的 fetch 记录。' +
+                '在确认之前别假定「本地已是最新」：推送有可能被远程拒绝。',
+            ])
+          : null,
         (g.behind ?? 0) > 0
           ? el('div', { class: 'note warn', style: { marginTop: '10px' } }, [
               `远程有 ${g.behind} 个新提交还没并进来（常见来源：每天的引用数自动更新）。` +
@@ -1669,7 +1695,9 @@ async function openGitTool() {
           : null,
         state.gitFetchFailed
           ? el('div', { class: 'note warn', style: { marginTop: '10px' } }, [
-              '这次没能连上 GitHub，「领先 / 落后」是本地缓存的数据，可能不准。',
+              g.compared === false
+                ? '这次没能连上 GitHub，也还没有可用的历史记录，所以算不出领先 / 落后。'
+                : `这次没能连上 GitHub，上面的领先 / 落后用的是${checkedAt ? ` ${checkedAt} ` : '上次'}同步到的数据，可能不准。`,
             ])
           : null,
         changed.length

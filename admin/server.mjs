@@ -317,8 +317,9 @@ const ROUTES = {
   'GET /api/git': async () => ({ body: { ok: true, git: await gitStatus() } }),
 
   /**
-   * 拉取远程引用后再读状态。`GET /api/git` 是不联网的（快），但它算出来的
-   * behind 用的是本地缓存的远程引用 —— 打开面板时先走这条，看到的才是真的。
+   * 先 fetch 再看状态。`GET /api/git` 是不联网的（快），它算 behind 用的是
+   * 上次 fetch 记下来的远程 sha —— 远程真的前进了，不刷新就看不出来。
+   * 打开面板时先走这条，看到的才是真的。
    */
   'POST /api/git/refresh': async () => {
     const fetched = await gitFetch();
@@ -327,7 +328,7 @@ const ROUTES = {
         ok: true,
         fetched: fetched.ok,
         fetchLog: fetched.ok ? '' : fetched.log,
-        git: await gitStatus(),
+        git: await gitStatus({ remoteSha: fetched.ok ? fetched.sha : null }),
       },
     };
   },
